@@ -1,4 +1,5 @@
 <?php
+
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
@@ -19,19 +20,30 @@
  *
  */
 
-
-/*
-
-Example:
-
-$this->card_types = array(
-    1 => array( "card_name" => ...,
-                ...
-              )
+$this->characters_info = array(
+  1 => array(
+    "name" => "_FANA7IC",
+    "color" => "e94190",
+  ),
+  2 => array(
+    "name" => "TOX.INA",
+    "color" => "ffffff",
+  ),
+  3 => array(
+    "name" => "[AXIOMA]",
+    "color" => "72c3b1",
+  ),
+  4 => array(
+    "name" => "#FOSSIL",
+    "color" => "f07f16"
+  )
 );
 
-*/
-
-
-
-
+$this->corporations_info = array(
+  1 => "Cosmoco",
+  2 => "Biolife",
+  3 => "Delacruz",
+  4 => "Jihui",
+  5 => "Lumni",
+  6 => "SJT"
+);

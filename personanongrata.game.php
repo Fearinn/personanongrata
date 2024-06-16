@@ -28,6 +28,18 @@ class PersonaNonGrata extends Table
         parent::__construct();
 
         $this->initGameStateLabels(array());
+
+        $this->characters = $this->getNew("module.common.deck");
+        $this->characters->init("character");
+
+        $this->informations = $this->getNew("module.common.deck");
+        $this->informations->init("information");
+
+        $this->actions = $this->getNew("module.common.deck");
+        $this->actions->init("action");
+
+        $this->corporations = $this->getNew("module.common.deck");
+        $this->corporations->init("corporation");
     }
 
     protected function getGameName()
@@ -55,6 +67,14 @@ class PersonaNonGrata extends Table
         $this->reloadPlayersBasicInfos();
 
         /************ Start the game initialization *****/
+
+        // foreach ($players as $player_id => $player) {
+        //     $player_color = $this->getPlayerColorById($player_id);
+
+        //     $character = $this->getCharacterByColor($player_color);
+
+        //     $this->characters->moveCard($character["id"], "hand", $player_id);
+        // }
 
         /************ End of the game initialization *****/
     }
@@ -87,6 +107,24 @@ class PersonaNonGrata extends Table
     //////////// Utility functions
     ////////////    
 
+    // function getCharacterByColor(string $color, string $location = "deck"): array
+    // {
+    //     $type = null;
+
+    //     foreach ($this->characters_info as $character) {
+    //         if ($color === $character["color"]) {
+    //             $type = $character["name"];
+    //         }
+    //     }
+
+    //     $characters = $this->characters->getCardsOfTypeInLocation($type, null, $location);
+
+    //     if (!$characters) {
+    //         throw new BgaVisibleSystemException("Impossible to get character by color");
+    //     }
+
+    //     return array_shift($characters);
+    // }
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Player actions
