@@ -41,7 +41,6 @@ define([
             8
           );
           div.classList.add("prs_cardFace");
-          div.id = `prs_hackerFront:${card.id}`;
           div.dataset.direction = "backwards";
         },
         setupBackDiv: (card, div) => {
@@ -54,13 +53,51 @@ define([
           div.classList.add("prs_cardFace");
         },
       });
+
+      this.corporationManager = new CardManager(this, {
+        getId: (card) => `corporation-${card.id}`,
+        setupDiv: (card, div) => {
+          div.classList.add("prs_card");
+          div.style.width = "180px";
+          div.style.height = "280px";
+          div.style.position = "relative";
+        },
+        setupFrontDiv: (card, div) => {
+          div.style.background = `url(${g_gamethemeurl}img/corporations.png)`;
+
+          const type = parseInt(card.type);
+          const type_arg = parseInt(card.type_arg);
+
+          const valueShift = type_arg == 4 ? 3 : type_arg;
+          console.log(type, "type");
+          const position = (type - 1) * 4 + valueShift;
+          console.log("pos", position);
+
+          div.style.backgroundPosition = this.calcBackgroundPosition(
+            position,
+            25
+          );
+          div.classList.add("prs_cardFace");
+        },
+        setupBackDiv: (card, div) => {
+          div.style.backgroundImage = `url(${g_gamethemeurl}img/corporations.png)`;
+          div.style.backgroundPosition = this.calcBackgroundPosition(24, 25);
+          div.classList.add("prs_cardFace");
+        },
+      });
     },
 
     setup: function (gamedatas) {
       console.log("Starting game setup");
 
-      for (const player_id in gamedatas.players) {
-        const player = gamedatas.players[player_id];
+      this.players = gamedatas.players;
+      this.corporations = gamedatas.corporations;
+      this.hackers = gamedatas.hackers;
+      this.keys = gamedatas.keys;
+      console.log(this.keys);
+
+      for (const player_id in this.players) {
+        const player = this.players[player_id];
 
         const hackerControlName = `hackerStock$${player_id}`;
         this[hackerControlName] = new LineStock(
@@ -68,9 +105,21 @@ define([
           $(`prs_hacker$${player_id}`)
         );
 
-        const hacker = gamedatas.hackers[player_id];
+        const hacker = this.hackers[player_id];
 
         this[hackerControlName].addCard(hacker);
+      }
+
+      const keyControlName = `keyStock`;
+      this[keyControlName] = new SlotStock(
+        this.corporationManager,
+        $(`prs_keys`),
+        { slotsIds: Object.keys(this.corporations) }
+      );
+
+      for (const key_id in this.keys) {
+        const key = this.keys[key_id];
+        this[keyControlName].addCard(key, {}, { slot: parseInt(key.type) });
       }
 
       this.setupNotifications();

@@ -65,6 +65,43 @@ class PersonaNonGrata extends Table
 
         /************ Start the game initialization *****/
 
+        $corporation_cards = array();
+
+        for ($value = 0; $value <= 4; $value++) {
+            if ($value === 3) {
+                continue;
+            }
+            
+            foreach ($this->corporation_info as $corporation_id => $corporation) {
+                $corporation_cards[] = array(
+                    "type" => $corporation_id,
+                    "type_arg" => $value,
+                    "nbr" => 1
+                );
+            }
+        }
+
+        $this->corporations->createCards($corporation_cards, "deck");
+
+        $keys = $this->getCardsByTypeArg("corporation", 1);
+        $key_ids = array_keys($keys);
+
+        $this->corporations->moveCards($key_ids, "keysontable");
+
+        foreach ($this->corporation_info as $corporation_id => $corporation) {
+            for ($value = 0; $value <= 4; $value++) {
+                if ($value === 1 || $value === 3) {
+                    continue;
+                }
+
+                $cards = $this->getCardsByTypeArg("corporation", $value);
+
+                foreach ($cards as $card_id => $card) {
+                    $this->corporations->insertCardOnExtremePosition($card_id, "corpdeck:" . $corporation_id, true);
+                }
+            }
+        }
+
         /************ End of the game initialization *****/
     }
 
@@ -75,9 +112,9 @@ class PersonaNonGrata extends Table
         $current_player_id = $this->getCurrentPlayerId();    // !! We must only return informations visible by this player !!
 
         $result["players"] = $this->getCollectionFromDb("SELECT player_id id, player_score score FROM player ");
+        $result["corporations"] = $this->corporation_info;
         $result["hackers"] = $this->getHackers();
-
-        // TODO: Gather all information about current game situation (visible by player $current_player_id).
+        $result["keys"] = $this->getKeys();
 
         return $result;
     }
@@ -92,7 +129,16 @@ class PersonaNonGrata extends Table
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Utility functions
-    ////////////    
+    ////////////  
+
+    function getCardsByTypeArg(string $table, int $type_arg): array | null
+    {
+        $result = $this->getCollectionFromDB(
+            "SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg from $table WHERE card_type_arg='$type_arg'"
+        );
+
+        return $result;
+    }
 
     function getHackerByColor(string $color): array
     {
@@ -128,6 +174,13 @@ class PersonaNonGrata extends Table
         }
 
         return $hackers;
+    }
+
+    function getKeys(): array
+    {
+        $keys = $this->corporations->getCardsInLocation("keysontable");
+
+        return $keys;
     }
 
     //////////////////////////////////////////////////////////////////////////////

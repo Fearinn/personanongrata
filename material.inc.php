@@ -39,7 +39,7 @@ $this->hackers_info = array(
   )
 );
 
-$this->corporations_info = array(
+$this->corporation_info = array(
   1 => "Cosmoco",
   2 => "Biolife",
   3 => "Delacruz",

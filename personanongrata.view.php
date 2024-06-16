@@ -33,7 +33,7 @@ class view_personanongrata_personanongrata extends game_view
         $template = "personanongrata_personanongrata";
 
         $this->tpl["YOU"] = $this->_("You");
-        $this->tpl["CORPORATION_CARDS"] = $this->_("Corporation cards");
+        $this->tpl["CORPORATION_CARDS"] = $this->_("Keys and corporation cards");
 
         $this->page->begin_block($template, "playerzone");
         $this->page->begin_block($template, "myzone");
