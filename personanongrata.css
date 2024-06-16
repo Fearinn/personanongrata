@@ -12,6 +12,11 @@
  * PersonaNonGrata stylesheet
  *
  */
+/* #overall-content {
+  background-image: url("img/background.png");
+  background-size: cover;
+} */
+
 .prs_gameArea {
   display: flex;
   flex-direction: column;
@@ -31,6 +36,12 @@
   width: 100%;
 }
 
+.prs_zone {
+  border: 2px solid #000;
+  border-radius: 8px;
+  min-width: 320px;
+}
+
 .prs_zoneTitle {
   display: inline-block;
   background-color: #fff;
@@ -40,5 +51,4 @@
 
 .prs_myZone {
   margin-top: auto;
-  min-width: 320px;
 }

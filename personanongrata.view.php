@@ -32,7 +32,8 @@ class view_personanongrata_personanongrata extends game_view
         $current_player = $g_user->get_id();
         $template = "personanongrata_personanongrata";
 
-        $this->tpl["MY_HAND"] = $this->_("My hand");
+        $this->tpl["YOU"] = $this->_("You");
+        $this->tpl["CORPORATION_CARDS"] = $this->_("Corporation cards");
 
         $this->page->begin_block($template, "playerzone");
         $this->page->begin_block($template, "myzone");

@@ -15,7 +15,7 @@
     <!-- BEGIN playerzone -->
     <div
       id="prs_playerZone"
-      class="prs_playerZone whiteblock"
+      class="prs_playerZone prs_zone whiteblock"
       style="border-color: #{PLAYER_COLOR}"
     >
       <h3 class="prs_zoneTitle" style="color: #{PLAYER_COLOR}">
@@ -26,13 +26,24 @@
     </div>
     <!-- END playerzone -->
   </div>
+  <div id="prs_publicZone" class="prs_publicZone prs_zone whiteblock">
+    <h3 class="prs_zoneTitle">{CORPORATION_CARDS}</h3>
+    <div id="prs_keys" class="prs_keys"></div>
+    <div id="prs_corporationCards" class="prs_corporationCards"></div>
+  </div>
   <!-- BEGIN myzone -->
   <div
     id="prs_myZone"
-    class="prs_myZone whiteblock"
+    class="prs_myZone prs_playerZone prs_zone whiteblock"
     style="border-color: #{PLAYER_COLOR}"
   >
-    <h3 class="prs_zoneTitle" style="color: #{PLAYER_COLOR}">{PLAYER_NAME}</h3>
+    <h3
+      id="prs_myZoneTitle"
+      class="prs_zoneTitle"
+      style="color: #{PLAYER_COLOR}"
+    >
+      {YOU}
+    </h3>
     <div id="prs_hand${PLAYER_ID}" class="prs_myHand"></div>
     <div id="prs_downloaded${PLAYER_ID}" class="prs_myDownloaded"></div>
   </div>
