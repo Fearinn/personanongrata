@@ -29,9 +29,6 @@ class PersonaNonGrata extends Table
 
         $this->initGameStateLabels(array());
 
-        $this->characters = $this->getNew("module.common.deck");
-        $this->characters->init("character");
-
         $this->informations = $this->getNew("module.common.deck");
         $this->informations->init("information");
 
@@ -68,14 +65,6 @@ class PersonaNonGrata extends Table
 
         /************ Start the game initialization *****/
 
-        // foreach ($players as $player_id => $player) {
-        //     $player_color = $this->getPlayerColorById($player_id);
-
-        //     $character = $this->getCharacterByColor($player_color);
-
-        //     $this->characters->moveCard($character["id"], "hand", $player_id);
-        // }
-
         /************ End of the game initialization *****/
     }
 
@@ -85,10 +74,8 @@ class PersonaNonGrata extends Table
 
         $current_player_id = $this->getCurrentPlayerId();    // !! We must only return informations visible by this player !!
 
-        // Get information about players
-        // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score FROM player ";
-        $result['players'] = $this->getCollectionFromDb($sql);
+        $result["players"] = $this->getCollectionFromDb("SELECT player_id id, player_score score FROM player ");
+        $result["characters"] = $this->getHackers();
 
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
 
@@ -107,24 +94,41 @@ class PersonaNonGrata extends Table
     //////////// Utility functions
     ////////////    
 
-    // function getCharacterByColor(string $color, string $location = "deck"): array
-    // {
-    //     $type = null;
+    function getHackerByColor(string $color): array
+    {
+        $hacker_card = null;
 
-    //     foreach ($this->characters_info as $character) {
-    //         if ($color === $character["color"]) {
-    //             $type = $character["name"];
-    //         }
-    //     }
+        foreach ($this->hackers_info as $hacker_id => $hacker) {
+            if ($color === $hacker["color"]) {
+                $hacker_card = array(
+                    "id" => $hacker_id,
+                    "type" => $hacker["name"],
+                    "type_arg" => $hacker_id,
+                );
+            }
+        }
 
-    //     $characters = $this->characters->getCardsOfTypeInLocation($type, null, $location);
+        if (!$hacker_card) {
+            throw new BgaVisibleSystemException("Unable to get hacker by color");
+        }
 
-    //     if (!$characters) {
-    //         throw new BgaVisibleSystemException("Impossible to get character by color");
-    //     }
+        return $hacker_card;
+    }
 
-    //     return array_shift($characters);
-    // }
+    function getHackers(): array
+    {
+        $players = $this->loadPlayersBasicInfos();
+
+        $hackers = array();
+
+        foreach ($players as $player_id => $player) {
+            $player_color = $this->getPlayerColorById($player_id);
+
+            $hackers[$player_id] = $this->getHackerByColor($player_color);
+        }
+
+        return $hackers;
+    }
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Player actions

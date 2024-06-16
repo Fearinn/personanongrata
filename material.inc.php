@@ -20,7 +20,7 @@
  *
  */
 
-$this->characters_info = array(
+$this->hackers_info = array(
   1 => array(
     "name" => "_FANA7IC",
     "color" => "e94190",
