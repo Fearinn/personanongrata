@@ -12,10 +12,11 @@
  * PersonaNonGrata stylesheet
  *
  */
-/* #overall-content {
+
+.prs_customTheme #overall-content {
   background-image: url("img/background.png");
   background-size: cover;
-} */
+}
 
 .prs_gameArea {
   display: flex;

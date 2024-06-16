@@ -1,1 +1,10 @@
-{}
+{
+  "100": {
+    "name": "Themed background",
+    "needReload": true,
+    "values": {
+      "0": { "name": "Disabled" },
+      "1": { "name": "Enabled", "cssPref": "prs_customTheme", "default": true }
+    }
+  }
+}
