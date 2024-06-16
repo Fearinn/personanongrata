@@ -75,7 +75,7 @@ class PersonaNonGrata extends Table
         $current_player_id = $this->getCurrentPlayerId();    // !! We must only return informations visible by this player !!
 
         $result["players"] = $this->getCollectionFromDb("SELECT player_id id, player_score score FROM player ");
-        $result["characters"] = $this->getHackers();
+        $result["hackers"] = $this->getHackers();
 
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
 

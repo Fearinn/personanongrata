@@ -13,6 +13,8 @@
  *
  */
 
+@import url(modules/bga-cards.css);
+
 .prs_customTheme #overall-content {
   background-image: url("img/background.png");
   background-size: cover;
@@ -27,6 +29,10 @@
 
 .prs_gameArea > * {
   box-sizing: border-box;
+}
+
+.prs_cardFace {
+  border-radius: 12px;
 }
 
 .prs_playerZones {

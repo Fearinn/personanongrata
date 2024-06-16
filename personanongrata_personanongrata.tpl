@@ -21,6 +21,7 @@
       <h3 class="prs_zoneTitle" style="color: #{PLAYER_COLOR}">
         {PLAYER_NAME}
       </h3>
+      <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
       <div id="prs_hand${PLAYER_ID}" class="prs_hand"></div>
       <div id="prs_downloaded${PLAYER_ID}" class="prs_downloaded"></div>
     </div>
@@ -44,6 +45,7 @@
     >
       {YOU}
     </h3>
+    <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
     <div id="prs_hand${PLAYER_ID}" class="prs_myHand"></div>
     <div id="prs_downloaded${PLAYER_ID}" class="prs_myDownloaded"></div>
   </div>
