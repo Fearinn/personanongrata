@@ -45,11 +45,19 @@
 
 .prs_zoneTitle {
   display: inline-block;
-  background-color: #fff;
+  background-color: #000;
   border-radius: 8px;
+  color: #fff;
   padding: 0 4px;
+}
+
+.prs_publicZone .prs_zoneTitle {
+  background-color: #fff;
+  color: #000;
 }
 
 .prs_myZone {
   margin-top: auto;
+  max-width: 1024px;
+  width: 100%;
 }
