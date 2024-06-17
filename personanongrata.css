@@ -15,6 +15,10 @@
 
 @import url(modules/bga-cards.css);
 
+.hand-stock {
+  min-height: 330px;
+}
+
 .prs_darkTheme #overall-content {
   background-image: url("img/dark.jpg");
   background-position: top center;
@@ -36,8 +40,14 @@
   width: 100%;
 }
 
-.prs_gameArea * {
+.prs_gameArea *:not(.prs_card) {
   box-sizing: border-box;
+}
+
+.prs_selected {
+  border: 3px solid red;
+  transform: none !important;
+  z-index: 99 !important;
 }
 
 .prs_card,
@@ -54,9 +64,13 @@
 }
 
 .prs_zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   border: 4px solid #000;
   border-radius: 8px;
   outline: 2px solid #000;
+  gap: 8px;
   min-width: 320px;
 }
 
@@ -84,8 +98,9 @@
 }
 
 .prs_corporationDecks {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
   gap: 8px;
-  margin-top: 8px;
+  width: 100%;
 }

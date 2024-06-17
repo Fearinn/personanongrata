@@ -20,7 +20,7 @@
  *
  */
 
-$this->hackers_info = array(
+$this->hacker_info = array(
   1 => array(
     "name" => "_FANA7IC",
     "color" => "e94190",
@@ -37,6 +37,13 @@ $this->hackers_info = array(
     "name" => "#FOSSIL",
     "color" => "f07f16"
   )
+);
+
+$this->action_info = array(
+  1 => clienttranslate("download"),
+  2 => clienttranslate("encrypt"),
+  3 => clienttranslate("send to right"),
+  4 => clienttranslate("send to left"),
 );
 
 $this->corporation_info = array(

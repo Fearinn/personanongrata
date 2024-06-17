@@ -32,8 +32,8 @@ class PersonaNonGrata extends Table
         $this->informations = $this->getNew("module.common.deck");
         $this->informations->init("information");
 
-        $this->actions = $this->getNew("module.common.deck");
-        $this->actions->init("action");
+        $this->action_cards = $this->getNew("module.common.deck");
+        $this->action_cards->init("action");
 
         $this->corporation_cards = $this->getNew("module.common.deck");
         $this->corporation_cards->init("corporation");
@@ -103,6 +103,35 @@ class PersonaNonGrata extends Table
             }
         }
 
+        $action_cards = array();
+
+        foreach ($this->hacker_info as $hacker_id => $hacker) {
+            foreach ($this->action_info as $action_id => $action) {
+                $nbr = $action_id === 1 ? 2 : 1;
+
+                $action_cards[] = array(
+                    "type" => $hacker_id,
+                    "type_arg" => $action_id,
+                    "nbr" => $nbr,
+                );
+            }
+        }
+
+        $this->action_cards->createCards($action_cards, "deck");
+
+        foreach ($players as $player_id => $player) {
+            foreach ($this->hacker_info as $hacker_id => $hacker) {
+                $player_color = $this->getPlayerColorById($player_id);
+
+                if ($hacker["color"] !== $player_color) {
+                    continue;
+                }
+
+                $card_ids = array_keys($this->action_cards->getCardsOfTypeInLocation($hacker_id, null, "deck"));
+                $this->action_cards->moveCards($card_ids, "hand", $player_id);
+            }
+        }
+
         /************ End of the game initialization *****/
     }
 
@@ -117,6 +146,8 @@ class PersonaNonGrata extends Table
         $result["hackers"] = $this->getHackers();
         $result["keys"] = $this->getKeys();
         $result["corporationDecks"] = $this->getCorporationDecks();
+        $result["actionsInMyHand"] = $this->getActionsInMyHand($current_player_id);
+        $result["actionsInOtherHands"] = $this->getActionsInOtherHands($current_player_id);
 
         return $result;
     }
@@ -147,7 +178,7 @@ class PersonaNonGrata extends Table
     {
         $hacker_card = null;
 
-        foreach ($this->hackers_info as $hacker_id => $hacker) {
+        foreach ($this->hacker_info as $hacker_id => $hacker) {
             if ($color === $hacker["color"]) {
                 $hacker_card = array(
                     "id" => $hacker_id,
@@ -195,6 +226,27 @@ class PersonaNonGrata extends Table
         }
 
         return $corporation_cards;
+    }
+
+    function getActionsInMyHand(int $player_id): array
+    {
+        $action_cards = $this->action_cards->getCardsInLocation("hand", $player_id);
+
+        return $action_cards;
+    }
+
+    function getActionsInOtherHands(int $current_player_id): array
+    {
+        $action_cards = array();
+        $players = $this->loadPlayersBasicInfos();
+
+        foreach ($players as $player_id => $player) {
+            if ($player_id !== $current_player_id) {
+                $action_cards[$player_id] = $this->action_cards->countCardsInLocation("hand", $player_id);
+            }
+        }
+
+        return $action_cards;
     }
 
     //////////////////////////////////////////////////////////////////////////////

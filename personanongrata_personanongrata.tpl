@@ -53,7 +53,9 @@
       {YOU}
     </h3>
     <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
-    <div id="prs_hand${PLAYER_ID}" class="prs_myHand"></div>
+    <div id="prs_hand${PLAYER_ID}" class="prs_myHand">
+      <div id="prs_actionHand${PLAYER_ID}" class="prs_actionHand"></div>
+    </div>
     <div id="prs_downloaded${PLAYER_ID}" class="prs_myDownloaded"></div>
   </div>
   <!-- END myzone -->

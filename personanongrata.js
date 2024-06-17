@@ -27,6 +27,8 @@ define([
       console.log("personanongrata constructor");
 
       this.hackerManager = new CardManager(this, {
+        cardHeight: 280,
+        cardWidth: 180,
         getId: (card) => `hacker-${card.id}`,
         setupDiv: (card, div) => {
           div.classList.add("prs_card");
@@ -85,6 +87,40 @@ define([
           div.classList.add("prs_cardFace");
         },
       });
+
+      this.actionManager = new CardManager(this, {
+        selectedCardClass: "prs_selected",
+        getId: (card) => `action-${card.id}`,
+        setupDiv: (card, div) => {
+          div.classList.add("prs_card");
+          div.style.width = "180px";
+          div.style.height = "280px";
+          div.style.position = "relative";
+        },
+        setupFrontDiv: (card, div) => {
+          div.style.background = `url(${g_gamethemeurl}img/actions.png)`;
+
+          const type = parseInt(card.type);
+          const type_arg = parseInt(card.type_arg);
+
+          const position = (type - 1) * 5 + type_arg;
+
+          div.style.backgroundPosition = this.calcBackgroundPosition(
+            position,
+            20
+          );
+          div.classList.add("prs_cardFace");
+        },
+        setupBackDiv: (card, div) => {
+          div.style.backgroundImage = `url(${g_gamethemeurl}img/actions.png)`;
+          div.style.backgroundPosition = this.calcBackgroundPosition(
+            parseInt(card.type) - 1 * 5,
+            20
+          );
+
+          div.classList.add("prs_cardFace");
+        },
+      });
     },
 
     setup: function (gamedatas) {
@@ -95,31 +131,30 @@ define([
       this.hackers = gamedatas.hackers;
       this.keys = gamedatas.keys;
       this.corporationDecks = gamedatas.corporationDecks;
+      this.actionsInMyHand = gamedatas.actionsInMyHand;
 
       for (const player_id in this.players) {
         const player = this.players[player_id];
 
-        const hackerControlName = `hackerStock$${player_id}`;
-        this[hackerControlName] = new LineStock(
+        const hackerControl = `hackerStock$${player_id}`;
+        this[hackerControl] = new LineStock(
           this.hackerManager,
           $(`prs_hacker$${player_id}`)
         );
 
         const hacker = this.hackers[player_id];
 
-        this[hackerControlName].addCard(hacker);
+        this[hackerControl].addCard(hacker);
       }
 
-      const keyControlName = `keyStock`;
-      this[keyControlName] = new SlotStock(
-        this.corporationManager,
-        $(`prs_keys`),
-        { slotsIds: Object.keys(this.corporations) }
-      );
+      const keyControl = `keyStock`;
+      this[keyControl] = new SlotStock(this.corporationManager, $(`prs_keys`), {
+        slotsIds: Object.keys(this.corporations),
+      });
 
       for (const key_id in this.keys) {
         const key = this.keys[key_id];
-        this[keyControlName].addCard(key, {}, { slot: parseInt(key.type) });
+        this[keyControl].addCard(key, {}, { slot: parseInt(key.type) });
       }
 
       for (const corporation_id in this.corporations) {
@@ -131,25 +166,36 @@ define([
           cards.push(card);
         }
 
-        const corpControlName = `corpDeck:${corporation_id}`;
-        this[corpControlName] = new Deck(
+        const corpControl = `corpDeck:${corporation_id}`;
+        this[corpControl] = new Deck(
           this.corporationManager,
           $(`prs_corpDeck:${corporation_id}`),
-          {}
+          { sort: sortFunction("type", "type_arg") }
         );
 
         cards.sort((a, b) => {
           return a.location_arg - b.location_arg;
         });
 
-        cards.forEach((card) => {
-          this[corpControlName].addCard(
-            card,
-            {},
-            {
-              visible: true,
-            }
-          );
+        this[corpControl].addCards(cards, undefined, {
+          visible: true,
+        });
+      }
+
+      //actions
+      const actionsInMyHandControl = `actionsInMyHandStock`;
+      this[actionsInMyHandControl] = new HandStock(
+        this.actionManager,
+        $(`prs_actionHand$${this.player_id}`),
+        { cardOverlap: "90px", sort: sortFunction("type", "type_arg") }
+      );
+
+      this[actionsInMyHandControl].setSelectionMode("single");
+
+      for (const card_id in this.actionsInMyHand) {
+        const card = this.actionsInMyHand[card_id];
+        this[actionsInMyHandControl].addCard(card, undefined, {
+          visible: true,
         });
       }
 
@@ -179,7 +225,7 @@ define([
     ///////////////////////////////////////////////////
     //// Utility methods
 
-    calcBackgroundPosition: function (spritePosition, itemsPerRow = 10) {
+    calcBackgroundPosition: function (spritePosition, itemsPerRow) {
       const xAxis = (spritePosition % itemsPerRow) * 100;
       const yAxis = Math.floor(spritePosition / itemsPerRow) * 100;
       return `-${xAxis}% -${yAxis}%`;
