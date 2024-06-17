@@ -30,7 +30,14 @@
   <div id="prs_publicZone" class="prs_publicZone prs_zone whiteblock">
     <h3 class="prs_zoneTitle">{CORPORATION_CARDS}</h3>
     <div id="prs_keys" class="prs_keys"></div>
-    <div id="prs_corporationCards" class="prs_corporationCards"></div>
+    <div id="prs_corporationDecks" class="prs_corporationDecks">
+      <div id="prs_corpDeck:1"></div>
+      <div id="prs_corpDeck:2"></div>
+      <div id="prs_corpDeck:3"></div>
+      <div id="prs_corpDeck:4"></div>
+      <div id="prs_corpDeck:5"></div>
+      <div id="prs_corpDeck:6"></div>
+    </div>
   </div>
   <!-- BEGIN myzone -->
   <div

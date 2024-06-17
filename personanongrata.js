@@ -55,6 +55,8 @@ define([
       });
 
       this.corporationManager = new CardManager(this, {
+        cardHeight: 280,
+        cardWidth: 180,
         getId: (card) => `corporation-${card.id}`,
         setupDiv: (card, div) => {
           div.classList.add("prs_card");
@@ -69,9 +71,7 @@ define([
           const type_arg = parseInt(card.type_arg);
 
           const valueShift = type_arg == 4 ? 3 : type_arg;
-          console.log(type, "type");
           const position = (type - 1) * 4 + valueShift;
-          console.log("pos", position);
 
           div.style.backgroundPosition = this.calcBackgroundPosition(
             position,
@@ -94,7 +94,7 @@ define([
       this.corporations = gamedatas.corporations;
       this.hackers = gamedatas.hackers;
       this.keys = gamedatas.keys;
-      console.log(this.keys);
+      this.corporationDecks = gamedatas.corporationDecks;
 
       for (const player_id in this.players) {
         const player = this.players[player_id];
@@ -120,6 +120,37 @@ define([
       for (const key_id in this.keys) {
         const key = this.keys[key_id];
         this[keyControlName].addCard(key, {}, { slot: parseInt(key.type) });
+      }
+
+      for (const corporation_id in this.corporations) {
+        const corpDeck = this.corporationDecks[corporation_id];
+        const cards = [];
+
+        for (const card_id in corpDeck) {
+          const card = corpDeck[card_id];
+          cards.push(card);
+        }
+
+        const corpControlName = `corpDeck:${corporation_id}`;
+        this[corpControlName] = new Deck(
+          this.corporationManager,
+          $(`prs_corpDeck:${corporation_id}`),
+          {}
+        );
+
+        cards.sort((a, b) => {
+          return a.location_arg - b.location_arg;
+        });
+
+        cards.forEach((card) => {
+          this[corpControlName].addCard(
+            card,
+            {},
+            {
+              visible: true,
+            }
+          );
+        });
       }
 
       this.setupNotifications();

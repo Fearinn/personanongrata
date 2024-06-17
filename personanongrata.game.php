@@ -35,8 +35,8 @@ class PersonaNonGrata extends Table
         $this->actions = $this->getNew("module.common.deck");
         $this->actions->init("action");
 
-        $this->corporations = $this->getNew("module.common.deck");
-        $this->corporations->init("corporation");
+        $this->corporation_cards = $this->getNew("module.common.deck");
+        $this->corporation_cards->init("corporation");
     }
 
     protected function getGameName()
@@ -71,7 +71,7 @@ class PersonaNonGrata extends Table
             if ($value === 3) {
                 continue;
             }
-            
+
             foreach ($this->corporation_info as $corporation_id => $corporation) {
                 $corporation_cards[] = array(
                     "type" => $corporation_id,
@@ -81,12 +81,12 @@ class PersonaNonGrata extends Table
             }
         }
 
-        $this->corporations->createCards($corporation_cards, "deck");
+        $this->corporation_cards->createCards($corporation_cards, "deck");
 
         $keys = $this->getCardsByTypeArg("corporation", 1);
         $key_ids = array_keys($keys);
 
-        $this->corporations->moveCards($key_ids, "keysontable");
+        $this->corporation_cards->moveCards($key_ids, "keysontable");
 
         foreach ($this->corporation_info as $corporation_id => $corporation) {
             for ($value = 0; $value <= 4; $value++) {
@@ -94,10 +94,11 @@ class PersonaNonGrata extends Table
                     continue;
                 }
 
-                $cards = $this->getCardsByTypeArg("corporation", $value);
+                $cards = $this->getCollectionFromDB("SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, 
+                card_location_arg location_arg from corporation WHERE card_type_arg='$value' AND card_location='deck' AND card_type='$corporation_id'");
 
                 foreach ($cards as $card_id => $card) {
-                    $this->corporations->insertCardOnExtremePosition($card_id, "corpdeck:" . $corporation_id, true);
+                    $this->corporation_cards->insertCardOnExtremePosition($card_id, "corpdeck:" . $corporation_id, true);
                 }
             }
         }
@@ -115,6 +116,7 @@ class PersonaNonGrata extends Table
         $result["corporations"] = $this->corporation_info;
         $result["hackers"] = $this->getHackers();
         $result["keys"] = $this->getKeys();
+        $result["corporationDecks"] = $this->getCorporationDecks();
 
         return $result;
     }
@@ -133,9 +135,10 @@ class PersonaNonGrata extends Table
 
     function getCardsByTypeArg(string $table, int $type_arg): array | null
     {
-        $result = $this->getCollectionFromDB(
-            "SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg from $table WHERE card_type_arg='$type_arg'"
-        );
+        $sql = "SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg 
+        from $table WHERE card_type_arg='$type_arg'";
+
+        $result = $this->getCollectionFromDB($sql);
 
         return $result;
     }
@@ -178,9 +181,20 @@ class PersonaNonGrata extends Table
 
     function getKeys(): array
     {
-        $keys = $this->corporations->getCardsInLocation("keysontable");
+        $keys = $this->corporation_cards->getCardsInLocation("keysontable");
 
         return $keys;
+    }
+
+    function getCorporationDecks(): array
+    {
+        $corporation_cards = array();
+
+        foreach ($this->corporation_info as $corporation_id => $corporation) {
+            $corporation_cards[$corporation_id] = $this->corporation_cards->getCardsInLocation("corpdeck:" . $corporation_id);
+        }
+
+        return $corporation_cards;
     }
 
     //////////////////////////////////////////////////////////////////////////////
