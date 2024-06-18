@@ -20,14 +20,12 @@
 }
 
 .prs_darkTheme #overall-content {
-  background: url("img/dark.jpg");
-  background-size: cover;
+  background-image: url("img/dark.jpg");
   background-position: top center;
 }
 
 .prs_lightTheme .prs_gameArea {
-  background: url("img/light.jpg");
-  background-size: cover;
+  background-image: url("img/light.jpg");
   background-position: top center;
 }
 
@@ -61,8 +59,9 @@
 .prs_playerZones {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
-  gap: 16px;
   justify-content: center;
+  column-gap: 16px;
+  row-gap: 8px;
   width: 100%;
 }
 
@@ -74,7 +73,7 @@
   border-radius: 8px;
   box-shadow: 5px 5px 5px 0 rgba(0, 0, 0, 0.2);
   outline: 2px solid #000;
-  gap: 8px;
+  gap: 16px;
   min-width: 480px;
 }
 

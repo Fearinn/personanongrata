@@ -39,8 +39,7 @@ define([
         setupFrontDiv: (card, div) => {
           div.style.background = `url(${g_gamethemeurl}img/hackers.png)`;
           div.style.backgroundPosition = this.calcBackgroundPosition(
-            card.type_arg - 1,
-            8
+            card.type_arg - 1
           );
           div.classList.add("prs_cardFace");
           div.dataset.direction = "backwards";
@@ -49,8 +48,7 @@ define([
           div.dataset.direction = "forward";
           div.style.backgroundImage = `url(${g_gamethemeurl}img/hackers.png)`;
           div.style.backgroundPosition = this.calcBackgroundPosition(
-            card.type_arg + 3,
-            8
+            card.type_arg + 3
           );
           div.classList.add("prs_cardFace");
         },
@@ -75,15 +73,12 @@ define([
           const valueShift = type_arg == 4 ? 3 : type_arg;
           const position = (type - 1) * 4 + valueShift;
 
-          div.style.backgroundPosition = this.calcBackgroundPosition(
-            position,
-            25
-          );
+          div.style.backgroundPosition = this.calcBackgroundPosition(position);
           div.classList.add("prs_cardFace");
         },
         setupBackDiv: (card, div) => {
           div.style.backgroundImage = `url(${g_gamethemeurl}img/corporations.png)`;
-          div.style.backgroundPosition = this.calcBackgroundPosition(24, 25);
+          div.style.backgroundPosition = this.calcBackgroundPosition(24);
           div.classList.add("prs_cardFace");
         },
       });
@@ -105,10 +100,7 @@ define([
 
           const position = (type - 1) * 5 + type_arg;
 
-          div.style.backgroundPosition = this.calcBackgroundPosition(
-            position,
-            20
-          );
+          div.style.backgroundPosition = this.calcBackgroundPosition(position);
           div.classList.add("prs_cardFace");
         },
         setupBackDiv: (card, div) => {
@@ -117,10 +109,37 @@ define([
           const type = parseInt(card.type);
 
           div.style.backgroundPosition = this.calcBackgroundPosition(
-            (type - 1) * 5,
-            20
+            (type - 1) * 5
           );
 
+          div.classList.add("prs_cardFace");
+        },
+      });
+
+      this.informationManager = new CardManager(this, {
+        cardHeight: 280,
+        cardWidth: 180,
+        selectedCardClass: "prs_selected",
+        getId: (card) => `information-${card.id}`,
+        setupDiv: (card, div) => {
+          div.classList.add("prs_card");
+          div.style.width = "180px";
+          div.style.height = "280px";
+          div.style.position = "relative";
+        },
+        setupFrontDiv: (card, div) => {
+          div.style.background = `url(${g_gamethemeurl}img/informations.jpg)`;
+
+          const type = parseInt(card.type);
+          const type_arg = parseInt(card.type_arg);
+          const position = type_arg - 2 + (type - 1) * 6;
+
+          div.style.backgroundPosition = this.calcBackgroundPosition(position);
+          div.classList.add("prs_cardFace");
+        },
+        setupBackDiv: (card, div) => {
+          div.style.backgroundImage = `url(${g_gamethemeurl}img/informations.jpg)`;
+          div.style.backgroundPosition = this.calcBackgroundPosition(30);
           div.classList.add("prs_cardFace");
         },
       });
@@ -136,6 +155,7 @@ define([
       this.corporationDecks = gamedatas.corporationDecks;
       this.actionsInMyHand = gamedatas.actionsInMyHand;
       this.actionsInOtherHands = gamedatas.actionsInOtherHands;
+      this.deckOfInformations = gamedatas.deckOfInformations;
 
       for (const player_id in this.players) {
         const player = this.players[player_id];
@@ -192,7 +212,7 @@ define([
         this[corpControl] = new Deck(
           this.corporationManager,
           $(`prs_corpDeck:${corporation_id}`),
-          { sort: sortFunction("type", "type_arg") }
+          {}
         );
 
         cards.sort((a, b) => {
@@ -205,11 +225,11 @@ define([
       }
 
       //actions
-      const actionsInMyHandControl = `actionsInMyHandStock`;
+      const actionsInMyHandControl = "actionsInMyHandStock";
       this[actionsInMyHandControl] = new HandStock(
         this.actionManager,
         $(`prs_handOfActions$${this.player_id}`),
-        { cardOverlap: "90px", sort: sortFunction("type", "type_arg") }
+        { cardOverlap: "90px", sort: sortFunction("type_arg") }
       );
 
       this[actionsInMyHandControl].setSelectionMode("single");
@@ -219,6 +239,21 @@ define([
         this[actionsInMyHandControl].addCard(card, undefined, {
           visible: true,
         });
+      }
+
+      //informations
+      const deckOfInformationsControl = "deckOfInformationsStock";
+      this[deckOfInformationsControl] = new Deck(
+        this.informationManager,
+        $(`prs_infoDeck`),
+        {}
+      );
+
+      for (const card_id in this.deckOfInformations) {
+        const card = this.deckOfInformations[card_id];
+
+        this[deckOfInformationsControl].addCard(card);
+        this[deckOfInformationsControl].setCardVisible(card, false);
       }
 
       this.setupNotifications();
@@ -247,10 +282,9 @@ define([
     ///////////////////////////////////////////////////
     //// Utility methods
 
-    calcBackgroundPosition: function (spritePosition, itemsPerRow) {
-      const xAxis = (spritePosition % itemsPerRow) * 100;
-      const yAxis = Math.floor(spritePosition / itemsPerRow) * 100;
-      return `-${xAxis}% -${yAxis}%`;
+    calcBackgroundPosition: function (spritePosition) {
+      const xAxis = spritePosition * 100;
+      return `-${xAxis}% 0`;
     },
 
     ///////////////////////////////////////////////////

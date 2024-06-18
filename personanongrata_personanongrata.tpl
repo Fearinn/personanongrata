@@ -51,6 +51,7 @@
   </div>
   <div id="prs_publicZone" class="prs_publicZone prs_zone whiteblock">
     <h3 class="prs_zoneTitle">{CORPORATION_CARDS}</h3>
+    <div id="prs_infoDeck" class="prs_infoDeck"></div>
     <div id="prs_keys" class="prs_keys"></div>
     <div id="prs_corporationDecks" class="prs_corporationDecks">
       <div id="prs_corpDeck:1"></div>

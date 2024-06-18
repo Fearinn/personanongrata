@@ -20,7 +20,7 @@
  *
  */
 
-$this->hacker_info = array(
+$this->hackers = array(
   1 => array(
     "name" => "_FANA7IC",
     "color" => "e94190",
@@ -39,18 +39,46 @@ $this->hacker_info = array(
   )
 );
 
-$this->action_info = array(
+$this->actions = array(
   1 => clienttranslate("download"),
   2 => clienttranslate("encrypt"),
   3 => clienttranslate("send to right"),
   4 => clienttranslate("send to left"),
 );
 
-$this->corporation_info = array(
-  1 => "Cosmoco",
-  2 => "Biolife",
-  3 => "Delacruz",
-  4 => "Jihui",
+$this->corporations = array(
+  1 => "Biolife",
+  2 => "Cosmoco",
+  3 => "Jihui",
+  4 => "Delacruz",
   5 => "Lumni",
   6 => "SJT"
+);
+
+$this->informations = array(
+  2 => array(
+    "name" => clienttranslate("Worker"),
+    "nbr" => 3,
+    "activators" => true,
+  ),
+  3 => array(
+    "name" => clienttranslate("Assistant"),
+    "nbr" => 4,
+    "activators" => false,
+  ),
+  4 => array(
+    "name" => clienttranslate("Manager"),
+    "nbr" => 2,
+    "activators" => false,
+  ),
+  5 => array(
+    "name" => clienttranslate("Director"),
+    "nbr" => 2,
+    "activators" => false,
+  ),
+  6 => array(
+    "name" => clienttranslate("President"),
+    "nbr" => 1,
+    "activactor" => false,
+  )
 );
