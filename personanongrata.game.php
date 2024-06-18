@@ -164,6 +164,7 @@ class PersonaNonGrata extends Table
     //////////// Utility functions
     ////////////  
 
+    //getters
     function getCardsByTypeArg(string $table, int $type_arg): array | null
     {
         $sql = "SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg 
@@ -242,7 +243,9 @@ class PersonaNonGrata extends Table
 
         foreach ($players as $player_id => $player) {
             if ($player_id !== $current_player_id) {
-                $action_cards[$player_id] = $this->action_cards->countCardsInLocation("hand", $player_id);
+                $cards = $this->action_cards->getCardsInLocation("hand", $player_id);
+
+                $action_cards[$player_id] = $cards;
             }
         }
 

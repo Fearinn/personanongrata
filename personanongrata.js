@@ -113,8 +113,11 @@ define([
         },
         setupBackDiv: (card, div) => {
           div.style.backgroundImage = `url(${g_gamethemeurl}img/actions.png)`;
+
+          const type = parseInt(card.type);
+
           div.style.backgroundPosition = this.calcBackgroundPosition(
-            parseInt(card.type) - 1 * 5,
+            (type - 1) * 5,
             20
           );
 
@@ -132,6 +135,7 @@ define([
       this.keys = gamedatas.keys;
       this.corporationDecks = gamedatas.corporationDecks;
       this.actionsInMyHand = gamedatas.actionsInMyHand;
+      this.actionsInOtherHands = gamedatas.actionsInOtherHands;
 
       for (const player_id in this.players) {
         const player = this.players[player_id];
@@ -145,6 +149,26 @@ define([
         const hacker = this.hackers[player_id];
 
         this[hackerControl].addCard(hacker);
+
+        //actions
+        if (this.player_id !== player_id) {
+          const actionsInHandControl = `actionInHandStock`;
+          this[actionsInHandControl] = new HandStock(
+            this.actionManager,
+            $(`prs_handOfActions$${player_id}`),
+            { cardOverlap: "175px", sort: sortFunction("type", "type_arg") }
+          );
+          const actionCards = this.actionsInOtherHands[player_id];
+
+          for (const card_id in actionCards) {
+            const card = actionCards[card_id];
+
+            this[actionsInHandControl].addCard(card);
+            this[actionsInHandControl].setCardVisible(card, false, {
+              updateBack: true,
+            });
+          }
+        }
       }
 
       const keyControl = `keyStock`;
@@ -186,7 +210,7 @@ define([
       const actionsInMyHandControl = `actionsInMyHandStock`;
       this[actionsInMyHandControl] = new HandStock(
         this.actionManager,
-        $(`prs_actionHand$${this.player_id}`),
+        $(`prs_handOfActions$${this.player_id}`),
         { cardOverlap: "90px", sort: sortFunction("type", "type_arg") }
       );
 

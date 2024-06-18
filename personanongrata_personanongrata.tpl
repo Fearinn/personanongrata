@@ -22,7 +22,9 @@
         {PLAYER_NAME}
       </h3>
       <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
-      <div id="prs_hand${PLAYER_ID}" class="prs_hand"></div>
+      <div id="prs_hand${PLAYER_ID}" class="prs_hand">
+        <div id="prs_handOfActions${PLAYER_ID}" class="prs_handOfActions"></div>
+      </div>
       <div id="prs_downloaded${PLAYER_ID}" class="prs_downloaded"></div>
     </div>
     <!-- END playerzone -->
@@ -53,8 +55,8 @@
       {YOU}
     </h3>
     <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
-    <div id="prs_hand${PLAYER_ID}" class="prs_myHand">
-      <div id="prs_actionHand${PLAYER_ID}" class="prs_actionHand"></div>
+    <div id="prs_hand${PLAYER_ID}" class="prs_myHand prs_hand">
+      <div id="prs_handOfActions${PLAYER_ID}" class="prs_handOfActions"></div>
     </div>
     <div id="prs_downloaded${PLAYER_ID}" class="prs_myDownloaded"></div>
   </div>
