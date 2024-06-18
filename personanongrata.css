@@ -20,23 +20,26 @@
 }
 
 .prs_darkTheme #overall-content {
-  background-image: url("img/dark.jpg");
+  background: url("img/dark.jpg");
+  background-size: cover;
   background-position: top center;
 }
 
 .prs_lightTheme .prs_gameArea {
-  background-image: url("img/light.jpg");
+  background: url("img/light.jpg");
+  background-size: cover;
   background-position: top center;
 }
 
 .prs_lightTheme .prs_gameArea .whiteblock {
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.75);
 }
 
 .prs_gameArea {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 8px;
   width: 100%;
 }
 
@@ -57,8 +60,8 @@
 
 .prs_playerZones {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+  gap: 16px;
   justify-content: center;
   width: 100%;
 }
@@ -67,19 +70,21 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  border: 4px solid #000;
+  border: 3px solid #000;
   border-radius: 8px;
+  box-shadow: 5px 5px 5px 0 rgba(0, 0, 0, 0.2);
   outline: 2px solid #000;
   gap: 8px;
-  min-width: 320px;
+  min-width: 480px;
 }
 
 .prs_publicZone {
-  border-width: 1px;
+  outline-color: #fff;
 }
 
 .prs_zoneTitle {
   display: inline-block;
+  align-self: flex-start;
   background-color: #000;
   border-radius: 8px;
   color: #fff;
@@ -105,10 +110,11 @@
   width: 100%;
 }
 
-.prs_myHand {
+.prs_hand {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 60px;
+  row-gap: 8px;
+  column-gap: 60px;
   width: 100%;
 }

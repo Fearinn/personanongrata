@@ -156,7 +156,7 @@ define([
           this[actionsInHandControl] = new HandStock(
             this.actionManager,
             $(`prs_handOfActions$${player_id}`),
-            { cardOverlap: "150px", sort: sortFunction("type", "type_arg") }
+            { cardOverlap: "175px", sort: sortFunction("type", "type_arg") }
           );
           const actionCards = this.actionsInOtherHands[player_id];
 
