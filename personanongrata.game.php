@@ -170,6 +170,7 @@ class PersonaNonGrata extends Table
         $result["actionsInMyHand"] = $this->getActionsInMyHand($current_player_id);
         $result["actionsInOtherHands"] = $this->getActionsInOtherHands($current_player_id);
         $result["deckOfInformations"] = $this->getDeckOfInformations();
+        $result["infoInMyHand"] = $this->getInfoInMyHand($current_player_id);
 
         return $result;
     }
@@ -296,6 +297,13 @@ class PersonaNonGrata extends Table
         $hidden_deck = $this->hideCards($deck);
 
         return $hidden_deck;
+    }
+
+    function getInfoInMyHand(int $player_id): array
+    {
+        $hand = $this->information_cards->getCardsInLocation("hand", $player_id);
+
+        return $hand;
     }
 
     //////////////////////////////////////////////////////////////////////////////

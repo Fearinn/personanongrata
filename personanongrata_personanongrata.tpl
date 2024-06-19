@@ -27,6 +27,7 @@
     <div id="prs_hand${PLAYER_ID}" class="prs_myHand prs_hand">
       <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
       <div id="prs_handOfActions${PLAYER_ID}" class="prs_handOfActions"></div>
+      <div id="prs_handOfInfo${PLAYER_ID}" class="prs_handOfInfo"></div>
     </div>
     <div id="prs_downloaded${PLAYER_ID}" class="prs_myDownloaded"></div>
   </div>

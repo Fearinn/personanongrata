@@ -132,7 +132,7 @@ define([
 
           const type = parseInt(card.type);
           const type_arg = parseInt(card.type_arg);
-          const position = type_arg - 2 + (type - 1) * 6;
+          const position = type_arg - 2 + (type - 1) * 5;
 
           div.style.backgroundPosition = this.calcBackgroundPosition(position);
           div.classList.add("prs_cardFace");
@@ -156,6 +156,7 @@ define([
       this.actionsInMyHand = gamedatas.actionsInMyHand;
       this.actionsInOtherHands = gamedatas.actionsInOtherHands;
       this.deckOfInformations = gamedatas.deckOfInformations;
+      this.infoInMyHand = gamedatas.infoInMyHand;
 
       for (const player_id in this.players) {
         const player = this.players[player_id];
@@ -254,6 +255,20 @@ define([
 
         this[deckOfInformationsControl].addCard(card);
         this[deckOfInformationsControl].setCardVisible(card, false);
+      }
+
+      const infoInMyHandControl = "infoInMyHandStock";
+      this[infoInMyHandControl] = new HandStock(
+        this.informationManager,
+        $(`prs_handOfInfo$${this.player_id}`),
+        { cardOverlap: "90px", sort: sortFunction("type_arg", "type") }
+      );
+
+      for (const card_id in this.infoInMyHand) {
+        const card = this.infoInMyHand[card_id];
+
+        this[infoInMyHandControl].addCard(card);
+        this[infoInMyHandControl].setSelectionMode("single");
       }
 
       this.setupNotifications();
