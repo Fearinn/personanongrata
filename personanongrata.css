@@ -35,9 +35,11 @@
 
 .prs_gameArea {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  align-items: stretch;
+  justify-content: center;
+  flex-wrap: wrap;
+  column-gap: 16px;
+  min-height: 800px;
   width: 100%;
 }
 
@@ -69,6 +71,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
   border: 3px solid #000;
   border-radius: 8px;
   box-shadow: 5px 5px 5px 0 rgba(0, 0, 0, 0.2);
@@ -96,7 +99,6 @@
 }
 
 .prs_myZone {
-  margin-top: auto;
   max-width: 1024px;
   width: 100%;
 }
@@ -109,11 +111,14 @@
   width: 100%;
 }
 
-.prs_hand {
+.prs_handContainer {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   row-gap: 8px;
-  column-gap: 60px;
   width: 100%;
+}
+
+.prs_hand {
+  padding: 16px 60px;
 }

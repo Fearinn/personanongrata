@@ -171,6 +171,7 @@ class PersonaNonGrata extends Table
         $result["actionsInOtherHands"] = $this->getActionsInOtherHands($current_player_id);
         $result["deckOfInformations"] = $this->getDeckOfInformations();
         $result["infoInMyHand"] = $this->getInfoInMyHand($current_player_id);
+        $result["infoInOtherHands"] = $this->getInfoInOtherHands($current_player_id);
 
         return $result;
     }
@@ -269,25 +270,25 @@ class PersonaNonGrata extends Table
 
     function getActionsInMyHand(int $player_id): array
     {
-        $action_cards = $this->action_cards->getCardsInLocation("hand", $player_id);
+        $hand = $this->action_cards->getCardsInLocation("hand", $player_id);
 
-        return $action_cards;
+        return $hand;
     }
 
     function getActionsInOtherHands(int $current_player_id): array
     {
-        $action_cards = array();
+        $hands = array();
         $players = $this->loadPlayersBasicInfos();
 
         foreach ($players as $player_id => $player) {
             if ($player_id !== $current_player_id) {
                 $cards = $this->action_cards->getCardsInLocation("hand", $player_id);
 
-                $action_cards[$player_id] = $cards;
+                $hands[$player_id] = $cards;
             }
         }
 
-        return $action_cards;
+        return $hands;
     }
 
     function getDeckOfInformations(): array
@@ -304,6 +305,23 @@ class PersonaNonGrata extends Table
         $hand = $this->information_cards->getCardsInLocation("hand", $player_id);
 
         return $hand;
+    }
+
+    function getInfoInOtherHands(int $current_player_id): array
+    {
+        $hands = array();
+
+        $players = $this->loadPlayersBasicInfos();
+
+        foreach ($players as $player_id => $player) {
+            if ($player_id !== $current_player_id) {
+                $cards = $this->information_cards->getCardsInLocation("hand", $player_id);
+
+                $hands[$player_id] = $this->hideCards($cards);
+            }
+        }
+
+        return $hands;
     }
 
     //////////////////////////////////////////////////////////////////////////////

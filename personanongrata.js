@@ -157,6 +157,7 @@ define([
       this.actionsInOtherHands = gamedatas.actionsInOtherHands;
       this.deckOfInformations = gamedatas.deckOfInformations;
       this.infoInMyHand = gamedatas.infoInMyHand;
+      this.infoInOtherHands = gamedatas.infoInOtherHands;
 
       for (const player_id in this.players) {
         const player = this.players[player_id];
@@ -172,12 +173,12 @@ define([
         this[hackerControl].addCard(hacker);
 
         //actions
-        if (this.player_id !== player_id) {
-          const actionsInHandControl = `actionInHandStock`;
+        if (this.player_id != player_id) {
+          const actionsInHandControl = `actionInHandStock$${player_id}`;
           this[actionsInHandControl] = new HandStock(
             this.actionManager,
             $(`prs_handOfActions$${player_id}`),
-            { cardOverlap: "175px", sort: sortFunction("type", "type_arg") }
+            { cardOverlap: "160px", sort: sortFunction("type", "type_arg") }
           );
           const actionCards = this.actionsInOtherHands[player_id];
 
@@ -187,9 +188,24 @@ define([
             this[actionsInHandControl].addCard(card);
             this[actionsInHandControl].setCardVisible(card, false);
           }
+
+          const infoInHandControl = `infoInHandStock$${player_id}`;
+          this[infoInHandControl] = new HandStock(
+            this.informationManager,
+            $(`prs_handOfInfo$${player_id}`),
+            { cardOverlap: "160px", sort: sortFunction("type", "type_arg") }
+          );
+
+          const infoCards = this.infoInOtherHands[player_id];
+          for (const card_id in infoCards) {
+            const card = infoCards[card_id];
+            this[infoInHandControl].addCard(card);
+            this[infoInHandControl].setCardVisible(card, false);
+          }
         }
       }
 
+      //keys
       const keyControl = `keyStock`;
       this[keyControl] = new SlotStock(this.corporationManager, $(`prs_keys`), {
         slotsIds: Object.keys(this.corporations),
@@ -200,6 +216,7 @@ define([
         this[keyControl].addCard(key, {}, { slot: parseInt(key.type) });
       }
 
+      //corporations
       for (const corporation_id in this.corporations) {
         const corpDeck = this.corporationDecks[corporation_id];
         const cards = [];
@@ -250,6 +267,7 @@ define([
         {}
       );
 
+      //informations
       for (const card_id in this.deckOfInformations) {
         const card = this.deckOfInformations[card_id];
 
