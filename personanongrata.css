@@ -24,15 +24,6 @@
   background-position: top center;
 }
 
-.prs_lightTheme .prs_gameArea {
-  background-image: url("img/light.jpg");
-  background-position: top center;
-}
-
-.prs_lightTheme .prs_gameArea .whiteblock {
-  background-color: rgba(0, 0, 0, 0.75);
-}
-
 .prs_gameArea {
   display: flex;
   align-items: stretch;

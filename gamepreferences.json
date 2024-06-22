@@ -4,8 +4,7 @@
     "needReload": true,
     "values": {
       "0": { "name": "Disabled" },
-      "1": { "name": "Dark", "cssPref": "prs_darkTheme", "default": true },
-      "2": { "name": "Light", "cssPref": "prs_lightTheme" }
+      "1": { "name": "Enabled", "cssPref": "prs_darkTheme", "default": true }
     }
   }
 }
