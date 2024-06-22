@@ -27,7 +27,10 @@ class PersonaNonGrata extends Table
     {
         parent::__construct();
 
-        $this->initGameStateLabels(array());
+        $this->initGameStateLabels(array(
+            "week" => 10,
+            "direction" => 11,
+        ));
 
         $this->information_cards = $this->getNew("module.common.deck");
         $this->information_cards->init("information");
@@ -64,6 +67,8 @@ class PersonaNonGrata extends Table
         $this->reloadPlayersBasicInfos();
 
         /************ Start the game initialization *****/
+
+        $this->setGameStateInitialValue("week", 1);
 
         //corporations
         $corporation_cards = array();
@@ -163,6 +168,9 @@ class PersonaNonGrata extends Table
         $current_player_id = $this->getCurrentPlayerId();    // !! We must only return informations visible by this player !!
 
         $result["players"] = $this->getCollectionFromDb("SELECT player_id id, player_score score FROM player ");
+        $result["clockwise"] = $this->isClockwise();
+        $result["prevPlayer"] = $this->getPlayerBefore($current_player_id);
+        $result["nextPlayer"] = $this->getPlayerAfter($current_player_id);
         $result["corporations"] = $this->corporations;
         $result["hackers"] = $this->getHackers();
         $result["keys"] = $this->getKeys();
@@ -186,7 +194,16 @@ class PersonaNonGrata extends Table
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Utility functions
-    ////////////  
+    ////////////
+    function getCustomPlayerAfter(int $player_id): int
+    {
+        return $this->isClockwise() ? $this->getPlayerAfter($player_id) : $this->getPlayerBefore($player_id);
+    }
+
+    function getCustomPlayerBefore(int $player_id): int
+    {
+        return $this->isClockwise() ? $this->getPlayerBefore($player_id) : $this->getPlayerAfter($player_id);
+    }
 
     function hideCards(array $cards): array
     {
@@ -204,6 +221,13 @@ class PersonaNonGrata extends Table
     }
 
     //getters
+    function isClockwise()
+    {
+        $week = $this->getGameStateValue("week");
+
+        return !($week % 2);
+    }
+
     function getCardsByTypeArg(string $table, int $type_arg): array | null
     {
         $sql = "SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg 

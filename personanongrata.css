@@ -58,6 +58,10 @@
   width: 100%;
 }
 
+.prs_playerZones .prs_playerZone {
+  order: 2;
+}
+
 .prs_zone {
   display: flex;
   flex-direction: column;
@@ -90,6 +94,7 @@
 }
 
 .prs_myZone {
+  min-width: 640px;
   max-width: 1024px;
   width: 100%;
 }

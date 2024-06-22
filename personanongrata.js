@@ -149,6 +149,10 @@ define([
       console.log("Starting game setup");
 
       this.players = gamedatas.players;
+      this.clockwise = false;
+      this.nextPlayer = gamedatas.nextPlayer;
+      this.prevPlayer = gamedatas.prevPlayer;
+
       this.corporations = gamedatas.corporations;
       this.hackers = gamedatas.hackers;
       this.keys = gamedatas.keys;
@@ -159,6 +163,12 @@ define([
       this.infoInMyHand = gamedatas.infoInMyHand;
       this.infoInOtherHands = gamedatas.infoInOtherHands;
 
+      console.log(this.nextPlayer, this.prevPlayer);
+
+      $(`prs_playerZone$${this.player_id}`).style.order = 0;
+      $(`prs_playerZone$${this.prevPlayer}`).style.order = -1;
+      $(`prs_playerZone$${this.nextPlayer}`).style.order = 1;
+
       for (const player_id in this.players) {
         const player = this.players[player_id];
 
@@ -168,9 +178,13 @@ define([
           $(`prs_hacker$${player_id}`)
         );
 
-        const hacker = this.hackers[player_id];
+        const hackerCard = this.hackers[player_id];
 
-        this[hackerControl].addCard(hacker);
+        this[hackerControl].addCard(hackerCard);
+
+        if (this.clockwise) {
+          this[hackerControl].flipCard(hackerCard);
+        }
 
         //actions
         if (this.player_id != player_id) {
