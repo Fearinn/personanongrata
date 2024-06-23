@@ -111,10 +111,10 @@
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  row-gap: 8px;
+  gap: 16px;
   width: 100%;
 }
 
 .prs_hand {
-  padding: 16px 60px;
+  padding: 60px;
 }

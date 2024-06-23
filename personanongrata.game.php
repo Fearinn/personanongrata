@@ -180,6 +180,7 @@ class PersonaNonGrata extends Table
         $result["deckOfInformations"] = $this->getDeckOfInformations();
         $result["infoInMyHand"] = $this->getInfoInMyHand($current_player_id);
         $result["infoInOtherHands"] = $this->getInfoInOtherHands($current_player_id);
+        $result["playedCards"] = $this->getPlayedCards($current_player_id);
 
         return $result;
     }
@@ -205,6 +206,16 @@ class PersonaNonGrata extends Table
         return $this->isClockwise() ? $this->getPlayerBefore($player_id) : $this->getPlayerAfter($player_id);
     }
 
+    function getCardsByTypeArg(string $table, int $type_arg): array | null
+    {
+        $sql = "SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg 
+        from $table WHERE card_type_arg='$type_arg'";
+
+        $result = $this->getCollectionFromDB($sql);
+
+        return $result;
+    }
+
     function hideCards(array $cards): array
     {
         $hidden_cards = array();
@@ -221,23 +232,6 @@ class PersonaNonGrata extends Table
     }
 
     //getters
-    function isClockwise()
-    {
-        $week = $this->getGameStateValue("week");
-
-        return !($week % 2);
-    }
-
-    function getCardsByTypeArg(string $table, int $type_arg): array | null
-    {
-        $sql = "SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg 
-        from $table WHERE card_type_arg='$type_arg'";
-
-        $result = $this->getCollectionFromDB($sql);
-
-        return $result;
-    }
-
     function getHackerByColor(string $color): array
     {
         $hacker_card = null;
@@ -348,11 +342,82 @@ class PersonaNonGrata extends Table
         return $hands;
     }
 
+    function getPlayedCards(int $player_id): array
+    {
+        $played_cards = array();
+
+        $location_action = $this->action_cards->getCardsInLocation("played", $player_id);
+        $played_cards["action"] = array_shift($location_action);
+
+        $location_info = $this->information_cards->getCardsInLocation("played", $player_id);
+        $played_cards["info"] = array_shift($location_info);
+
+        return $played_cards;
+    }
+
+    //checkers
+    function isClockwise(): bool
+    {
+        $week = $this->getGameStateValue("week");
+
+        return !($week % 2);
+    }
+
+    function cardInHand(array $card, int $player_id): bool
+    {
+        return $card["location"] === "hand" && $card["location_arg"] == $player_id;
+    }
+
     //////////////////////////////////////////////////////////////////////////////
     //////////// Player actions
     //////////// 
 
+    function playCards(int $action_card_id, int $info_card_id)
+    {
+        $this->checkAction("playCards");
 
+        $player_id = $this->getCurrentPlayerId();
+
+        $action_card = $this->action_cards->getCard($action_card_id);
+        $info_card = $this->information_cards->getCard($info_card_id);
+
+        if (!$action_card || !$info_card) {
+            throw new BgaVisibleSystemException("Card not found");
+        }
+
+        if (!$this->cardInHand($action_card, $player_id) || !$this->cardInHand($info_card, $player_id)) {
+            throw new BgaVisibleSystemException("This card is not in your hand");
+        }
+
+        $action_id = $action_card["type_arg"];
+        $info_id = $info_card["type_arg"];
+        $corp_id = intval($info_card["type"]);
+
+        $this->action_cards->moveCard($action_card_id, "played", $player_id);
+        $this->information_cards->moveCard($info_card_id, "played", $player_id);
+
+        $this->notifyPlayer(
+            $player_id,
+            "playCards",
+            clienttranslate('You combine a ${action_label} to a ${info_label} of ${corp_label}'),
+            array(
+                "i18n" => array("action_label", "info_label", "corp_label"),
+                "player_id" => $player_id,
+                "action_label" => $this->actions[$action_id],
+                "info_label" => $this->informations[$info_id]["name"],
+                "corp_label" => $this->corporations[$corp_id],
+                "actionCard" => $action_card,
+                "infoCard" => $info_card
+            )
+        );
+
+        if ($this->getPlayersNumber() === 2) {
+            $this->gamestate->nextPrivateState($player_id, "discardCard");
+            return;
+        }
+
+        $this->gamestate->setPlayerNonMultiactive($player_id, "infoArchiving");
+    }
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Game state arguments

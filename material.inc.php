@@ -40,10 +40,10 @@ $this->hackers = array(
 );
 
 $this->actions = array(
-  1 => clienttranslate("download"),
-  2 => clienttranslate("encrypt"),
-  3 => clienttranslate("send to right"),
-  4 => clienttranslate("send to left"),
+  1 => clienttranslate("Download"),
+  2 => clienttranslate("Encrypt"),
+  3 => clienttranslate("Send to Right"),
+  4 => clienttranslate("Send to Left"),
 );
 
 $this->corporations = array(

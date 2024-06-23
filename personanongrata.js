@@ -163,7 +163,8 @@ define([
       this.infoInMyHand = gamedatas.infoInMyHand;
       this.infoInOtherHands = gamedatas.infoInOtherHands;
 
-      console.log(this.nextPlayer, this.prevPlayer);
+      this.selectedAction = gamedatas.playedCards["action"];
+      this.selectedInfo = gamedatas.playedCards["info"];
 
       $(`prs_playerZone$${this.player_id}`).style.order = 0;
       $(`prs_playerZone$${this.prevPlayer}`).style.order = -1;
@@ -189,11 +190,13 @@ define([
         //actions
         if (this.player_id != player_id) {
           const actionsInHandControl = `actionInHandStock$${player_id}`;
+
           this[actionsInHandControl] = new HandStock(
             this.actionManager,
             $(`prs_handOfActions$${player_id}`),
             { cardOverlap: "160px", sort: sortFunction("type", "type_arg") }
           );
+
           const actionCards = this.actionsInOtherHands[player_id];
 
           for (const card_id in actionCards) {
@@ -217,6 +220,28 @@ define([
             this[infoInHandControl].setCardVisible(card, false);
           }
         }
+      }
+
+      //played
+      const playedActionControl = `myPlayedAction`;
+      this[playedActionControl] = new LineStock(
+        this.actionManager,
+        $(`prs_playedAction$${this.player_id}`),
+        {}
+      );
+      if (this.selectedAction) {
+        this[playedActionControl].addCard(this.selectedAction);
+      }
+
+      const playedInfoControl = `myPlayedInfo`;
+      this[playedInfoControl] = new LineStock(
+        this.informationManager,
+        $(`prs_playedInfo$${this.player_id}`),
+        {}
+      );
+
+      if (this.selectedInfo) {
+        this[playedInfoControl].addCard(this.selectedInfo);
       }
 
       //keys
@@ -265,12 +290,28 @@ define([
       );
 
       this[actionsInMyHandControl].setSelectionMode("single");
+      this[actionsInMyHandControl].onSelectionChange = (
+        selection,
+        lastChange
+      ) => {
+        if (selection.length === 0) {
+          this.selectedAction = null;
+        } else {
+          this.selectedAction = lastChange;
+        }
+
+        this.handleConfirmationButton();
+      };
 
       for (const card_id in this.actionsInMyHand) {
         const card = this.actionsInMyHand[card_id];
-        this[actionsInMyHandControl].addCard(card, undefined, {
-          visible: true,
-        });
+        this[actionsInMyHandControl].addCard(
+          card,
+          {},
+          {
+            visible: true,
+          }
+        );
       }
 
       //informations
@@ -300,7 +341,20 @@ define([
         const card = this.infoInMyHand[card_id];
 
         this[infoInMyHandControl].addCard(card);
+
         this[infoInMyHandControl].setSelectionMode("single");
+        this[infoInMyHandControl].onSelectionChange = (
+          selection,
+          lastChange
+        ) => {
+          if (selection.length === 0) {
+            this.selectedInfo = null;
+          } else {
+            this.selectedInfo = lastChange;
+          }
+
+          this.handleConfirmationButton();
+        };
       }
 
       this.setupNotifications();
@@ -329,102 +383,75 @@ define([
     ///////////////////////////////////////////////////
     //// Utility methods
 
+    sendAjaxCall: function (action, args = {}) {
+      args.lock = true;
+
+      if (this.checkAction(action, true)) {
+        this.ajaxcall(
+          "/" + this.game_name + "/" + this.game_name + "/" + action + ".html",
+          args,
+          this,
+          (result) => {},
+          (isError) => {}
+        );
+      }
+    },
+
     calcBackgroundPosition: function (spritePosition) {
       const xAxis = spritePosition * 100;
       return `-${xAxis}% 0`;
     },
 
+    handleConfirmationButton: function () {
+      this.removeActionButtons();
+
+      if (this.selectedAction && this.selectedInfo) {
+        this.addActionButton(
+          "prs_confirmationBtn",
+          _("Confirm selection"),
+          () => {
+            this.onPlayCards();
+          }
+        );
+      }
+    },
+
     ///////////////////////////////////////////////////
     //// Player's action
 
-    /*
-        
-            Here, you are defining methods to handle player's action (ex: results of mouse click on 
-            game objects).
-            
-            Most of the time, these methods:
-            _ check the action is possible at this game state.
-            _ make a call to the game server
-        
-        */
+    onPlayCards() {
+      if (!this.selectedAction || !this.selectedInfo) {
+        this.showMessage(_("Please select both cards first"), "error");
+        return;
+      }
 
-    /* Example:
-        
-        onMyMethodToCall1: function( evt )
-        {
-            console.log( 'onMyMethodToCall1' );
-            
-            // Preventing default browser reaction
-            dojo.stopEvent( evt );
-
-            // Check that this action is possible (see "possibleactions" in states.inc.php)
-            if( ! this.checkAction( 'myAction' ) )
-            {   return; }
-
-            this.ajaxcall( "/personanongrata/personanongrata/myAction.html", { 
-                                                                    lock: true, 
-                                                                    myArgument1: arg1, 
-                                                                    myArgument2: arg2,
-                                                                    ...
-                                                                 }, 
-                         this, function( result ) {
-                            
-                            // What to do after the server call if it succeeded
-                            // (most of the time: nothing)
-                            
-                         }, function( is_error) {
-
-                            // What to do after the server call in anyway (success or failure)
-                            // (most of the time: nothing)
-
-                         } );        
-        },        
-        
-        */
+      this.sendAjaxCall("playCards", {
+        action_card_id: this.selectedAction.id,
+        info_card_id: this.selectedInfo.id,
+      });
+    },
 
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
 
-    /*
-            setupNotifications:
-            
-            In this method, you associate each of your game notifications with your local method to handle it.
-            
-            Note: game notification names correspond to "notifyAllPlayers" and "notifyPlayer" calls in
-                  your personanongrata.game.php file.
-        
-        */
     setupNotifications: function () {
       console.log("notifications subscriptions setup");
-
-      // TODO: here, associate your game notifications with local methods
-
-      // Example 1: standard notification handling
-      // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
-
-      // Example 2: standard notification handling + tell the user interface to wait
-      //            during 3 seconds after calling the method in order to let the players
-      //            see what is happening in the game.
-      // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
-      // this.notifqueue.setSynchronous( 'cardPlayed', 3000 );
-      //
+      dojo.subscribe("playCards", this, "notif_playCards");
     },
 
-    // TODO: from this point and below, you can write your game notifications handling methods
+    notif_playCards: function (notif) {
+      const player_id = notif.args.player_id;
+      const actionCard = notif.args.actionCard;
+      const infoCard = notif.args.infoCard;
 
-    /*
-        Example:
-        
-        notif_cardPlayed: function( notif )
-        {
-            console.log( 'notif_cardPlayed' );
-            console.log( notif );
-            
-            // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
-            
-            // TODO: play the card in the user interface.
-        },    
-        
-        */
+      actionCard.category = "action";
+      infoCard.category = "information";
+
+      const playedActionControl = `playedActionStock$${player_id}`;
+      this[playedActionControl].addCard(actionCard);
+
+      const playedInfoControl = `playedInfoStock$${player_id}`;
+      this[playedInfoControl].addCard(infoCard);
+    },
   });
 });
