@@ -223,7 +223,7 @@ define([
       }
 
       //played
-      const playedActionControl = `myPlayedAction`;
+      const playedActionControl = `myPlayedActionStock`;
       this[playedActionControl] = new LineStock(
         this.actionManager,
         $(`prs_playedAction$${this.player_id}`),
@@ -233,7 +233,7 @@ define([
         this[playedActionControl].addCard(this.selectedAction);
       }
 
-      const playedInfoControl = `myPlayedInfo`;
+      const playedInfoControl = `myPlayedInfoStock`;
       this[playedInfoControl] = new LineStock(
         this.informationManager,
         $(`prs_playedInfo$${this.player_id}`),
@@ -444,13 +444,10 @@ define([
       const actionCard = notif.args.actionCard;
       const infoCard = notif.args.infoCard;
 
-      actionCard.category = "action";
-      infoCard.category = "information";
-
-      const playedActionControl = `playedActionStock$${player_id}`;
+      const playedActionControl = `myPlayedActionStock`;
       this[playedActionControl].addCard(actionCard);
 
-      const playedInfoControl = `playedInfoStock$${player_id}`;
+      const playedInfoControl = `myPlayedInfoStock`;
       this[playedInfoControl].addCard(infoCard);
     },
   });
