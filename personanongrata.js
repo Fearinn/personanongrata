@@ -373,6 +373,7 @@ define([
       if (stateName === "playCards") {
         this["actionsInMyHandStock"].setSelectionMode("single");
         this["infoInMyHandStock"].setSelectionMode("single");
+        return;
       }
     },
 
@@ -382,10 +383,21 @@ define([
       if (stateName === "playCards") {
         this["actionsInMyHandStock"].setSelectionMode("none");
         this["infoInMyHandStock"].setSelectionMode("none");
+        return;
       }
     },
 
     onUpdateActionButtons: function (stateName, args) {
+      console.log("Update action buttons: " + stateName);
+
+      if (stateName === "day") {
+        if (!this.isCurrentPlayerActive()) {
+          this.addActionButton("prs_changeMind_btn", _("Change mind"), () => {
+            this.onChangeMind();
+          });
+        }
+        return;
+      }
     },
 
     ///////////////////////////////////////////////////
@@ -395,10 +407,10 @@ define([
       return this.gamedatas.gamestate.name;
     },
 
-    sendAjaxCall: function (action, args = {}) {
+    sendAjaxCall: function (action, args = {}, allowInactive = false) {
       args.lock = true;
 
-      if (this.checkAction(action, true)) {
+      const runCall = () => {
         this.ajaxcall(
           "/" + this.game_name + "/" + this.game_name + "/" + action + ".html",
           args,
@@ -406,6 +418,17 @@ define([
           (result) => {},
           (isError) => {}
         );
+      };
+
+      if (allowInactive) {
+        if (this.checkPossibleActions(action, true) && this.checkLock()) {
+          runCall();
+        }
+        return;
+      }
+
+      if (this.checkAction(action, true)) {
+        runCall();
       }
     },
 
@@ -443,16 +466,20 @@ define([
       });
     },
 
+    onChangeMind() {
+      this.sendAjaxCall("changeMind", {}, true);
+    },
+
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
 
     setupNotifications: function () {
       console.log("notifications subscriptions setup");
       dojo.subscribe("playCards", this, "notif_playCards");
+      dojo.subscribe("changeMind", this, "notif_changeMind");
     },
 
     notif_playCards: function (notif) {
-      const player_id = notif.args.player_id;
       const actionCard = notif.args.actionCard;
       const infoCard = notif.args.infoCard;
 
@@ -461,6 +488,20 @@ define([
 
       const playedInfoControl = `myPlayedInfoStock`;
       this[playedInfoControl].addCard(infoCard);
+    },
+
+    notif_changeMind: function (notif) {
+      const actionCard = notif.args.actionCard;
+      const infoCard = notif.args.infoCard;
+
+      const actionInMyHandControl = `actionsInMyHandStock`;
+      this[actionInMyHandControl].addCard(actionCard);
+
+      const infoInMyHandControl = `infoInMyHandStock`;
+      this[infoInMyHandControl].addCard(infoCard);
+
+      this.selectedAction = null;
+      this.selectedInfo = null;
     },
   });
 });

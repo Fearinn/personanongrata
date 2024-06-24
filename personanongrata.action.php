@@ -47,4 +47,11 @@ class action_personanongrata extends APP_GameAction
 
     $this->ajaxResponse();
   }
+
+  public function changeMind()
+  {
+    $this->setAjaxMode();
+    $this->game->changeMind();
+    $this->ajaxResponse();
+  }
 }

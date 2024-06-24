@@ -419,6 +419,36 @@ class PersonaNonGrata extends Table
         $this->gamestate->setPlayerNonMultiactive($player_id, "infoArchiving");
     }
 
+    function changeMind()
+    {
+        $this->gamestate->checkPossibleAction("changeMind");
+
+        $player_id = $this->getCurrentPlayerId();
+
+        $played_cards = $this->getPlayedCards($player_id);
+
+        $action_card = $played_cards["action"];
+        $info_card = $played_cards["info"];
+
+        $this->action_cards->moveCard($action_card["id"], "hand", $player_id);
+        $this->information_cards->moveCard($info_card["id"], "hand", $player_id);
+
+        $this->notifyPlayer(
+            $player_id,
+            "changeMind",
+            clienttranslate("You change your mind and become active again"),
+            array(
+                "player_id" => $player_id,
+                "actionCard" => $action_card,
+                "infoCard" => $info_card,
+            )
+        );
+
+        $this->gamestate->setPlayersMultiactive(array($player_id), "error");
+
+        $this->gamestate->initializePrivateState($player_id);
+    }
+
     //////////////////////////////////////////////////////////////////////////////
     //////////// Game state arguments
     ////////////
