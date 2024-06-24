@@ -415,7 +415,7 @@ class PersonaNonGrata extends Table
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
                 "action_label" => $this->actions[$action_id],
-                "info_label" => $this->informations[$info_id]["name"],
+                "info_label" => $encrypt ? null : $this->informations[$info_id]["name"],
                 "corp_label" => $this->corporations[$corp_id],
                 "actionCard" => $action_card,
                 "infoCard" => $info_card,
@@ -455,7 +455,7 @@ class PersonaNonGrata extends Table
         $this->notifyPlayer(
             $player_id,
             "playCards",
-            clienttranslate('You combine a ${action_label} to a ${info_label} of ${corp_label}'),
+            "",
             array(
                 "i18n" => array("action_label", "info_label", "corp_label"),
                 "player_id" => $player_id,
