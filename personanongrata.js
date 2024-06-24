@@ -289,18 +289,19 @@ define([
         { cardOverlap: "90px", sort: sortFunction("type_arg") }
       );
 
-      this[actionsInMyHandControl].setSelectionMode("single");
       this[actionsInMyHandControl].onSelectionChange = (
         selection,
         lastChange
       ) => {
-        if (selection.length === 0) {
-          this.selectedAction = null;
-        } else {
-          this.selectedAction = lastChange;
-        }
+        if (this.getStateName() === "day" && this.isCurrentPlayerActive()) {
+          if (selection.length === 0) {
+            this.selectedAction = null;
+          } else {
+            this.selectedAction = lastChange;
+          }
 
-        this.handleConfirmationButton();
+          this.handleConfirmationButton();
+        }
       };
 
       for (const card_id in this.actionsInMyHand) {
@@ -342,18 +343,19 @@ define([
 
         this[infoInMyHandControl].addCard(card);
 
-        this[infoInMyHandControl].setSelectionMode("single");
         this[infoInMyHandControl].onSelectionChange = (
           selection,
           lastChange
         ) => {
-          if (selection.length === 0) {
-            this.selectedInfo = null;
-          } else {
-            this.selectedInfo = lastChange;
-          }
+          if (this.getStateName() === "day" && this.isCurrentPlayerActive()) {
+            if (selection.length === 0) {
+              this.selectedInfo = null;
+            } else {
+              this.selectedInfo = lastChange;
+            }
 
-          this.handleConfirmationButton();
+            this.handleConfirmationButton();
+          }
         };
       }
 
@@ -367,21 +369,31 @@ define([
 
     onEnteringState: function (stateName, args) {
       console.log("Entering state: " + stateName);
+
+      if (stateName === "playCards") {
+        this["actionsInMyHandStock"].setSelectionMode("single");
+        this["infoInMyHandStock"].setSelectionMode("single");
+      }
     },
 
     onLeavingState: function (stateName) {
       console.log("Leaving state: " + stateName);
+
+      if (stateName === "playCards") {
+        this["actionsInMyHandStock"].setSelectionMode("none");
+        this["infoInMyHandStock"].setSelectionMode("none");
+      }
     },
 
     onUpdateActionButtons: function (stateName, args) {
-      console.log("onUpdateActionButtons: " + stateName);
-
-      if (this.isCurrentPlayerActive()) {
-      }
     },
 
     ///////////////////////////////////////////////////
     //// Utility methods
+
+    getStateName: function () {
+      return this.gamedatas.gamestate.name;
+    },
 
     sendAjaxCall: function (action, args = {}) {
       args.lock = true;
