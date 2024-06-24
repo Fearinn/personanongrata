@@ -75,8 +75,18 @@
   min-width: 480px;
 }
 
+.prs_myZone {
+  min-width: 640px;
+  width: 100%;
+}
+
 .prs_publicZone {
   outline-color: #fff;
+}
+
+.prs_piles {
+  display: flex;
+  gap: 8px;
 }
 
 .prs_zoneTitle {
@@ -91,12 +101,6 @@
 .prs_publicZone .prs_zoneTitle {
   background-color: #fff;
   color: #000;
-}
-
-.prs_myZone {
-  min-width: 640px;
-  max-width: 1024px;
-  width: 100%;
 }
 
 .prs_corporationDecks {
@@ -116,5 +120,5 @@
 }
 
 .prs_hand {
-  padding: 60px;
+  padding: 0 60px;
 }

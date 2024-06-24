@@ -389,7 +389,73 @@ class PersonaNonGrata extends Table
         return $card["location"] === "hand" && $card["location_arg"] == $player_id;
     }
 
-    function revealPlayed(int $player_id): void
+    // action cards
+
+    function download(array $info_card, int $player_id): void
+    {
+        $this->information_cards->moveCard($info_card["id"], "downloaded", $player_id);
+
+        $this->notifyAllPlayers(
+            "download",
+            "",
+            array(
+                "player_id" => $player_id,
+                "infoCard" => $info_card,
+                "encrypt" => false
+            )
+        );
+    }
+
+    function encrypt(array $info_card, int $player_id): void
+    {
+        $this->information_cards->moveCard($info_card["id"], "encrypted", $player_id);
+
+        $this->notifyAllPlayers(
+            "download",
+            "",
+            array(
+                "player_id" => $player_id,
+                "infoCard" => $this->hideCard($info_card, true),
+                "encrypt" => true
+            )
+        );
+    }
+    function sendToRight(array $info_card, int $player_id): void
+    {
+        $right_id = $this->getPlayerAfter($player_id);
+
+        $this->information_cards->moveCard($info_card["id"], "downloaded", $right_id);
+
+        $this->notifyAllPlayers(
+            "download",
+            "",
+            array(
+                "player_id" => $right_id,
+                "infoCard" => $info_card,
+                "encrypt" => false
+            )
+        );
+    }
+
+    function sendToLeft(array $info_card, int $player_id): void
+    {
+        $left_id = $this->getPlayerBefore($player_id);
+
+        $this->information_cards->moveCard($info_card["id"], "downloaded", $left_id);
+
+        $this->notifyAllPlayers(
+            "download",
+            "",
+            array(
+                "player_id" => $left_id,
+                "infoCard" => $info_card,
+                "encrypt" => false
+            )
+        );
+    }
+
+    // operations
+    function revealPlayed(int $player_id): array
     {
         $action_card = $this->getSingleCardInLocation($this->action_cards, "played", $player_id);
         $info_card = $this->getSingleCardInLocation($this->information_cards, "played", $player_id);
@@ -420,6 +486,43 @@ class PersonaNonGrata extends Table
                 "actionCard" => $action_card,
                 "infoCard" => $info_card,
                 "encrypt" => $encrypt
+            )
+        );
+
+        return array("action" => $action_card, "info" => $info_card);
+    }
+
+    function activateActionCard(int $player_id)
+    {
+        $action_card = $this->getSingleCardInLocation($this->action_cards, "played", $player_id);
+        $info_card = $this->getSingleCardInLocation($this->information_cards, "played", $player_id);
+
+        $action_id = $action_card["type_arg"];
+
+        if ($action_id == 1) {
+            $this->download($info_card, $player_id);
+        }
+
+        if ($action_id == 2) {
+            $this->encrypt($info_card, $player_id);
+        }
+
+        if ($action_id == 3) {
+            $this->sendToRight($info_card, $player_id);
+        }
+
+        if ($action_id == 4) {
+            $this->sendToLeft($info_card, $player_id);
+        }
+
+        $this->action_cards->moveCard($action_card["id"], "discard", $player_id);
+
+        $this->notifyAllPlayers(
+            "activateActionCard",
+            "",
+            array(
+                "player_id" => $player_id,
+                "actionCard" => $action_card
             )
         );
     }
@@ -455,7 +558,7 @@ class PersonaNonGrata extends Table
         $this->notifyPlayer(
             $player_id,
             "playCards",
-            "",
+            clienttranslate('You combine a ${action_label} to a ${info_label} of ${corp_label}'),
             array(
                 "i18n" => array("action_label", "info_label", "corp_label"),
                 "player_id" => $player_id,
@@ -467,10 +570,10 @@ class PersonaNonGrata extends Table
             )
         );
 
-        if ($this->getPlayersNumber() === 2) {
-            $this->gamestate->nextPrivateState($player_id, "discardCard");
-            return;
-        }
+        // if ($this->getPlayersNumber() === 2) {
+        //     $this->gamestate->nextPrivateState($player_id, "discardCard");
+        //     return;
+        // }
 
         $this->gamestate->setPlayerNonMultiactive($player_id, "infoArchiving");
     }
@@ -525,8 +628,14 @@ class PersonaNonGrata extends Table
         $players = $this->loadPlayersBasicInfos();
         $current_player_id = $this->getCurrentPlayerId();
 
+        $cards_played = array();
+
         foreach ($players as $player_id => $player) {
-            $this->revealPlayed($player_id);
+            if ($current_player_id != $player_id) {
+                $this->revealPlayed($player_id);
+            }
+
+            $this->activateActionCard($player_id);
         }
 
         $this->gamestate->nextState("nextDay");

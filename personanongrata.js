@@ -233,6 +233,13 @@ define([
             $(`prs_playedInfo$${player_id}`),
             {}
           );
+
+          const downloadedControl = `downloadedStock$${player_id}`;
+          this[downloadedControl] = new LineStock(
+            this.informationManager,
+            $(`prs_downloaded$${player_id}`),
+            {}
+          );
         }
       }
 
@@ -257,6 +264,22 @@ define([
       if (this.selectedInfo) {
         this[myPlayedInfoControl].addCard(this.selectedInfo);
       }
+
+      //downloaded
+      const myDownloadedControl = `downloadedStock$${this.player_id}`;
+      this[myDownloadedControl] = new LineStock(
+        this.informationManager,
+        $(`prs_downloaded$${this.player_id}`),
+        {}
+      );
+
+      //discard
+      const actionDiscardControl = `actionDiscardStock`;
+      this[actionDiscardControl] = new HandStock(
+        this.actionManager,
+        $("prs_actionDiscard"),
+        { cardOverlap: "175px" }
+      );
 
       //keys
       const keyControl = `keyStock`;
@@ -490,7 +513,11 @@ define([
     setupNotifications: function () {
       console.log("notifications subscriptions setup");
       dojo.subscribe("playCards", this, "notif_playCards");
+      this.notifqueue.setSynchronous("playCards", 100);
       dojo.subscribe("changeMind", this, "notif_changeMind");
+      dojo.subscribe("activateActionCard", this, "notif_activateActionCard");
+      dojo.subscribe("download", this, "notif_download");
+      this.notifqueue.setSynchronous("playCards", 1000);
     },
 
     notif_playCards: function (notif) {
@@ -522,6 +549,25 @@ define([
 
       this.selectedAction = null;
       this.selectedInfo = null;
+    },
+
+    notif_download: function (notif) {
+      const player_id = notif.args.player_id;
+      const infoCard = notif.args.infoCard;
+      const encrypt = notif.args.encrypt;
+
+      const downloadedControl = `downloadedStock$${player_id}`;
+      this[downloadedControl].addCard(infoCard);
+
+      if (encrypt) {
+        this[downloadedControl].setCardVisible(infoCard);
+      }
+    },
+
+    notif_activateActionCard: function (notif) {
+      const actionCard = notif.args.actionCard;
+
+      this["actionDiscardStock"].addCard(actionCard, {});
     },
   });
 });

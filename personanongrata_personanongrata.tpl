@@ -27,6 +27,10 @@
     <div id="prs_hand${PLAYER_ID}" class="prs_myHand prs_handContainer">
       <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
       <div id="prs_playedInfo${PLAYER_ID}" class="prs_playedInfo"></div>
+      <div
+        id="prs_downloaded${PLAYER_ID}"
+        class="prs_myDownloaded prs_downloaded"
+      ></div>
       <div id="prs_playedAction${PLAYER_ID}" class="prs_playedAction"></div>
       <div
         id="prs_handOfActions${PLAYER_ID}"
@@ -37,7 +41,6 @@
         class="prs_handOfInfo prs_hand"
       ></div>
     </div>
-    <div id="prs_downloaded${PLAYER_ID}" class="prs_myDownloaded"></div>
   </div>
   <!-- END myzone -->
   <div id="prs_playerZones" class="prs_playerZones">
@@ -53,6 +56,7 @@
       <div id="prs_hand${PLAYER_ID}" class="prs_handContainer">
         <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
         <div id="prs_playedInfo${PLAYER_ID}" class="prs_playedInfo"></div>
+        <div id="prs_downloaded${PLAYER_ID}" class="prs_downloaded"></div>
         <div id="prs_playedAction${PLAYER_ID}" class="prs_playedAction"></div>
         <div
           id="prs_handOfActions${PLAYER_ID}"
@@ -63,14 +67,16 @@
           class="prs_handOfInfo prs_hand"
         ></div>
       </div>
-      <div id="prs_downloaded${PLAYER_ID}" class="prs_downloaded"></div>
     </div>
     <!-- END playerzone -->
   </div>
 
   <div id="prs_publicZone" class="prs_publicZone prs_zone whiteblock">
     <h3 class="prs_zoneTitle">{CORPORATION_CARDS}</h3>
-    <div id="prs_infoDeck" class="prs_infoDeck"></div>
+    <div id="prs_piles" class="prs_piles">
+      <div id="prs_infoDeck" class="prs_infoDeck"></div>
+      <div id="prs_actionDiscard" class="prs_actionDiscard prs_hand"></div>
+    </div>
     <div id="prs_keys" class="prs_keys"></div>
     <div id="prs_corporationDecks" class="prs_corporationDecks">
       <div id="prs_corpDeck:1"></div>
