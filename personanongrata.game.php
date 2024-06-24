@@ -180,7 +180,7 @@ class PersonaNonGrata extends Table
         $result["deckOfInformations"] = $this->getDeckOfInformations();
         $result["infoInMyHand"] = $this->getInfoInMyHand($current_player_id);
         $result["infoInOtherHands"] = $this->getInfoInOtherHands($current_player_id);
-        $result["playedCards"] = $this->getPlayedCards($current_player_id);
+        $result["cardsPlayedByMe"] = $this->getCardsPlayedByMe($current_player_id);
 
         return $result;
     }
@@ -216,16 +216,40 @@ class PersonaNonGrata extends Table
         return $result;
     }
 
-    function hideCards(array $cards): array
+    function getSingleCardInLocation(object $deck, string $location, int $location_arg = null, $showError = true): ?array
+    {
+        $location_cards = $deck->getCardsInLocation($location, $location_arg);
+
+        $card = array_shift($location_cards);
+
+        if ($card === null && $showError) {
+            throw new BgaVisibleSystemException("Card not found");
+        }
+
+        return $card;
+    }
+
+    function hideCard(array $card, bool $hideType = false): array
+    {
+        $hidden_card = array(
+            "id" => $card["id"],
+            "location" => $card["location"],
+            "type" => $card["type"]
+        );
+
+        if ($hideType) {
+            unset($hidden_card["type"]);
+        }
+
+        return $hidden_card;
+    }
+
+    function hideCards(array $cards, bool $hideType = false): array
     {
         $hidden_cards = array();
 
         foreach ($cards as $card_id => $card) {
-            $hidden_cards[$card_id] = array(
-                "id" => $card_id,
-                "type" => $card["type"],
-                "location" => $card["location"],
-            );
+            $hidden_cards[$card_id] = $this->hideCard($card, $hideType);
         }
 
         return $hidden_cards;
@@ -342,15 +366,12 @@ class PersonaNonGrata extends Table
         return $hands;
     }
 
-    function getPlayedCards(int $player_id): array
+    function getCardsPlayedByMe(int $player_id): array
     {
         $played_cards = array();
 
-        $location_action = $this->action_cards->getCardsInLocation("played", $player_id);
-        $played_cards["action"] = array_shift($location_action);
-
-        $location_info = $this->information_cards->getCardsInLocation("played", $player_id);
-        $played_cards["info"] = array_shift($location_info);
+        $played_cards["action"] = $this->getSingleCardInLocation($this->action_cards, "played", $player_id, false);
+        $played_cards["info"] = $this->getSingleCardInLocation($this->information_cards, "played", $player_id, false);
 
         return $played_cards;
     }
@@ -366,6 +387,41 @@ class PersonaNonGrata extends Table
     function cardInHand(array $card, int $player_id): bool
     {
         return $card["location"] === "hand" && $card["location_arg"] == $player_id;
+    }
+
+    function revealPlayed(int $player_id): void
+    {
+        $action_card = $this->getSingleCardInLocation($this->action_cards, "played", $player_id);
+        $info_card = $this->getSingleCardInLocation($this->information_cards, "played", $player_id);
+
+        $action_id = $action_card["type_arg"];
+        $info_id = $info_card["type_arg"];
+        $corp_id = intval($info_card["type"]);
+
+        $encrypt = $action_id == 2;
+
+        if ($encrypt) {
+            $info_card = $this->hideCard($info_card, true);
+        }
+
+        $message =  $encrypt ? clienttranslate('${player_name} combines a ${action_label} to an information')
+            : clienttranslate('${player_name} combines a ${action_label} to a ${info_label} of ${corp_label}');
+
+        $this->notifyAllPlayers(
+            "playCards",
+            $message,
+            array(
+                "i18n" => array("action_label", "info_label", "corp_label"),
+                "player_id" => $player_id,
+                "player_name" => $this->getPlayerNameById($player_id),
+                "action_label" => $this->actions[$action_id],
+                "info_label" => $this->informations[$info_id]["name"],
+                "corp_label" => $this->corporations[$corp_id],
+                "actionCard" => $action_card,
+                "infoCard" => $info_card,
+                "encrypt" => $encrypt
+            )
+        );
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -425,7 +481,7 @@ class PersonaNonGrata extends Table
 
         $player_id = $this->getCurrentPlayerId();
 
-        $played_cards = $this->getPlayedCards($player_id);
+        $played_cards = $this->getCardsPlayedByMe($player_id);
 
         $action_card = $played_cards["action"];
         $info_card = $played_cards["info"];
@@ -462,6 +518,18 @@ class PersonaNonGrata extends Table
         $this->gamestate->setAllPlayersMultiactive();
 
         $this->gamestate->initializePrivateStateForAllActivePlayers();
+    }
+
+    function st_infoArchiving()
+    {
+        $players = $this->loadPlayersBasicInfos();
+        $current_player_id = $this->getCurrentPlayerId();
+
+        foreach ($players as $player_id => $player) {
+            $this->revealPlayed($player_id);
+        }
+
+        $this->gamestate->nextState("nextDay");
     }
 
     function zombieTurn($state, $active_player)

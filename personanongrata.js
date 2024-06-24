@@ -163,8 +163,8 @@ define([
       this.infoInMyHand = gamedatas.infoInMyHand;
       this.infoInOtherHands = gamedatas.infoInOtherHands;
 
-      this.selectedAction = gamedatas.playedCards["action"];
-      this.selectedInfo = gamedatas.playedCards["info"];
+      this.selectedAction = gamedatas.cardsPlayedByMe["action"];
+      this.selectedInfo = gamedatas.cardsPlayedByMe["info"];
 
       $(`prs_playerZone$${this.player_id}`).style.order = 0;
       $(`prs_playerZone$${this.prevPlayer}`).style.order = -1;
@@ -219,29 +219,43 @@ define([
             this[infoInHandControl].addCard(card);
             this[infoInHandControl].setCardVisible(card, false);
           }
+
+          const playedActionControl = `playedActionStock$${player_id}`;
+          this[playedActionControl] = new LineStock(
+            this.actionManager,
+            $(`prs_playedAction$${player_id}`),
+            {}
+          );
+
+          const playedInfoControl = `playedInfoStock$${player_id}`;
+          this[playedInfoControl] = new LineStock(
+            this.informationManager,
+            $(`prs_playedInfo$${player_id}`),
+            {}
+          );
         }
       }
 
       //played
-      const playedActionControl = `myPlayedActionStock`;
-      this[playedActionControl] = new LineStock(
+      const myPlayedActionControl = `playedActionStock$${this.player_id}`;
+      this[myPlayedActionControl] = new LineStock(
         this.actionManager,
         $(`prs_playedAction$${this.player_id}`),
         {}
       );
       if (this.selectedAction) {
-        this[playedActionControl].addCard(this.selectedAction);
+        this[myPlayedActionControl].addCard(this.selectedAction);
       }
 
-      const playedInfoControl = `myPlayedInfoStock`;
-      this[playedInfoControl] = new LineStock(
+      const myPlayedInfoControl = `playedInfoStock$${this.player_id}`;
+      this[myPlayedInfoControl] = new LineStock(
         this.informationManager,
         $(`prs_playedInfo$${this.player_id}`),
         {}
       );
 
       if (this.selectedInfo) {
-        this[playedInfoControl].addCard(this.selectedInfo);
+        this[myPlayedInfoControl].addCard(this.selectedInfo);
       }
 
       //keys
@@ -480,14 +494,20 @@ define([
     },
 
     notif_playCards: function (notif) {
+      const player_id = notif.args.player_id;
       const actionCard = notif.args.actionCard;
       const infoCard = notif.args.infoCard;
+      const encrypt = notif.args.encrypt;
 
-      const playedActionControl = `myPlayedActionStock`;
+      const playedActionControl = `playedActionStock$${player_id}`;
       this[playedActionControl].addCard(actionCard);
 
-      const playedInfoControl = `myPlayedInfoStock`;
+      const playedInfoControl = `playedInfoStock$${player_id}`;
       this[playedInfoControl].addCard(infoCard);
+
+      if (this.player_id != player_id && encrypt) {
+        this[playedInfoControl].setCardVisible(infoCard, false);
+      }
     },
 
     notif_changeMind: function (notif) {
