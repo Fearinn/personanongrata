@@ -163,6 +163,8 @@ define([
       this.infoInMyHand = gamedatas.infoInMyHand;
       this.infoInOtherHands = gamedatas.infoInOtherHands;
 
+      console.log(this.infoInOtherHands);
+
       this.selectedAction = gamedatas.cardsPlayedByMe["action"];
       this.selectedInfo = gamedatas.cardsPlayedByMe["info"];
 
@@ -368,7 +370,7 @@ define([
         this[deckOfInformationsControl].setCardVisible(card, false);
       }
 
-      const infoInMyHandControl = "infoInMyHandStock";
+      const infoInMyHandControl = `infoInHandStock$${this.player_id}`;
       this[infoInMyHandControl] = new HandStock(
         this.informationManager,
         $(`prs_handOfInfo$${this.player_id}`),
@@ -409,7 +411,7 @@ define([
 
       if (stateName === "playCards") {
         this["actionsInMyHandStock"].setSelectionMode("single");
-        this["infoInMyHandStock"].setSelectionMode("single");
+        this[`infoInHandStock$${this.player_id}`].setSelectionMode("single");
         return;
       }
     },
@@ -419,7 +421,7 @@ define([
 
       if (stateName === "playCards") {
         this["actionsInMyHandStock"].setSelectionMode("none");
-        this["infoInMyHandStock"].setSelectionMode("none");
+        this[`infoInHandStock$${this.player_id}`].setSelectionMode("none");
         return;
       }
     },
@@ -513,7 +515,7 @@ define([
     setupNotifications: function () {
       console.log("notifications subscriptions setup");
       dojo.subscribe("playCards", this, "notif_playCards");
-      this.notifqueue.setSynchronous("playCards", 100);
+      this.notifqueue.setSynchronous("playCards", 1000);
       dojo.subscribe("changeMind", this, "notif_changeMind");
       dojo.subscribe("activateActionCard", this, "notif_activateActionCard");
       dojo.subscribe("download", this, "notif_download");
@@ -525,14 +527,26 @@ define([
       const actionCard = notif.args.actionCard;
       const infoCard = notif.args.infoCard;
       const encrypt = notif.args.encrypt;
+      const isCurrentPlayer = this.player_id == player_id;
 
       const playedActionControl = `playedActionStock$${player_id}`;
       this[playedActionControl].addCard(actionCard);
 
-      const playedInfoControl = `playedInfoStock$${player_id}`;
-      this[playedInfoControl].addCard(infoCard);
+      if (!isCurrentPlayer) {
+        const infoInHandControl = `infoInHandStock$${player_id}`;
+        const hand = this[infoInHandControl].getCards();
+        const randomIndex = Math.floor(Math.random() * hand.length);
+        this[infoInHandControl].removeCard(hand[randomIndex]);
+      }
 
-      if (this.player_id != player_id && encrypt) {
+      const playedInfoControl = `playedInfoStock$${player_id}`;
+      this[playedInfoControl].removeAll();
+
+      this[playedInfoControl].addCard(infoCard, {
+        fromElement: $(`prs_playedInfo$${player_id}`),
+      });
+
+      if (!isCurrentPlayer && encrypt) {
         this[playedInfoControl].setCardVisible(infoCard, false);
       }
     },
@@ -544,7 +558,7 @@ define([
       const actionInMyHandControl = `actionsInMyHandStock`;
       this[actionInMyHandControl].addCard(actionCard);
 
-      const infoInMyHandControl = `infoInMyHandStock`;
+      const infoInMyHandControl = `infoInHandStock$${player_id}`;
       this[infoInMyHandControl].addCard(infoCard);
 
       this.selectedAction = null;
@@ -556,8 +570,13 @@ define([
       const infoCard = notif.args.infoCard;
       const encrypt = notif.args.encrypt;
 
+      const playedInfoControl = `playedInfoStock$${player_id}`;
+      this[playedInfoControl].removeAll();
+
       const downloadedControl = `downloadedStock$${player_id}`;
-      this[downloadedControl].addCard(infoCard);
+      this[downloadedControl].addCard(infoCard, {
+        fromElement: $(`prs_playedInfo$${player_id}`),
+      });
 
       if (encrypt) {
         this[downloadedControl].setCardVisible(infoCard);

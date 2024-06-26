@@ -19,6 +19,10 @@
   min-height: 330px;
 }
 
+.hand-stock:empty {
+  min-height: unset;
+}
+
 .prs_darkTheme #overall-content {
   background-image: url("img/dark.jpg");
   background-position: top center;

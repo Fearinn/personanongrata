@@ -229,27 +229,43 @@ class PersonaNonGrata extends Table
         return $card;
     }
 
-    function hideCard(array $card, bool $hideType = false): array
+    function hideCard(array $card, bool $hideType = false, string | int $fake_id = null): array
     {
         $hidden_card = array(
             "id" => $card["id"],
             "location" => $card["location"],
-            "type" => $card["type"]
+            "type" => $card["type"],
         );
 
         if ($hideType) {
             unset($hidden_card["type"]);
         }
 
+        if ($fake_id) {
+            $hidden_card["id"] = $fake_id . ":" . $card["location_arg"];
+        }
+
         return $hidden_card;
     }
 
-    function hideCards(array $cards, bool $hideType = false): array
+    function hideCards(array $cards, bool $hideType = false, bool $hideId = false): array
     {
         $hidden_cards = array();
 
+        $fake_ids = range(count($cards) * -1, -1);
+
         foreach ($cards as $card_id => $card) {
-            $hidden_cards[$card_id] = $this->hideCard($card, $hideType);
+            $fake_id = null;
+
+            if ($hideId) {
+                $random_key = array_rand($fake_ids);
+                $fake_id = $fake_ids[$random_key];
+                unset($fake_ids[$random_key]);
+
+                $card_id = $fake_id;
+            }
+
+            $hidden_cards[$card_id] = $this->hideCard($card, $hideType, $fake_id);
         }
 
         return $hidden_cards;
@@ -359,7 +375,7 @@ class PersonaNonGrata extends Table
             if ($player_id !== $current_player_id) {
                 $cards = $this->information_cards->getCardsInLocation("hand", $player_id);
 
-                $hands[$player_id] = $this->hideCards($cards);
+                $hands[$player_id] = $this->hideCards($cards, true, true);
             }
         }
 
@@ -415,7 +431,7 @@ class PersonaNonGrata extends Table
             "",
             array(
                 "player_id" => $player_id,
-                "infoCard" => $this->hideCard($info_card, true),
+                "infoCard" => $this->hideCard($info_card, true, uniqid()),
                 "encrypt" => true
             )
         );
@@ -467,7 +483,7 @@ class PersonaNonGrata extends Table
         $encrypt = $action_id == 2;
 
         if ($encrypt) {
-            $info_card = $this->hideCard($info_card, true);
+            $info_card = $this->hideCard($info_card, true, uniqid());
         }
 
         $message =  $encrypt ? clienttranslate('${player_name} combines a ${action_label} to an information')
@@ -482,7 +498,7 @@ class PersonaNonGrata extends Table
                 "player_name" => $this->getPlayerNameById($player_id),
                 "action_label" => $this->actions[$action_id],
                 "info_label" => $encrypt ? null : $this->informations[$info_id]["name"],
-                "corp_label" => $this->corporations[$corp_id],
+                "corp_label" => $encrypt ? null : $this->corporations[$corp_id],
                 "actionCard" => $action_card,
                 "infoCard" => $info_card,
                 "encrypt" => $encrypt
