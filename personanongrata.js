@@ -162,8 +162,10 @@ define([
       this.deckOfInformations = gamedatas.deckOfInformations;
       this.infoInMyHand = gamedatas.infoInMyHand;
       this.infoInOtherHands = gamedatas.infoInOtherHands;
+      this.infoArchivedByMe = gamedatas.infoArchivedByMe;
+      this.infoArchivedByOthers = gamedatas.infoArchivedByOthers;
 
-      console.log(this.infoInOtherHands);
+      console.log(this.infoArchivedByOthers, "archived");
 
       this.selectedAction = gamedatas.cardsPlayedByMe["action"];
       this.selectedInfo = gamedatas.cardsPlayedByMe["info"];
@@ -236,12 +238,26 @@ define([
             {}
           );
 
+          //archived
           const archivedControl = `archivedStock$${player_id}`;
           this[archivedControl] = new LineStock(
             this.informationManager,
             $(`prs_archived$${player_id}`),
             {}
           );
+
+          const archivedCards = this.infoArchivedByOthers[player_id];
+          const visibleArchived = archivedCards["visible"];
+
+          for (const card_id in visibleArchived) {
+            const card = visibleArchived[card_id];
+            this[archivedControl].addCard(card);
+          }
+
+          const encryptedCard = archivedCards["encrypted"];
+          if (encryptedCard) {
+            this[archivedControl].addCard(encryptedCard);
+          }
         }
       }
 
@@ -268,12 +284,22 @@ define([
       }
 
       //archived
-      const myDownloadedControl = `archivedStock$${this.player_id}`;
-      this[myDownloadedControl] = new LineStock(
+      const myArchivedControl = `archivedStock$${this.player_id}`;
+      this[myArchivedControl] = new LineStock(
         this.informationManager,
         $(`prs_archived$${this.player_id}`),
         {}
       );
+
+      for (const card_id in this.infoArchivedByMe) {
+        const card = this.infoArchivedByMe[card_id];
+
+        this[myArchivedControl].addCard(card);
+
+        if (card["location"] === "encrypted") {
+          this[myArchivedControl].setCardVisible(card, false);
+        }
+      }
 
       //discard
       const actionDiscardControl = `actionDiscardStock`;

@@ -181,6 +181,8 @@ class PersonaNonGrata extends Table
         $result["infoInMyHand"] = $this->getInfoInMyHand($current_player_id);
         $result["infoInOtherHands"] = $this->getInfoInOtherHands($current_player_id);
         $result["cardsPlayedByMe"] = $this->getCardsPlayedByMe($current_player_id);
+        $result["infoArchivedByMe"] = $this->getInfoArchivedByMe($current_player_id);
+        $result["infoArchivedByOthers"] = $this->getInfoArchivedByOthers($current_player_id);
 
         return $result;
     }
@@ -392,6 +394,39 @@ class PersonaNonGrata extends Table
         return $played_cards;
     }
 
+    function getInfoArchivedByMe(int $player_id): array
+    {
+        $archived_cards = array();
+
+        $visible_cards = $this->information_cards->getCardsInLocation("archived", $player_id);
+        $encrypted_cards = $this->information_cards->getCardsInLocation("encrypted", $player_id);
+
+        $archived_cards = $visible_cards + $encrypted_cards;
+
+        return $archived_cards;
+    }
+
+    function getInfoArchivedByOthers(int $current_player_id): array
+    {
+        $archived_cards = array();
+
+        $players = $this->loadPlayersBasicInfos();
+
+        foreach ($players as $player_id => $player) {
+            if ($player_id == $current_player_id) {
+                continue;
+            }
+
+            $visible_cards = $this->information_cards->getCardsInLocation("archived", $player_id);
+            $encrypted_card = $this->getSingleCardInLocation($this->information_cards, "encrypted", $player_id, false);
+
+            $archived_cards[$player_id]["visible"] = $visible_cards;
+            $archived_cards[$player_id]["encrypted"] = $encrypted_card ? $this->hideCard($encrypted_card, true, -1) : null;
+        }
+
+        return $archived_cards;
+    }
+
     //checkers
     function isClockwise(): bool
     {
@@ -406,7 +441,6 @@ class PersonaNonGrata extends Table
     }
 
     // action cards
-
     function download(array $info_card, int $player_id): void
     {
         $this->information_cards->moveCard($info_card["id"], "archived", $player_id);
@@ -430,7 +464,7 @@ class PersonaNonGrata extends Table
             "",
             array(
                 "player_id" => $player_id,
-                "infoCard" => $this->hideCard($info_card, true, uniqid()),
+                "infoCard" => $this->hideCard($info_card, true, -1),
                 "encrypt" => true
             )
         );
@@ -496,7 +530,7 @@ class PersonaNonGrata extends Table
         $encrypt = $action_id == 2;
 
         if ($encrypt) {
-            $info_card = $this->hideCard($info_card, true, uniqid());
+            $info_card = $this->hideCard($info_card, true, -1);
         }
 
         $message =  $encrypt ? clienttranslate('${player_name} combines a ${action_label} to an information')
