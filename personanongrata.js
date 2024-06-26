@@ -236,10 +236,10 @@ define([
             {}
           );
 
-          const downloadedControl = `downloadedStock$${player_id}`;
-          this[downloadedControl] = new LineStock(
+          const archivedControl = `archivedStock$${player_id}`;
+          this[archivedControl] = new LineStock(
             this.informationManager,
-            $(`prs_downloaded$${player_id}`),
+            $(`prs_archived$${player_id}`),
             {}
           );
         }
@@ -267,11 +267,11 @@ define([
         this[myPlayedInfoControl].addCard(this.selectedInfo);
       }
 
-      //downloaded
-      const myDownloadedControl = `downloadedStock$${this.player_id}`;
+      //archived
+      const myDownloadedControl = `archivedStock$${this.player_id}`;
       this[myDownloadedControl] = new LineStock(
         this.informationManager,
-        $(`prs_downloaded$${this.player_id}`),
+        $(`prs_archived$${this.player_id}`),
         {}
       );
 
@@ -518,8 +518,8 @@ define([
       this.notifqueue.setSynchronous("playCards", 1000);
       dojo.subscribe("changeMind", this, "notif_changeMind");
       dojo.subscribe("activateActionCard", this, "notif_activateActionCard");
-      dojo.subscribe("download", this, "notif_download");
-      this.notifqueue.setSynchronous("playCards", 1000);
+      dojo.subscribe("archive", this, "notif_archive");
+      this.notifqueue.setSynchronous("archive", 1000);
     },
 
     notif_playCards: function (notif) {
@@ -565,7 +565,7 @@ define([
       this.selectedInfo = null;
     },
 
-    notif_download: function (notif) {
+    notif_archive: function (notif) {
       const player_id = notif.args.player_id;
       const infoCard = notif.args.infoCard;
       const encrypt = notif.args.encrypt;
@@ -573,13 +573,13 @@ define([
       const playedInfoControl = `playedInfoStock$${player_id}`;
       this[playedInfoControl].removeAll();
 
-      const downloadedControl = `downloadedStock$${player_id}`;
-      this[downloadedControl].addCard(infoCard, {
+      const archivedControl = `archivedStock$${player_id}`;
+      this[archivedControl].addCard(infoCard, {
         fromElement: $(`prs_playedInfo$${player_id}`),
       });
 
       if (encrypt) {
-        this[downloadedControl].setCardVisible(infoCard);
+        this[archivedControl].setCardVisible(infoCard);
       }
     },
 

@@ -28,8 +28,8 @@
       <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
       <div id="prs_playedInfo${PLAYER_ID}" class="prs_playedInfo"></div>
       <div
-        id="prs_downloaded${PLAYER_ID}"
-        class="prs_myDownloaded prs_downloaded"
+        id="prs_archived${PLAYER_ID}"
+        class="prs_myDownloaded prs_archived"
       ></div>
       <div id="prs_playedAction${PLAYER_ID}" class="prs_playedAction"></div>
       <div
@@ -56,7 +56,7 @@
       <div id="prs_hand${PLAYER_ID}" class="prs_handContainer">
         <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
         <div id="prs_playedInfo${PLAYER_ID}" class="prs_playedInfo"></div>
-        <div id="prs_downloaded${PLAYER_ID}" class="prs_downloaded"></div>
+        <div id="prs_archived${PLAYER_ID}" class="prs_archived"></div>
         <div id="prs_playedAction${PLAYER_ID}" class="prs_playedAction"></div>
         <div
           id="prs_handOfActions${PLAYER_ID}"

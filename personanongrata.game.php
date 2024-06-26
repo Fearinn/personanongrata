@@ -409,15 +409,14 @@ class PersonaNonGrata extends Table
 
     function download(array $info_card, int $player_id): void
     {
-        $this->information_cards->moveCard($info_card["id"], "downloaded", $player_id);
+        $this->information_cards->moveCard($info_card["id"], "archived", $player_id);
 
         $this->notifyAllPlayers(
-            "download",
+            "archive",
             "",
             array(
                 "player_id" => $player_id,
                 "infoCard" => $info_card,
-                "encrypt" => false
             )
         );
     }
@@ -427,7 +426,7 @@ class PersonaNonGrata extends Table
         $this->information_cards->moveCard($info_card["id"], "encrypted", $player_id);
 
         $this->notifyAllPlayers(
-            "download",
+            "archive",
             "",
             array(
                 "player_id" => $player_id,
@@ -438,34 +437,48 @@ class PersonaNonGrata extends Table
     }
     function sendToRight(array $info_card, int $player_id): void
     {
-        $right_id = $this->getPlayerAfter($player_id);
+        $recipient_id = $this->getPlayerAfter($player_id);
 
-        $this->information_cards->moveCard($info_card["id"], "downloaded", $right_id);
+        $this->information_cards->moveCard($info_card["id"], "archived", $recipient_id);
+
+        $info_id = $info_card["type_arg"];
+        $corp_id = intval($info_card["type"]);
 
         $this->notifyAllPlayers(
-            "download",
-            "",
+            "archive",
+            clienttranslate('${player_name2} sends a ${info_label} of ${corp_label} to ${player_name}'),
             array(
-                "player_id" => $right_id,
+                "player_id" => $recipient_id,
+                "player_name" => $this->getPlayerNameById($recipient_id),
+                "player_id2" => $player_id,
+                "player_name2" => $this->getPlayerNameById($player_id),
+                "info_label" => $this->informations[$info_id]["name"],
+                "corp_label" => $this->corporations[$corp_id],
                 "infoCard" => $info_card,
-                "encrypt" => false
             )
         );
     }
 
     function sendToLeft(array $info_card, int $player_id): void
     {
-        $left_id = $this->getPlayerBefore($player_id);
+        $recipient_id = $this->getPlayerBefore($player_id);
 
-        $this->information_cards->moveCard($info_card["id"], "downloaded", $left_id);
+        $this->information_cards->moveCard($info_card["id"], "archived", $recipient_id);
+
+        $info_id = $info_card["type_arg"];
+        $corp_id = intval($info_card["type"]);
 
         $this->notifyAllPlayers(
-            "download",
-            "",
+            "archive",
+            clienttranslate('${player_name2} sends a ${info_label} of ${corp_label} to ${player_name}'),
             array(
-                "player_id" => $left_id,
+                "player_id" => $recipient_id,
+                "player_name" => $this->getPlayerNameById($recipient_id),
+                "player_id2" => $player_id,
+                "player_name2" => $this->getPlayerNameById($player_id),
+                "info_label" => $this->informations[$info_id]["name"],
+                "corp_label" => $this->corporations[$corp_id],
                 "infoCard" => $info_card,
-                "encrypt" => false
             )
         );
     }
