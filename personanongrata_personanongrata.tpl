@@ -27,10 +27,6 @@
     <div id="prs_hand${PLAYER_ID}" class="prs_myHand prs_handContainer">
       <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
       <div id="prs_playedInfo${PLAYER_ID}" class="prs_playedInfo"></div>
-      <div
-        id="prs_archived${PLAYER_ID}"
-        class="prs_myDownloaded prs_archived"
-      ></div>
       <div id="prs_playedAction${PLAYER_ID}" class="prs_playedAction"></div>
       <div
         id="prs_handOfActions${PLAYER_ID}"
@@ -40,6 +36,8 @@
         id="prs_handOfInfo${PLAYER_ID}"
         class="prs_handOfInfo prs_hand"
       ></div>
+      <div id="prs_archived${PLAYER_ID}" class="prs_archived"></div>
+      <div id="prs_actionDiscard${PLAYER_ID}" class="prs_actionDiscard"></div>
     </div>
   </div>
   <!-- END myzone -->
@@ -56,7 +54,6 @@
       <div id="prs_hand${PLAYER_ID}" class="prs_handContainer">
         <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
         <div id="prs_playedInfo${PLAYER_ID}" class="prs_playedInfo"></div>
-        <div id="prs_archived${PLAYER_ID}" class="prs_archived"></div>
         <div id="prs_playedAction${PLAYER_ID}" class="prs_playedAction"></div>
         <div
           id="prs_handOfActions${PLAYER_ID}"
@@ -66,6 +63,8 @@
           id="prs_handOfInfo${PLAYER_ID}"
           class="prs_handOfInfo prs_hand"
         ></div>
+        <div id="prs_archived${PLAYER_ID}" class="prs_archived"></div>
+        <div id="prs_actionDiscard${PLAYER_ID}" class="prs_actionDiscard"></div>
       </div>
     </div>
     <!-- END playerzone -->
@@ -73,10 +72,7 @@
 
   <div id="prs_publicZone" class="prs_publicZone prs_zone whiteblock">
     <h3 class="prs_zoneTitle">{CORPORATION_CARDS}</h3>
-    <div id="prs_piles" class="prs_piles">
-      <div id="prs_infoDeck" class="prs_infoDeck"></div>
-      <div id="prs_actionDiscard" class="prs_actionDiscard prs_hand"></div>
-    </div>
+    <div id="prs_infoDeck" class="prs_infoDeck"></div>
     <div id="prs_keys" class="prs_keys"></div>
     <div id="prs_corporationDecks" class="prs_corporationDecks">
       <div id="prs_corpDeck:1"></div>

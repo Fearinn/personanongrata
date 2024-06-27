@@ -19,7 +19,7 @@
   min-height: 330px;
 }
 
-.hand-stock:empty {
+.card-stock:empty {
   min-height: unset;
 }
 
@@ -86,11 +86,6 @@
 
 .prs_publicZone {
   outline-color: #fff;
-}
-
-.prs_piles {
-  display: flex;
-  gap: 8px;
 }
 
 .prs_zoneTitle {

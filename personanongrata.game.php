@@ -183,6 +183,7 @@ class PersonaNonGrata extends Table
         $result["cardsPlayedByMe"] = $this->getCardsPlayedByMe($current_player_id);
         $result["infoArchivedByMe"] = $this->getInfoArchivedByMe($current_player_id);
         $result["infoArchivedByOthers"] = $this->getInfoArchivedByOthers($current_player_id);
+        $result["actionsDiscarded"] = $this->getActionsDiscarded($current_player_id);
 
         return $result;
     }
@@ -425,6 +426,19 @@ class PersonaNonGrata extends Table
         }
 
         return $archived_cards;
+    }
+
+    function getActionsDiscarded(): array
+    {
+        $discarded_cards = array();
+
+        $players = $this->loadPlayersBasicInfos();
+
+        foreach ($players as $player_id => $player) {
+            $discarded_cards[$player_id] = $this->action_cards->getCardsInLocation("discard", $player_id);
+        }
+
+        return $discarded_cards;
     }
 
     //checkers

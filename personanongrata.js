@@ -84,6 +84,8 @@ define([
       });
 
       this.actionManager = new CardManager(this, {
+        cardHeight: 280,
+        cardWidth: 180,
         selectedCardClass: "prs_selected",
         getId: (card) => `action-${card.id}`,
         setupDiv: (card, div) => {
@@ -164,6 +166,7 @@ define([
       this.infoInOtherHands = gamedatas.infoInOtherHands;
       this.infoArchivedByMe = gamedatas.infoArchivedByMe;
       this.infoArchivedByOthers = gamedatas.infoArchivedByOthers;
+      this.actionsDiscarded = gamedatas.actionsDiscarded;
 
       this.selectedAction = gamedatas.cardsPlayedByMe["action"];
       this.selectedInfo = gamedatas.cardsPlayedByMe["info"];
@@ -266,6 +269,33 @@ define([
             this[archivedControl].addCard(encryptedCard);
           }
         }
+
+        //discard
+        const actionsDiscardedControl = `actionsDiscardedStock$${player_id}`;
+        this[actionsDiscardedControl] = new ManualPositionStock(
+          this.actionManager,
+          $(`prs_actionDiscard$${player_id}`),
+          {},
+          (element, cards, lastCard, stock) => {
+            element.style.width = "180px";
+            element.style.height = 280 + 32 * cards.length + "px";
+
+            const index = cards.length - 1;
+
+            lastCardElement = stock.getCardElement(lastCard);
+            lastCardElement.style.position = "absolute";
+            lastCardElement.style.top = `${index * 32}px`;
+          }
+        );
+
+        const discardedCards = this.actionsDiscarded[player_id];
+
+        for (const card_id in discardedCards) {
+          const card = discardedCards[card_id];
+          this[actionsDiscardedControl].addCard(card);
+        }
+
+        //end of players loop
       }
 
       //played
@@ -316,14 +346,6 @@ define([
           this[myArchivedControl].setCardVisible(card, false);
         }
       }
-
-      //discard
-      const actionDiscardControl = `actionDiscardStock`;
-      this[actionDiscardControl] = new HandStock(
-        this.actionManager,
-        $("prs_actionDiscard"),
-        { cardOverlap: "175px" }
-      );
 
       //keys
       const keyControl = `keyStock`;
@@ -626,9 +648,10 @@ define([
     },
 
     notif_activateActionCard: function (notif) {
+      const player_id = notif.args.player_id;
       const actionCard = notif.args.actionCard;
 
-      this["actionDiscardStock"].addCard(actionCard, {});
+      this[`actionsDiscardedStock$${player_id}`].addCard(actionCard);
     },
   });
 });
