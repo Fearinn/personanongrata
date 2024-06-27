@@ -67,8 +67,8 @@ define([
         setupFrontDiv: (card, div) => {
           div.style.background = `url(${g_gamethemeurl}img/corporations.png)`;
 
-          const type = parseInt(card.type);
-          const type_arg = parseInt(card.type_arg);
+          const type = Number(card.type);
+          const type_arg = Number(card.type_arg);
 
           const valueShift = type_arg == 4 ? 3 : type_arg;
           const position = (type - 1) * 4 + valueShift;
@@ -95,8 +95,8 @@ define([
         setupFrontDiv: (card, div) => {
           div.style.background = `url(${g_gamethemeurl}img/actions.png)`;
 
-          const type = parseInt(card.type);
-          const type_arg = parseInt(card.type_arg);
+          const type = Number(card.type);
+          const type_arg = Number(card.type_arg);
 
           const position = (type - 1) * 5 + type_arg;
 
@@ -106,7 +106,7 @@ define([
         setupBackDiv: (card, div) => {
           div.style.backgroundImage = `url(${g_gamethemeurl}img/actions.png)`;
 
-          const type = parseInt(card.type);
+          const type = Number(card.type);
 
           div.style.backgroundPosition = this.calcBackgroundPosition(
             (type - 1) * 5
@@ -130,8 +130,8 @@ define([
         setupFrontDiv: (card, div) => {
           div.style.background = `url(${g_gamethemeurl}img/informations.jpg)`;
 
-          const type = parseInt(card.type);
-          const type_arg = parseInt(card.type_arg);
+          const type = Number(card.type);
+          const type_arg = Number(card.type_arg);
           const position = type_arg - 2 + (type - 1) * 5;
 
           div.style.backgroundPosition = this.calcBackgroundPosition(position);
@@ -164,8 +164,6 @@ define([
       this.infoInOtherHands = gamedatas.infoInOtherHands;
       this.infoArchivedByMe = gamedatas.infoArchivedByMe;
       this.infoArchivedByOthers = gamedatas.infoArchivedByOthers;
-
-      console.log(this.infoArchivedByOthers, "archived");
 
       this.selectedAction = gamedatas.cardsPlayedByMe["action"];
       this.selectedInfo = gamedatas.cardsPlayedByMe["info"];
@@ -240,10 +238,19 @@ define([
 
           //archived
           const archivedControl = `archivedStock$${player_id}`;
-          this[archivedControl] = new LineStock(
+          this[archivedControl] = new SlotStock(
             this.informationManager,
             $(`prs_archived$${player_id}`),
-            {}
+            {
+              slotsIds: Object.keys(this.corporations).concat([-1]),
+              mapCardToSlot: (card) => {
+                if (!card.type) {
+                  return -1;
+                }
+
+                return Number(card.type);
+              },
+            }
           );
 
           const archivedCards = this.infoArchivedByOthers[player_id];
@@ -285,10 +292,19 @@ define([
 
       //archived
       const myArchivedControl = `archivedStock$${this.player_id}`;
-      this[myArchivedControl] = new LineStock(
+      this[myArchivedControl] = new SlotStock(
         this.informationManager,
         $(`prs_archived$${this.player_id}`),
-        {}
+        {
+          slotsIds: Object.keys(this.corporations).concat([-1]),
+          mapCardToSlot: (card) => {
+            if (!card.type) {
+              return -1;
+            }
+
+            return Number(card.type);
+          },
+        }
       );
 
       for (const card_id in this.infoArchivedByMe) {
@@ -317,7 +333,7 @@ define([
 
       for (const key_id in this.keys) {
         const key = this.keys[key_id];
-        this[keyControl].addCard(key, {}, { slot: parseInt(key.type) });
+        this[keyControl].addCard(key, {}, { slot: Number(key.type) });
       }
 
       //corporations
@@ -605,7 +621,7 @@ define([
       });
 
       if (encrypt) {
-        this[archivedControl].setCardVisible(infoCard);
+        this[archivedControl].setCardVisible(infoCard, false);
       }
     },
 
