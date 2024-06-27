@@ -262,6 +262,7 @@ define([
           for (const card_id in visibleArchived) {
             const card = visibleArchived[card_id];
             this[archivedControl].addCard(card);
+            this.setSlotOffset(card, this[archivedControl]);
           }
 
           const encryptedCard = archivedCards["encrypted"];
@@ -341,6 +342,7 @@ define([
         const card = this.infoArchivedByMe[card_id];
 
         this[myArchivedControl].addCard(card);
+        this.setSlotOffset(card, this[myArchivedControl]);
 
         if (card["location"] === "encrypted") {
           this[myArchivedControl].setCardVisible(card, false);
@@ -540,6 +542,18 @@ define([
       return `-${xAxis}% 0`;
     },
 
+    setSlotOffset(card, stock, offset = 48) {
+      const cardElement = stock.getCardElement(card);
+      const slotElement = cardElement.parentNode;
+      const index = slotElement.childNodes.length - 1;
+
+      slotElement.style.height = 280 + offset * index + "px";
+
+      if (index) {
+        cardElement.style.marginTop = -280 + offset + "px";
+      }
+    },
+
     handleConfirmationButton: function () {
       this.removeActionButtons();
 
@@ -631,19 +645,20 @@ define([
 
     notif_archive: function (notif) {
       const player_id = notif.args.player_id;
-      const infoCard = notif.args.infoCard;
+      const card = notif.args.infoCard;
       const encrypt = notif.args.encrypt;
 
       const playedInfoControl = `playedInfoStock$${player_id}`;
       this[playedInfoControl].removeAll();
 
       const archivedControl = `archivedStock$${player_id}`;
-      this[archivedControl].addCard(infoCard, {
+      this[archivedControl].addCard(card, {
         fromElement: $(`prs_playedInfo$${player_id}`),
       });
+      this.setSlotOffset(card, this[archivedControl]);
 
       if (encrypt) {
-        this[archivedControl].setCardVisible(infoCard, false);
+        this[archivedControl].setCardVisible(card, false);
       }
     },
 
