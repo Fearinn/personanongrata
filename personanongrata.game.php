@@ -599,7 +599,8 @@ class PersonaNonGrata extends Table
             "",
             array(
                 "player_id" => $player_id,
-                "actionCard" => $action_card
+                "actionCard" => $action_card,
+                "encrypt" => $action_id == 2
             )
         );
     }

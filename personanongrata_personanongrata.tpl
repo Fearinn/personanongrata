@@ -38,6 +38,7 @@
       ></div>
       <div id="prs_archived${PLAYER_ID}" class="prs_archived"></div>
       <div id="prs_actionDiscard${PLAYER_ID}" class="prs_actionDiscard"></div>
+      <div id="prs_encryptAction${PLAYER_ID}" class="prs_encryptAction"></div>
     </div>
   </div>
   <!-- END myzone -->
@@ -65,6 +66,7 @@
         ></div>
         <div id="prs_archived${PLAYER_ID}" class="prs_archived"></div>
         <div id="prs_actionDiscard${PLAYER_ID}" class="prs_actionDiscard"></div>
+        <div id="prs_encryptAction${PLAYER_ID}" class="prs_encryptAction"></div>
       </div>
     </div>
     <!-- END playerzone -->

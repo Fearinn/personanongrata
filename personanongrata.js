@@ -265,13 +265,20 @@ define([
           for (const card_id in visibleArchived) {
             const card = visibleArchived[card_id];
             this[archivedControl].addCard(card);
-            this.setSlotOffset(card, this[archivedControl]);
+            this.setSlotOffset(this[archivedControl].getCardElement(card));
           }
 
           const encryptedCard = archivedCards["encrypted"];
           if (encryptedCard) {
             this[archivedControl].addCard(encryptedCard);
           }
+
+          const encryptActionControl = `encryptActionStock$${player_id}`;
+          this[encryptActionControl] = new LineStock(
+            this.actionManager,
+            $(`prs_encryptAction$${player_id}`),
+            {}
+          );
         }
 
         //discard
@@ -341,11 +348,18 @@ define([
         }
       );
 
+      const encryptActionControl = `encryptActionStock$${this.player_id}`;
+      this[encryptActionControl] = new LineStock(
+        this.actionManager,
+        $(`prs_encryptAction$${this.player_id}`),
+        {}
+      );
+
       for (const card_id in this.infoArchivedByMe) {
         const card = this.infoArchivedByMe[card_id];
 
         this[myArchivedControl].addCard(card);
-        this.setSlotOffset(card, this[myArchivedControl]);
+        this.setSlotOffset(this[myArchivedControl].getCardElement(card));
 
         if (card["location"] === "encrypted") {
           this[myArchivedControl].setCardVisible(card, false);
@@ -543,7 +557,6 @@ define([
 
     updateHandWidth: function (stock) {
       cardNumber = stock.getCards().length;
-      console.log(stock, cardNumber);
 
       shift = Number(
         stock.element.style.getPropertyValue("--card-shift").split("px")[0]
@@ -558,8 +571,7 @@ define([
       stock.element.style.width = width + "px";
     },
 
-    setSlotOffset(card, stock, offset = 48) {
-      const cardElement = stock.getCardElement(card);
+    setSlotOffset: function (cardElement, offset = 48) {
       const slotElement = cardElement.parentNode;
       const index = slotElement.childNodes.length - 1;
 
@@ -680,7 +692,7 @@ define([
       this[archivedControl].addCard(card, {
         fromElement: $(`prs_playedInfo$${player_id}`),
       });
-      this.setSlotOffset(card, this[archivedControl]);
+      this.setSlotOffset(this[archivedControl].getCardElement(card));
 
       if (encrypt) {
         this[archivedControl].setCardVisible(card, false);
@@ -690,6 +702,22 @@ define([
     notif_activateActionCard: function (notif) {
       const player_id = notif.args.player_id;
       const actionCard = notif.args.actionCard;
+      const encrypt = notif.args.encrypt;
+
+      if (encrypt) {
+        const encryptActionControl = `encryptActionStock$${player_id}`;
+        this[encryptActionControl].addCard(
+          actionCard,
+          {},
+          { forceToElement: $(`information--1:${player_id}`).parentElement }
+        );
+
+        const actionElement =
+          this[encryptActionControl].getCardElement(actionCard);
+        this.setSlotOffset(actionElement, 8);
+
+        return;
+      }
 
       this[`actionsDiscardedStock$${player_id}`].addCard(actionCard);
     },
