@@ -209,6 +209,7 @@ define([
 
             this[actionsInHandControl].addCard(card);
             this[actionsInHandControl].setCardVisible(card, false);
+            this.updateHandWidth(this[actionsInHandControl]);
           }
 
           const infoInHandControl = `infoInHandStock$${player_id}`;
@@ -219,10 +220,12 @@ define([
           );
 
           const infoCards = this.infoInOtherHands[player_id];
+
           for (const card_id in infoCards) {
             const card = infoCards[card_id];
             this[infoInHandControl].addCard(card);
             this[infoInHandControl].setCardVisible(card, false);
+            this.updateHandWidth(this[infoInHandControl]);
           }
 
           const playedActionControl = `playedActionStock$${player_id}`;
@@ -411,13 +414,8 @@ define([
 
       for (const card_id in this.actionsInMyHand) {
         const card = this.actionsInMyHand[card_id];
-        this[actionsInMyHandControl].addCard(
-          card,
-          {},
-          {
-            visible: true,
-          }
-        );
+        this[actionsInMyHandControl].addCard(card);
+        this.updateHandWidth(this[actionsInMyHandControl]);
       }
 
       //informations
@@ -447,6 +445,7 @@ define([
         const card = this.infoInMyHand[card_id];
 
         this[infoInMyHandControl].addCard(card);
+        this.updateHandWidth(this[infoInMyHandControl]);
 
         this[infoInMyHandControl].onSelectionChange = (
           selection,
@@ -542,6 +541,23 @@ define([
       return `-${xAxis}% 0`;
     },
 
+    updateHandWidth: function (stock) {
+      cardNumber = stock.getCards().length;
+      console.log(stock, cardNumber);
+
+      shift = Number(
+        stock.element.style.getPropertyValue("--card-shift").split("px")[0]
+      );
+
+      overlap = Number(
+        stock.element.style.getPropertyValue("--card-overlap").split("px")[0]
+      );
+
+      const width = 180 + (180 + shift - overlap) * cardNumber;
+
+      stock.element.style.width = width + "px";
+    },
+
     setSlotOffset(card, stock, offset = 48) {
       const cardElement = stock.getCardElement(card);
       const slotElement = cardElement.parentNode;
@@ -610,10 +626,13 @@ define([
       const playedActionControl = `playedActionStock$${player_id}`;
       this[playedActionControl].addCard(actionCard);
 
+      const actionsInHandControl = `actionsInMyHandStock`;
+      const infoInHandControl = `infoInHandStock$${player_id}`;
+
       if (!isCurrentPlayer) {
-        const infoInHandControl = `infoInHandStock$${player_id}`;
         const hand = this[infoInHandControl].getCards();
         const randomIndex = Math.floor(Math.random() * hand.length);
+
         this[infoInHandControl].removeCard(hand[randomIndex]);
       }
 
@@ -624,20 +643,26 @@ define([
         fromElement: $(`prs_playedInfo$${player_id}`),
       });
 
+      this.updateHandWidth(this[actionsInHandControl]);
+      this.updateHandWidth(this[infoInHandControl]);
+
       if (!isCurrentPlayer && encrypt) {
         this[playedInfoControl].setCardVisible(infoCard, false);
       }
     },
 
     notif_changeMind: function (notif) {
+      const player_id = notif.args.player_id;
       const actionCard = notif.args.actionCard;
       const infoCard = notif.args.infoCard;
 
-      const actionInMyHandControl = `actionsInMyHandStock`;
-      this[actionInMyHandControl].addCard(actionCard);
+      const actionsInMyHandControl = `actionsInMyHandStock`;
+      this[actionsInMyHandControl].addCard(actionCard);
+      this.updateHandWidth(this[actionsInMyHandControl]);
 
       const infoInMyHandControl = `infoInHandStock$${player_id}`;
       this[infoInMyHandControl].addCard(infoCard);
+      this.updateHandWidth(this[infoInMyHandControl]);
 
       this.selectedAction = null;
       this.selectedInfo = null;
