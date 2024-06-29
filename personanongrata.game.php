@@ -458,6 +458,7 @@ class PersonaNonGrata extends Table
     function download(array $info_card, int $player_id): void
     {
         $this->information_cards->moveCard($info_card["id"], "archived", $player_id);
+        $info_card = $this->getSingleCardInLocation($this->information_cards, "archived", $player_id);
 
         $this->notifyAllPlayers(
             "archive",
@@ -472,6 +473,7 @@ class PersonaNonGrata extends Table
     function encrypt(array $info_card, int $player_id): void
     {
         $this->information_cards->moveCard($info_card["id"], "encrypted", $player_id);
+        $info_card = $this->getSingleCardInLocation($this->information_cards, "encrypted", $player_id);
 
         $this->notifyAllPlayers(
             "archive",
@@ -488,6 +490,7 @@ class PersonaNonGrata extends Table
         $recipient_id = $this->getPlayerAfter($player_id);
 
         $this->information_cards->moveCard($info_card["id"], "archived", $recipient_id);
+        $info_card = $this->getSingleCardInLocation($this->information_cards, "archived", $recipient_id);
 
         $info_id = $info_card["type_arg"];
         $corp_id = intval($info_card["type"]);
@@ -512,6 +515,7 @@ class PersonaNonGrata extends Table
         $recipient_id = $this->getPlayerBefore($player_id);
 
         $this->information_cards->moveCard($info_card["id"], "archived", $recipient_id);
+        $info_card = $this->getSingleCardInLocation($this->information_cards, "archived", $recipient_id);
 
         $info_id = $info_card["type_arg"];
         $corp_id = intval($info_card["type"]);

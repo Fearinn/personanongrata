@@ -248,13 +248,14 @@ define([
             this.informationManager,
             $(`prs_archived$${player_id}`),
             {
-              slotsIds: Object.keys(this.corporations).concat([-1]),
+              slotsIds: [-1].concat(Object.keys(this.corporations)),
               mapCardToSlot: (card) => {
-                if (!card.type) {
+                if (card.location === "encrypted" || !card.type) {
                   return -1;
                 }
+                console.log(card);
 
-                return Number(card.type);
+                return card.type;
               },
             }
           );
@@ -265,7 +266,7 @@ define([
           for (const card_id in visibleArchived) {
             const card = visibleArchived[card_id];
             this[archivedControl].addCard(card);
-            this.setSlotOffset(this[archivedControl].getCardElement(card));
+            this.setSlotOffset(this[archivedControl].getCardElement(card), 8);
           }
 
           const encryptedCard = archivedCards["encrypted"];
@@ -279,74 +280,107 @@ define([
             $(`prs_encryptAction$${player_id}`),
             {}
           );
-        }
 
-        //discard
-        const actionsDiscardedControl = `actionsDiscardedStock$${player_id}`;
-        this[actionsDiscardedControl] = new ManualPositionStock(
-          this.actionManager,
-          $(`prs_actionDiscard$${player_id}`),
-          {},
-          (element, cards, lastCard, stock) => {
-            element.style.width = "180px";
-            element.style.height = 280 + 32 * cards.length + "px";
+          //discard
+          const actionsDiscardedControl = `actionsDiscardedStock$${player_id}`;
+          this[actionsDiscardedControl] = new ManualPositionStock(
+            this.actionManager,
+            $(`prs_actionDiscard$${player_id}`),
+            {},
+            (element, cards, lastCard, stock) => {
+              element.style.width = "180px";
+              element.style.height = 280 + 32 * cards.length + "px";
 
-            const index = cards.length - 1;
+              const index = cards.length - 1;
 
-            lastCardElement = stock.getCardElement(lastCard);
-            lastCardElement.style.position = "absolute";
-            lastCardElement.style.top = `${index * 32}px`;
+              lastCardElement = stock.getCardElement(lastCard);
+              lastCardElement.style.position = "absolute";
+              lastCardElement.style.top = `${index * 32}px`;
+            }
+          );
+
+          const discardedCards = this.actionsDiscarded[player_id];
+
+          for (const card_id in discardedCards) {
+            const card = discardedCards[card_id];
+
+            if (card.type_arg == 2) {
+              this[encryptActionControl].addCard(
+                card,
+                {},
+                {
+                  forceToElement: $(`information--1:${player_id}`)
+                    .parentElement,
+                }
+              );
+              this.setSlotOffset(
+                this[encryptActionControl].getCardElement(card),
+                8
+              );
+
+              continue;
+            }
+
+            this[actionsDiscardedControl].addCard(card);
           }
-        );
 
-        const discardedCards = this.actionsDiscarded[player_id];
-
-        for (const card_id in discardedCards) {
-          const card = discardedCards[card_id];
-          this[actionsDiscardedControl].addCard(card);
+          //end of current player excluding
         }
 
         //end of players loop
       }
 
       //played
-      const myPlayedActionControl = `playedActionStock$${this.player_id}`;
-      this[myPlayedActionControl] = new LineStock(
+      const playedActionControl = `playedActionStock$${this.player_id}`;
+      this[playedActionControl] = new LineStock(
         this.actionManager,
         $(`prs_playedAction$${this.player_id}`),
         {}
       );
       if (this.selectedAction) {
-        this[myPlayedActionControl].addCard(this.selectedAction);
+        this[playedActionControl].addCard(this.selectedAction);
       }
 
-      const myPlayedInfoControl = `playedInfoStock$${this.player_id}`;
-      this[myPlayedInfoControl] = new LineStock(
+      const playedInfoControl = `playedInfoStock$${this.player_id}`;
+      this[playedInfoControl] = new LineStock(
         this.informationManager,
         $(`prs_playedInfo$${this.player_id}`),
         {}
       );
 
       if (this.selectedInfo) {
-        this[myPlayedInfoControl].addCard(this.selectedInfo);
+        this[playedInfoControl].addCard(this.selectedInfo);
       }
 
       //archived
-      const myArchivedControl = `archivedStock$${this.player_id}`;
-      this[myArchivedControl] = new SlotStock(
+      const archivedControl = `archivedStock$${this.player_id}`;
+      this[archivedControl] = new SlotStock(
         this.informationManager,
         $(`prs_archived$${this.player_id}`),
         {
-          slotsIds: Object.keys(this.corporations).concat([-1]),
+          slotsIds: [-1].concat(Object.keys(this.corporations)),
           mapCardToSlot: (card) => {
-            if (!card.type) {
+            if (card.location === "encrypted" || !card.type) {
               return -1;
             }
 
-            return Number(card.type);
+            console.log(card);
+
+            return card.type;
           },
         }
       );
+
+      for (const card_id in this.infoArchivedByMe) {
+        const card = this.infoArchivedByMe[card_id];
+
+        this[archivedControl].addCard(card);
+        this.setSlotOffset(this[archivedControl].getCardElement(card));
+
+        if (card["location"] === "encrypted") {
+          this[archivedControl].setCardVisible(card, false);
+        }
+      }
 
       const encryptActionControl = `encryptActionStock$${this.player_id}`;
       this[encryptActionControl] = new LineStock(
@@ -355,15 +389,49 @@ define([
         {}
       );
 
-      for (const card_id in this.infoArchivedByMe) {
-        const card = this.infoArchivedByMe[card_id];
+      //discard
+      const actionsDiscardedControl = `actionsDiscardedStock$${this.player_id}`;
+      this[actionsDiscardedControl] = new ManualPositionStock(
+        this.actionManager,
+        $(`prs_actionDiscard$${this.player_id}`),
+        {},
+        (element, cards, lastCard, stock) => {
+          element.style.width = "180px";
+          element.style.height = 280 + 32 * cards.length + "px";
 
-        this[myArchivedControl].addCard(card);
-        this.setSlotOffset(this[myArchivedControl].getCardElement(card));
+          const index = cards.length - 1;
 
-        if (card["location"] === "encrypted") {
-          this[myArchivedControl].setCardVisible(card, false);
+          lastCardElement = stock.getCardElement(lastCard);
+          lastCardElement.style.position = "absolute";
+          lastCardElement.style.top = `${index * 32}px`;
         }
+      );
+
+      const discardedCards = this.actionsDiscarded[this.player_id];
+
+      for (const card_id in discardedCards) {
+        const card = discardedCards[card_id];
+
+        const encryptedInfo = this.getEncrypted(this.player_id);
+
+        if (card.type_arg == 2) {
+          this[encryptActionControl].addCard(
+            card,
+            {},
+            {
+              forceToElement: $(`information-${encryptedInfo.id}`)
+                .parentElement,
+            }
+          );
+          this.setSlotOffset(
+            this[encryptActionControl].getCardElement(card),
+            8
+          );
+
+          continue;
+        }
+
+        this[actionsDiscardedControl].addCard(card);
       }
 
       //keys
@@ -555,6 +623,16 @@ define([
       return `-${xAxis}% 0`;
     },
 
+    getEncrypted: function (player_id) {
+      const encryptedInfo = this[`archivedStock$${player_id}`]
+        .getCards()
+        .find((card) => {
+          return card.location === "encrypted";
+        });
+
+      return encryptedInfo;
+    },
+
     updateHandWidth: function (stock) {
       cardNumber = stock.getCards().length;
 
@@ -705,11 +783,12 @@ define([
       const encrypt = notif.args.encrypt;
 
       if (encrypt) {
+        const encryptedInfo = this.getEncrypted(player_id);
         const encryptActionControl = `encryptActionStock$${player_id}`;
         this[encryptActionControl].addCard(
           actionCard,
           {},
-          { forceToElement: $(`information--1:${player_id}`).parentElement }
+          { forceToElement: $(`information-${encryptedInfo.id}`).parentElement }
         );
 
         const actionElement =
