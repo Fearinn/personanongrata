@@ -67,6 +67,7 @@
 }
 
 .prs_playerZones .prs_playerZone {
+  flex-grow: 1;
   order: 2;
 }
 
@@ -82,8 +83,11 @@
   min-width: 480px;
 }
 
+.prs_playerZone {
+  max-width: 2560px;
+}
+
 .prs_myZone {
-  max-width: 1024px;
   width: 100%;
 }
 

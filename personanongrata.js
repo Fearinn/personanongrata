@@ -701,9 +701,9 @@ define([
       dojo.subscribe("playCards", this, "notif_playCards");
       this.notifqueue.setSynchronous("playCards", 1000);
       dojo.subscribe("changeMind", this, "notif_changeMind");
-      dojo.subscribe("activateActionCard", this, "notif_activateActionCard");
       dojo.subscribe("archive", this, "notif_archive");
-      this.notifqueue.setSynchronous("archive", 1000);
+      dojo.subscribe("activateActionCard", this, "notif_activateActionCard");
+      this.notifqueue.setSynchronous("activateActionCard", 1000);
     },
 
     notif_playCards: function (notif) {
@@ -763,13 +763,16 @@ define([
       const card = notif.args.infoCard;
       const encrypt = notif.args.encrypt;
 
-      const playedInfoControl = `playedInfoStock$${player_id}`;
-      this[playedInfoControl].removeAll();
+      if (encrypt) {
+        const playedInfoControl = `playedInfoStock$${player_id}`;
+        this[playedInfoControl].removeAll();
+      }
 
       const archivedControl = `archivedStock$${player_id}`;
       this[archivedControl].addCard(card, {
-        fromElement: $(`prs_playedInfo$${player_id}`),
+        fromElement: encrypt ? $(`prs_playedInfo$${player_id}`) : undefined,
       });
+
       this.setSlotOffset(this[archivedControl].getCardElement(card));
 
       if (encrypt) {
