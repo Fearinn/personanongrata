@@ -167,6 +167,7 @@ define([
       this.infoArchivedByMe = gamedatas.infoArchivedByMe;
       this.infoArchivedByOthers = gamedatas.infoArchivedByOthers;
       this.actionsDiscarded = gamedatas.actionsDiscarded;
+      this.encryptActionUsed = gamedatas.encryptActionUsed;
 
       this.selectedAction = gamedatas.cardsPlayedByMe["action"];
       this.selectedInfo = gamedatas.cardsPlayedByMe["info"];
@@ -253,7 +254,6 @@ define([
                 if (card.location === "encrypted" || !card.type) {
                   return -1;
                 }
-                console.log(card);
 
                 return card.type;
               },
@@ -281,6 +281,20 @@ define([
             {}
           );
 
+          const encryptActionUsed = this.encryptActionUsed[player_id];
+
+          if (encryptActionUsed) {
+            this[encryptActionControl].addCard(
+              encryptActionUsed,
+              {},
+              { forceToElement: $(`information--1:${player_id}`).parentElement }
+            );
+            this.setSlotOffset(
+              this[encryptActionControl].getCardElement(encryptActionUsed),
+              8
+            );
+          }
+
           //discard
           const actionsDiscardedControl = `actionsDiscardedStock$${player_id}`;
           this[actionsDiscardedControl] = new ManualPositionStock(
@@ -303,24 +317,6 @@ define([
 
           for (const card_id in discardedCards) {
             const card = discardedCards[card_id];
-
-            if (card.type_arg == 2) {
-              this[encryptActionControl].addCard(
-                card,
-                {},
-                {
-                  forceToElement: $(`information--1:${player_id}`)
-                    .parentElement,
-                }
-              );
-              this.setSlotOffset(
-                this[encryptActionControl].getCardElement(card),
-                8
-              );
-
-              continue;
-            }
-
             this[actionsDiscardedControl].addCard(card);
           }
 
@@ -364,8 +360,6 @@ define([
               return -1;
             }
 
-            console.log(card);
-
             return card.type;
           },
         }
@@ -389,6 +383,23 @@ define([
         {}
       );
 
+      const encryptActionUsed = this.encryptActionUsed[this.player_id];
+      const encryptedInfo = this.getEncrypted(this.player_id);
+
+      if (encryptActionUsed) {
+        this[encryptActionControl].addCard(
+          encryptActionUsed,
+          {},
+          {
+            forceToElement: $(`information-${encryptedInfo.id}`).parentElement,
+          }
+        );
+        this.setSlotOffset(
+          this[encryptActionControl].getCardElement(encryptActionUsed),
+          8
+        );
+      }
+
       //discard
       const actionsDiscardedControl = `actionsDiscardedStock$${this.player_id}`;
       this[actionsDiscardedControl] = new ManualPositionStock(
@@ -411,25 +422,6 @@ define([
 
       for (const card_id in discardedCards) {
         const card = discardedCards[card_id];
-
-        const encryptedInfo = this.getEncrypted(this.player_id);
-
-        if (card.type_arg == 2) {
-          this[encryptActionControl].addCard(
-            card,
-            {},
-            {
-              forceToElement: $(`information-${encryptedInfo.id}`)
-                .parentElement,
-            }
-          );
-          this.setSlotOffset(
-            this[encryptActionControl].getCardElement(card),
-            8
-          );
-
-          continue;
-        }
 
         this[actionsDiscardedControl].addCard(card);
       }
@@ -508,7 +500,6 @@ define([
         {}
       );
 
-      //informations
       for (const card_id in this.deckOfInformations) {
         const card = this.deckOfInformations[card_id];
 
@@ -655,9 +646,12 @@ define([
 
       slotElement.style.height = 280 + offset * index + "px";
 
-      if (index) {
-        cardElement.style.marginTop = -280 + offset + "px";
+      if (!index) {
+        cardElement.style.marginTop = 0;
+        return;
       }
+
+      cardElement.style.marginTop = -280 + offset + "px";
     },
 
     handleConfirmationButton: function () {
@@ -704,6 +698,8 @@ define([
       dojo.subscribe("archive", this, "notif_archive");
       dojo.subscribe("activateActionCard", this, "notif_activateActionCard");
       this.notifqueue.setSynchronous("activateActionCard", 1000);
+      dojo.subscribe("revealEncrypted", this, "notif_revealEncrypted");
+      this.notifqueue.setSynchronous("revealEncrypted", 1000);
     },
 
     notif_playCards: function (notif) {
@@ -802,6 +798,25 @@ define([
       }
 
       this[`actionsDiscardedStock$${player_id}`].addCard(actionCard);
+    },
+
+    notif_revealEncrypted: function (notif) {
+      const player_id = notif.args.player_id;
+      const infoCard = notif.args.infoCard;
+
+      const archivedControl = `archivedStock$${player_id}`;
+
+      this[archivedControl].removeCard({ id: `-1:${player_id}` });
+
+      this[archivedControl].addCard(infoCard);
+
+      const actionCard = this[`encryptActionStock$${player_id}`].getCards()[0];
+
+      const actionsDiscardedControl = `actionsDiscardedStock$${player_id}`;
+      this[actionsDiscardedControl].addCard(actionCard);
+      this.setSlotOffset(
+        this[actionsDiscardedControl].getCardElement(actionCard)
+      );
     },
   });
 });

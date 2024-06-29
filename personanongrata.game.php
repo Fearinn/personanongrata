@@ -183,8 +183,8 @@ class PersonaNonGrata extends Table
         $result["cardsPlayedByMe"] = $this->getCardsPlayedByMe($current_player_id);
         $result["infoArchivedByMe"] = $this->getInfoArchivedByMe($current_player_id);
         $result["infoArchivedByOthers"] = $this->getInfoArchivedByOthers($current_player_id);
-        $result["actionsDiscarded"] = $this->getActionsDiscarded($current_player_id);
-
+        $result["actionsDiscarded"] = $this->getActionsDiscarded();
+        $result["encryptActionUsed"] = $this->getEncryptActionUsed();
         return $result;
     }
 
@@ -441,6 +441,19 @@ class PersonaNonGrata extends Table
         return $discarded_cards;
     }
 
+    function getEncryptActionUsed(): array
+    {
+        $encrypt_cards = array();
+
+        $players = $this->loadPlayersBasicInfos();
+
+        foreach ($players as $player_id => $player) {
+            $encrypt_cards[$player_id] = $this->getSingleCardInLocation($this->action_cards, "encrypted", $player_id, false);
+        }
+
+        return $encrypt_cards;
+    }
+
     //checkers
     function isClockwise(): bool
     {
@@ -596,7 +609,11 @@ class PersonaNonGrata extends Table
             $this->sendToLeft($info_card, $player_id);
         }
 
-        $this->action_cards->moveCard($action_card["id"], "discard", $player_id);
+        if ($action_id == 2) {
+            $this->action_cards->moveCard($action_card["id"], "encrypted", $player_id);
+        } else {
+            $this->action_cards->moveCard($action_card["id"], "discard", $player_id);
+        }
 
         $this->notifyAllPlayers(
             "activateActionCard",
@@ -607,6 +624,68 @@ class PersonaNonGrata extends Table
                 "encrypt" => $action_id == 2
             )
         );
+    }
+
+    function revealEncrypted(int $player_id): void
+    {
+        $info_card = $this->getSingleCardInLocation($this->information_cards, "encrypted", $player_id);
+
+        $this->information_cards->moveCard($info_card["id"], "archived", $player_id);
+        $this->action_cards->moveAllCardsInLocation("encrypted", "discard", $player_id, $player_id);
+
+        $info_card = $this->information_cards->getCard($info_card["id"]);
+
+        $info_id = $info_card["type_arg"];
+        $corp_id = intval($info_card["type"]);
+
+        $this->notifyAllPlayers(
+            "revealEncrypted",
+            clienttranslate('${player_name} reveals his encrypted card... It&apos;s a ${info_label} of ${corp_label}!'),
+            array(
+                "i18n" => array("info_label", "corp_label"),
+                "player_id" => $player_id,
+                "player_name" => $this->getPlayerNameById($player_id),
+                "info_label" => $this->informations[$info_id]["name"],
+                "corp_label" => $this->corporations[$corp_id],
+                "infoCard" => $info_card
+            )
+        );
+    }
+
+    function archivePoints(int $corp_id): array
+    {
+        $players = $this->loadPlayersBasicInfos();
+
+        $archived_points = array();
+
+        foreach ($players as $player_id => $player) {
+            $archived_cards = $this->information_cards->getCardsInLocation("archived", $player_id);
+
+            $points = 0;
+
+            foreach ($archived_cards as $card_id => $card) {
+                if ($card["type"] == $corp_id) {
+                    $points += $card["type_arg"];
+                }
+            }
+
+            $archived_points[$player_id] = $points;
+
+            $this->notifyAllPlayers(
+                "archivePoints",
+                clienttranslate('${player_name} scores ${points} points for ${corp_label}'),
+                array(
+                    "i18n" => array("corp_label"),
+                    "player_id" => $player_id,
+                    "player_name" => $this->getPlayerNameById($player_id),
+                    "corp_label" => $this->corporations[$corp_id],
+                    "points" => $points
+                )
+            );
+        }
+
+
+        return $archived_points;
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -710,8 +789,6 @@ class PersonaNonGrata extends Table
         $players = $this->loadPlayersBasicInfos();
         $current_player_id = $this->getCurrentPlayerId();
 
-        $cards_played = array();
-
         foreach ($players as $player_id => $player) {
             if ($current_player_id != $player_id) {
                 $this->revealPlayed($player_id);
@@ -720,7 +797,87 @@ class PersonaNonGrata extends Table
             $this->activateActionCard($player_id);
         }
 
+        if (!$this->getActionsInMyHand($player_id)) {
+            $this->gamestate->nextState("weekend");
+            return;
+        }
+
         $this->gamestate->nextState("nextDay");
+    }
+
+    function st_weekend()
+    {
+        $players = $this->loadPlayersBasicInfos();
+
+        $corporation_points = array();
+
+        foreach ($players as $player_id => $player) {
+            $this->revealEncrypted($player_id);
+        }
+
+        foreach ($this->corporations as $corp_id => $corporation) {
+            $corporation_points = $this->archivePoints($corp_id);
+
+            $corp_label = $this->corporations[$corp_id];
+
+            $most_points = max($corporation_points);
+            $winners = array_keys($corporation_points, $most_points);
+
+            foreach ($winners as $player_id => $points) {
+                unset($corporation_points[$player_id]);
+            }
+
+            if (count($winners) >= 2) {
+                $this->notifyAllPlayers(
+                    "tie",
+                    clienttranslate('Two or more players are tied in the first-place'),
+                    array()
+                );
+            }
+
+            $first = array_shift($winners);
+
+            $this->notifyAllPlayers(
+                "obtainCorporation",
+                clienttranslate('${player_name} obtains the corporation card of ${corp_label}'),
+                array(
+                    "i18n" => array("corp_label"),
+                    "player_id" => $first,
+                    "player_name" => $this->getPlayerNameById($first),
+                    "corp_label" => $corp_label
+                )
+            );
+
+            $second_most_points = max($corporation_points);
+            $runner_ups = array_keys($corporation_points, $second_most_points);
+
+            if (count($runner_ups) >= 2 && $second_most_points) {
+                $this->notifyAllPlayers(
+                    "tie",
+                    clienttranslate('Two or more players are tied in the second-place'),
+                    array()
+                );
+            }
+
+            $second = array_shift($runner_ups);
+
+            if (!$second_most_points) {
+                $second = $first;
+            }
+
+            $this->notifyAllPlayers(
+                "obtainKey",
+                clienttranslate('${player_name} obtains the key of ${corp_label}'),
+                array(
+                    "i18n" => array("corp_label"),
+                    "player_id" => $second,
+                    "player_name" => $this->getPlayerNameById($second),
+                    "corp_label" => $corp_label
+                )
+            );
+        }
+
+        $this->gamestate->nextState("nextWeek");
     }
 
     function zombieTurn($state, $active_player)
