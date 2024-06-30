@@ -73,6 +73,7 @@ $machinestates = array(
         "type" => "game",
         "action" => "st_weekend",
         "transitions" => array(
+            "weekend" => 4,
             "stealCard" => 41,
             "nextWeek" => 2
         ),

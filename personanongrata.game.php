@@ -29,7 +29,7 @@ class PersonaNonGrata extends Table
 
         $this->initGameStateLabels(array(
             "week" => 10,
-            "direction" => 11,
+            "currentCorporation" => 11
         ));
 
         $this->information_cards = $this->getNew("module.common.deck");
@@ -69,6 +69,7 @@ class PersonaNonGrata extends Table
         /************ Start the game initialization *****/
 
         $this->setGameStateInitialValue("week", 1);
+        $this->setGameStateInitialValue("currentCorporation", 1);
 
         //corporations
         $corporation_cards = array();
@@ -800,7 +801,7 @@ class PersonaNonGrata extends Table
         }
 
         //tests
-        if (count($this->getActionsInMyHand($player_id)) <= 4) {
+        if (count($this->getActionsInMyHand($player_id)) <= 3) {
             $this->gamestate->nextState("weekend");
             return;
         }
@@ -812,75 +813,108 @@ class PersonaNonGrata extends Table
     {
         $players = $this->loadPlayersBasicInfos();
 
-        $corporation_points = array();
+        $corp_id = $this->getGameStateValue("currentCorporation");
+        $this->incGameStateValue("currentCorporation", 1);
 
-        foreach ($players as $player_id => $player) {
-            $this->revealEncrypted($player_id);
+        $corp_label = $this->corporations[$corp_id];
+
+        if ($corp_id == 1) {
+            foreach ($players as $player_id => $player) {
+                $this->revealEncrypted($player_id);
+            }
         }
 
-        foreach ($this->corporations as $corp_id => $corporation) {
-            $corporation_points = $this->archivePoints($corp_id);
+        $corporation_points = $this->archivePoints($corp_id);
+        $most_points = max($corporation_points);
 
-            $corp_label = $this->corporations[$corp_id];
-
-            $most_points = max($corporation_points);
-            $winners = array_keys($corporation_points, $most_points);
-
-            foreach ($winners as $player_id => $points) {
-                unset($corporation_points[$player_id]);
-            }
-
-            if (count($winners) >= 2) {
-                $this->notifyAllPlayers(
-                    "tie",
-                    clienttranslate('Two or more players are tied in the first-place'),
-                    array()
-                );
-            }
-
-            $first = array_shift($winners);
-
+        if (!$most_points) {
             $this->notifyAllPlayers(
-                "obtainCorporation",
-                clienttranslate('${player_name} obtains the corporation card of ${corp_label}'),
+                "tie",
+                clienttranslate('No player scored points with ${corp_label} in this round'),
                 array(
                     "i18n" => array("corp_label"),
-                    "player_id" => $first,
-                    "player_name" => $this->getPlayerNameById($first),
+                    "corp_label" => $corp_label
+                )
+            );
+            $this->gamestate->nextState("weekend");
+            return;
+        }
+
+        $winners = array_keys($corporation_points, $most_points);
+
+        foreach ($winners as $player_id) {
+            unset($corporation_points[$player_id]);
+        }
+
+        if (count($winners) >= 2) {
+            $this->notifyAllPlayers(
+                "tie",
+                clienttranslate('Two or more players are tied in the first-place for ${corp_label}'),
+                array(
+                    "i18n" => array("corp_label"),
+                    "corp_label" => $corp_label
+                )
+            );
+            //tests
+            $this->gamestate->nextState("weekend");
+            return;
+        }
+
+        $first = array_shift($winners);
+
+        $this->notifyAllPlayers(
+            "obtainCorporation",
+            clienttranslate('${player_name} obtains the corporation card of ${corp_label}'),
+            array(
+                "i18n" => array("corp_label"),
+                "player_id" => $first,
+                "player_name" => $this->getPlayerNameById($first),
+                "corp_label" => $corp_label
+            )
+        );
+
+        $second_most_points = max($corporation_points);
+        $runner_ups = array_keys($corporation_points, $second_most_points);
+
+        if (count($runner_ups) >= 2 && $second_most_points) {
+            $this->notifyAllPlayers(
+                "tie",
+                clienttranslate('Two or more players are tied in the second-place for ${corp_label}'),
+                array(
+                    "i18n" => array("corp_label"),
                     "corp_label" => $corp_label
                 )
             );
 
-            $second_most_points = max($corporation_points);
-            $runner_ups = array_keys($corporation_points, $second_most_points);
-
-            if (count($runner_ups) >= 2 && $second_most_points) {
-                $this->notifyAllPlayers(
-                    "tie",
-                    clienttranslate('Two or more players are tied in the second-place'),
-                    array()
-                );
-            }
-
-            $second = array_shift($runner_ups);
-
-            if (!$second_most_points) {
-                $second = $first;
-            }
-
-            $this->notifyAllPlayers(
-                "obtainKey",
-                clienttranslate('${player_name} obtains the key of ${corp_label}'),
-                array(
-                    "i18n" => array("corp_label"),
-                    "player_id" => $second,
-                    "player_name" => $this->getPlayerNameById($second),
-                    "corp_label" => $corp_label
-                )
-            );
+            //tests
+            $this->gamestate->nextState("weekend");
+            return;
         }
 
-        $this->gamestate->nextState("nextWeek");
+        $second = array_shift($runner_ups);
+        $this->dump("second_points", $second_most_points);
+
+        if (!$second_most_points) {
+            $second = $first;
+        }
+
+        $this->notifyAllPlayers(
+            "obtainKey",
+            clienttranslate('${player_name} obtains the key of ${corp_label}'),
+            array(
+                "i18n" => array("corp_label"),
+                "player_id" => $second,
+                "player_name" => $this->getPlayerNameById($second),
+                "corp_label" => $corp_label
+            )
+        );
+
+        if ($corp_id == 6) {
+            $this->gamestate->nextState("nextWeek");
+            return;
+        }
+
+        $this->gamestate->nextState("weekend");
     }
 
     function zombieTurn($state, $active_player)

@@ -695,6 +695,12 @@ define([
       this.notifqueue.setSynchronous("activateActionCard", 1000);
       dojo.subscribe("revealEncrypted", this, "notif_revealEncrypted");
       this.notifqueue.setSynchronous("revealEncrypted", 1000);
+      dojo.subscribe("obtainCorporation", this, "notif_obtainCorporation");
+      this.notifqueue.setSynchronous("obtainCorporation", 1000);
+      dojo.subscribe("obtainKey", this, "notif_obtainKey");
+      this.notifqueue.setSynchronous("obtainKey", 1000);
+      dojo.subscribe("tie", this, "notif_tie");
+      this.notifqueue.setSynchronous("tie", 1000);
     },
 
     notif_playCards: function (notif) {
@@ -809,5 +815,9 @@ define([
         actionCard
       ).style.marginTop = 0;
     },
+
+    notif_obtainCorporation: function (notif) {},
+    notif_obtainKey: function (notif) {},
+    notif_tie: function (notif) {},
   });
 });
