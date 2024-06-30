@@ -209,15 +209,15 @@ define([
             const card = actionCards[card_id];
 
             this[actionsInHandControl].addCard(card);
-            this[actionsInHandControl].setCardVisible(card, false);
             this.updateHandWidth(this[actionsInHandControl]);
           }
 
+          //informations
           const infoInHandControl = `infoInHandStock$${player_id}`;
           this[infoInHandControl] = new HandStock(
             this.informationManager,
             $(`prs_handOfInfo$${player_id}`),
-            { cardOverlap: "160px", sort: sortFunction("type", "type_arg") }
+            { cardOverlap: "160px", sort: sortFunction("type_arg", "type") }
           );
 
           const infoCards = this.infoInOtherHands[player_id];
@@ -225,10 +225,12 @@ define([
           for (const card_id in infoCards) {
             const card = infoCards[card_id];
             this[infoInHandControl].addCard(card);
-            this[infoInHandControl].setCardVisible(card, false);
             this.updateHandWidth(this[infoInHandControl]);
           }
 
+          console.log(this[infoInHandControl].getCards());
+
+          //played
           const playedActionControl = `playedActionStock$${player_id}`;
           this[playedActionControl] = new LineStock(
             this.actionManager,
@@ -501,8 +503,8 @@ define([
         this[deckOfInformationsControl].setCardVisible(card, false);
       }
 
-      const infoInMyHandControl = `infoInHandStock$${this.player_id}`;
-      this[infoInMyHandControl] = new HandStock(
+      const infoInHandControl = `infoInHandStock$${this.player_id}`;
+      this[infoInHandControl] = new HandStock(
         this.informationManager,
         $(`prs_handOfInfo$${this.player_id}`),
         { cardOverlap: "90px", sort: sortFunction("type_arg", "type") }
@@ -510,14 +512,10 @@ define([
 
       for (const card_id in this.infoInMyHand) {
         const card = this.infoInMyHand[card_id];
+        this[infoInHandControl].addCard(card);
+        this.updateHandWidth(this[infoInHandControl]);
 
-        this[infoInMyHandControl].addCard(card);
-        this.updateHandWidth(this[infoInMyHandControl]);
-
-        this[infoInMyHandControl].onSelectionChange = (
-          selection,
-          lastChange
-        ) => {
+        this[infoInHandControl].onSelectionChange = (selection, lastChange) => {
           if (this.getStateName() === "day" && this.isCurrentPlayerActive()) {
             if (selection.length === 0) {
               this.selectedInfo = null;
@@ -707,7 +705,6 @@ define([
       const player_id = notif.args.player_id;
       const actionCard = notif.args.actionCard;
       const infoCard = notif.args.infoCard;
-      const encrypt = notif.args.encrypt;
       const isCurrentPlayer = this.player_id == player_id;
 
       const playedActionControl = `playedActionStock$${player_id}`;
@@ -719,8 +716,10 @@ define([
       if (!isCurrentPlayer) {
         const hand = this[infoInHandControl].getCards();
         const randomIndex = Math.floor(Math.random() * hand.length);
+        const randomCard = hand[randomIndex];
 
-        this[infoInHandControl].removeCard(hand[randomIndex]);
+        this[infoInHandControl].removeCard(randomCard);
+        console.log(player_id, infoCard, randomCard);
       }
 
       const playedInfoControl = `playedInfoStock$${player_id}`;
@@ -732,10 +731,6 @@ define([
 
       this.updateHandWidth(this[actionsInHandControl]);
       this.updateHandWidth(this[infoInHandControl]);
-
-      if (!isCurrentPlayer && encrypt) {
-        this[playedInfoControl].setCardVisible(infoCard, false);
-      }
     },
 
     notif_changeMind: function (notif) {
@@ -747,9 +742,9 @@ define([
       this[actionsInMyHandControl].addCard(actionCard);
       this.updateHandWidth(this[actionsInMyHandControl]);
 
-      const infoInMyHandControl = `infoInHandStock$${player_id}`;
-      this[infoInMyHandControl].addCard(infoCard);
-      this.updateHandWidth(this[infoInMyHandControl]);
+      const infoInHandControl = `infoInHandStock$${player_id}`;
+      this[infoInHandControl].addCard(infoCard);
+      this.updateHandWidth(this[infoInHandControl]);
 
       this.selectedAction = null;
       this.selectedInfo = null;

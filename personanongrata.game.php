@@ -256,7 +256,7 @@ class PersonaNonGrata extends Table
     {
         $hidden_cards = array();
 
-        $fake_ids = range(count($cards) * -1, -1);
+        $fake_ids = range(count($cards) * -1 - 1, -2);
 
         foreach ($cards as $card_id => $card) {
             $fake_id = null;
@@ -790,12 +790,9 @@ class PersonaNonGrata extends Table
     function st_infoArchiving()
     {
         $players = $this->loadPlayersBasicInfos();
-        $current_player_id = $this->getCurrentPlayerId();
 
         foreach ($players as $player_id => $player) {
-            if ($current_player_id != $player_id) {
-                $this->revealPlayed($player_id);
-            }
+            $this->revealPlayed($player_id);
 
             $this->activateActionCard($player_id);
         }
