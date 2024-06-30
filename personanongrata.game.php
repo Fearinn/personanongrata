@@ -671,17 +671,19 @@ class PersonaNonGrata extends Table
 
             $archived_points[$player_id] = $points;
 
-            $this->notifyAllPlayers(
-                "archivePoints",
-                clienttranslate('${player_name} scores ${points} points for ${corp_label}'),
-                array(
-                    "i18n" => array("corp_label"),
-                    "player_id" => $player_id,
-                    "player_name" => $this->getPlayerNameById($player_id),
-                    "corp_label" => $this->corporations[$corp_id],
-                    "points" => $points
-                )
-            );
+            if ($points > 0) {
+                $this->notifyAllPlayers(
+                    "archivePoints",
+                    clienttranslate('${player_name} scores ${points} points for ${corp_label}'),
+                    array(
+                        "i18n" => array("corp_label"),
+                        "player_id" => $player_id,
+                        "player_name" => $this->getPlayerNameById($player_id),
+                        "corp_label" => $this->corporations[$corp_id],
+                        "points" => $points
+                    )
+                );
+            }
         }
 
 
@@ -797,7 +799,8 @@ class PersonaNonGrata extends Table
             $this->activateActionCard($player_id);
         }
 
-        if (!$this->getActionsInMyHand($player_id)) {
+        //tests
+        if (count($this->getActionsInMyHand($player_id)) <= 4) {
             $this->gamestate->nextState("weekend");
             return;
         }

@@ -370,10 +370,6 @@ define([
 
         this[archivedControl].addCard(card);
         this.setSlotOffset(this[archivedControl].getCardElement(card));
-
-        if (card["location"] === "encrypted") {
-          this[archivedControl].setCardVisible(card, false);
-        }
       }
 
       const encryptActionControl = `encryptActionStock$${this.player_id}`;
@@ -458,9 +454,7 @@ define([
           return a.location_arg - b.location_arg;
         });
 
-        this[corpControl].addCards(cards, undefined, {
-          visible: true,
-        });
+        this[corpControl].addCards(cards);
       }
 
       //actions
@@ -696,6 +690,7 @@ define([
       this.notifqueue.setSynchronous("playCards", 1000);
       dojo.subscribe("changeMind", this, "notif_changeMind");
       dojo.subscribe("archive", this, "notif_archive");
+      this.notifqueue.setSynchronous("archive", 1000);
       dojo.subscribe("activateActionCard", this, "notif_activateActionCard");
       this.notifqueue.setSynchronous("activateActionCard", 1000);
       dojo.subscribe("revealEncrypted", this, "notif_revealEncrypted");
@@ -768,12 +763,7 @@ define([
       this[archivedControl].addCard(card, {
         fromElement: encrypt ? $(`prs_playedInfo$${player_id}`) : undefined,
       });
-
       this.setSlotOffset(this[archivedControl].getCardElement(card));
-
-      if (encrypt) {
-        this[archivedControl].setCardVisible(card, false);
-      }
     },
 
     notif_activateActionCard: function (notif) {
@@ -814,9 +804,10 @@ define([
 
       const actionsDiscardedControl = `actionsDiscardedStock$${player_id}`;
       this[actionsDiscardedControl].addCard(actionCard);
-      this.setSlotOffset(
-        this[actionsDiscardedControl].getCardElement(actionCard)
-      );
+
+      this[actionsDiscardedControl].getCardElement(
+        actionCard
+      ).style.marginTop = 0;
     },
   });
 });

@@ -63,7 +63,7 @@ $machinestates = array(
         "description" => "",
         "type" => "game",
         "action" => "st_infoArchiving",
-        "transitions" => array("nextDay" => 2),
+        "transitions" => array("nextDay" => 2, "weekend" => 4),
         "updateGameProgression" => true
     ),
 
