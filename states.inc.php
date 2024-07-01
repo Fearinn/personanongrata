@@ -34,7 +34,7 @@ $machinestates = array(
         "type" => "multipleactiveplayer",
         "action" => "st_day",
         "possibleactions" => array("changeMind"),
-        "transitions" => array("infoArchiving" => 3),
+        "transitions" => array("endOfDay" => 3),
         "initialprivate" => 20
     ),
 
@@ -45,7 +45,7 @@ $machinestates = array(
         "type" => "private",
         // "args" => "arg_playCards",
         "possibleactions" => array("playCards"),
-        "transitions" => array("discardCard" => 21, "infoArchiving" => 3),
+        "transitions" => array("discardCard" => 21, "endOfDay" => 3),
     ),
 
     21 => array(
@@ -59,21 +59,21 @@ $machinestates = array(
     ),
 
     3 => array(
-        "name" => "infoArchiving",
+        "name" => "endOfDay",
         "description" => "",
         "type" => "game",
-        "action" => "st_infoArchiving",
-        "transitions" => array("nextDay" => 2, "weekend" => 4),
+        "action" => "st_endOfDay",
+        "transitions" => array("nextDay" => 2, "infoArchiving" => 4),
         "updateGameProgression" => true
     ),
 
     4 => array(
-        "name" => "weekend",
+        "name" => "infoArchiving",
         "description" => "",
         "type" => "game",
-        "action" => "st_weekend",
+        "action" => "st_infoArchiving",
         "transitions" => array(
-            "weekend" => 4,
+            "infoArchiving" => 4,
             "stealCard" => 41,
             "nextWeek" => 2
         ),
@@ -87,7 +87,7 @@ $machinestates = array(
         "type" => "activeplayer",
         "possibleactions" => array("stealCard"),
         "transitions" => array(
-            "weekend" => 4,
+            "infoArchiving" => 4,
             "nextWeek" => 2
         )
     ),

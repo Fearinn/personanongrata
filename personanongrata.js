@@ -164,8 +164,8 @@ define([
       this.deckOfInformations = gamedatas.deckOfInformations;
       this.infoInMyHand = gamedatas.infoInMyHand;
       this.infoInOtherHands = gamedatas.infoInOtherHands;
-      this.infoArchivedByMe = gamedatas.infoArchivedByMe;
-      this.infoArchivedByOthers = gamedatas.infoArchivedByOthers;
+      this.infoStoredByMe = gamedatas.infoStoredByMe;
+      this.infoStoredByOthers = gamedatas.infoStoredByOthers;
       this.actionsDiscarded = gamedatas.actionsDiscarded;
       this.encryptActionUsed = gamedatas.encryptActionUsed;
 
@@ -245,11 +245,11 @@ define([
             {}
           );
 
-          //archived
-          const archivedControl = `archivedStock$${player_id}`;
-          this[archivedControl] = new SlotStock(
+          //stored
+          const storedControl = `storedStock$${player_id}`;
+          this[storedControl] = new SlotStock(
             this.informationManager,
-            $(`prs_archived$${player_id}`),
+            $(`prs_stored$${player_id}`),
             {
               slotsIds: [-1].concat(Object.keys(this.corporations)),
               mapCardToSlot: (card) => {
@@ -262,18 +262,18 @@ define([
             }
           );
 
-          const archivedCards = this.infoArchivedByOthers[player_id];
-          const visibleArchived = archivedCards["visible"];
+          const storedCards = this.infoStoredByOthers[player_id];
+          const visibleStored = storedCards["visible"];
 
-          for (const card_id in visibleArchived) {
-            const card = visibleArchived[card_id];
-            this[archivedControl].addCard(card);
-            this.setSlotOffset(this[archivedControl].getCardElement(card), 8);
+          for (const card_id in visibleStored) {
+            const card = visibleStored[card_id];
+            this[storedControl].addCard(card);
+            this.setSlotOffset(this[storedControl].getCardElement(card), 8);
           }
 
-          const encryptedCard = archivedCards["encrypted"];
+          const encryptedCard = storedCards["encrypted"];
           if (encryptedCard) {
-            this[archivedControl].addCard(encryptedCard);
+            this[storedControl].addCard(encryptedCard);
           }
 
           const encryptActionControl = `encryptActionStock$${player_id}`;
@@ -325,6 +325,14 @@ define([
           //end of current player excluding
         }
 
+        //archived
+        const archivedCorporationControl = `archivedCorporationStock$${player_id}`;
+        this[archivedCorporationControl] = new LineStock(
+          this.corporationManager,
+          $(`prs_archived$${player_id}`),
+          {}
+        );
+
         //end of players loop
       }
 
@@ -350,11 +358,11 @@ define([
         this[playedInfoControl].addCard(this.selectedInfo);
       }
 
-      //archived
-      const archivedControl = `archivedStock$${this.player_id}`;
-      this[archivedControl] = new SlotStock(
+      //stored
+      const storedControl = `storedStock$${this.player_id}`;
+      this[storedControl] = new SlotStock(
         this.informationManager,
-        $(`prs_archived$${this.player_id}`),
+        $(`prs_stored$${this.player_id}`),
         {
           slotsIds: [-1].concat(Object.keys(this.corporations)),
           mapCardToSlot: (card) => {
@@ -367,11 +375,11 @@ define([
         }
       );
 
-      for (const card_id in this.infoArchivedByMe) {
-        const card = this.infoArchivedByMe[card_id];
+      for (const card_id in this.infoStoredByMe) {
+        const card = this.infoStoredByMe[card_id];
 
-        this[archivedControl].addCard(card);
-        this.setSlotOffset(this[archivedControl].getCardElement(card));
+        this[storedControl].addCard(card);
+        this.setSlotOffset(this[storedControl].getCardElement(card));
       }
 
       const encryptActionControl = `encryptActionStock$${this.player_id}`;
@@ -437,18 +445,18 @@ define([
 
       //corporations
       for (const corporation_id in this.corporations) {
-        const corpDeck = this.corporationDecks[corporation_id];
+        const corporationDeck = this.corporationDecks[corporation_id];
         const cards = [];
 
-        for (const card_id in corpDeck) {
-          const card = corpDeck[card_id];
+        for (const card_id in corporationDeck) {
+          const card = corporationDeck[card_id];
           cards.push(card);
         }
 
-        const corpControl = `corpDeck:${corporation_id}`;
+        const corpControl = `corporationDeck:${corporation_id}`;
         this[corpControl] = new Deck(
           this.corporationManager,
-          $(`prs_corpDeck:${corporation_id}`),
+          $(`prs_corporationDeck:${corporation_id}`),
           {}
         );
 
@@ -456,7 +464,7 @@ define([
           return a.location_arg - b.location_arg;
         });
 
-        this[corpControl].addCards(cards);
+        this[corpControl].addCards(cards, {}, { visible: true });
       }
 
       //actions
@@ -607,7 +615,7 @@ define([
     },
 
     getEncrypted: function (player_id) {
-      const encryptedInfo = this[`archivedStock$${player_id}`]
+      const encryptedInfo = this[`storedStock$${player_id}`]
         .getCards()
         .find((card) => {
           return card.location === "encrypted";
@@ -687,8 +695,8 @@ define([
       dojo.subscribe("playCards", this, "notif_playCards");
       this.notifqueue.setSynchronous("playCards", 1000);
       dojo.subscribe("changeMind", this, "notif_changeMind");
-      dojo.subscribe("archive", this, "notif_archive");
-      this.notifqueue.setSynchronous("archive", 1000);
+      dojo.subscribe("store", this, "notif_store");
+      this.notifqueue.setSynchronous("store", 1000);
       dojo.subscribe("activateActionCard", this, "notif_activateActionCard");
       this.notifqueue.setSynchronous("activateActionCard", 1000);
       dojo.subscribe("revealEncrypted", this, "notif_revealEncrypted");
@@ -750,7 +758,7 @@ define([
       this.selectedInfo = null;
     },
 
-    notif_archive: function (notif) {
+    notif_store: function (notif) {
       const player_id = notif.args.player_id;
       const card = notif.args.infoCard;
       const encrypt = notif.args.encrypt;
@@ -760,11 +768,11 @@ define([
         this[playedInfoControl].removeAll();
       }
 
-      const archivedControl = `archivedStock$${player_id}`;
-      this[archivedControl].addCard(card, {
+      const storedControl = `storedStock$${player_id}`;
+      this[storedControl].addCard(card, {
         fromElement: encrypt ? $(`prs_playedInfo$${player_id}`) : undefined,
       });
-      this.setSlotOffset(this[archivedControl].getCardElement(card));
+      this.setSlotOffset(this[storedControl].getCardElement(card));
     },
 
     notif_activateActionCard: function (notif) {
@@ -795,11 +803,11 @@ define([
       const player_id = notif.args.player_id;
       const infoCard = notif.args.infoCard;
 
-      const archivedControl = `archivedStock$${player_id}`;
+      const storedControl = `storedStock$${player_id}`;
 
-      this[archivedControl].removeCard({ id: `-1:${player_id}` });
+      this[storedControl].removeCard({ id: `-1:${player_id}` });
 
-      this[archivedControl].addCard(infoCard);
+      this[storedControl].addCard(infoCard);
 
       const actionCard = this[`encryptActionStock$${player_id}`].getCards()[0];
 
@@ -811,7 +819,12 @@ define([
       ).style.marginTop = 0;
     },
 
-    notif_obtainCorporation: function (notif) {},
+    notif_obtainCorporation: function (notif) {
+      const player_id = notif.args.player_id;
+      const corporationCard = notif.args.corporationCard;
+
+      this[`archivedCorporationStock$${player_id}`].addCard(corporationCard);
+    },
     notif_obtainKey: function (notif) {},
     notif_tie: function (notif) {},
   });

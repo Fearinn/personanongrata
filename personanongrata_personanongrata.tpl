@@ -26,6 +26,7 @@
     </h3>
     <div id="prs_hand${PLAYER_ID}" class="prs_myHand prs_handContainer">
       <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
+      <div id="prs_archived${PLAYER_ID}"></div>
       <div id="prs_playedInfo${PLAYER_ID}" class="prs_playedInfo"></div>
       <div id="prs_playedAction${PLAYER_ID}" class="prs_playedAction"></div>
       <div
@@ -36,7 +37,7 @@
         id="prs_handOfInfo${PLAYER_ID}"
         class="prs_handOfInfo prs_hand"
       ></div>
-      <div id="prs_archived${PLAYER_ID}" class="prs_archived"></div>
+      <div id="prs_stored${PLAYER_ID}" class="prs_stored"></div>
       <div id="prs_actionDiscard${PLAYER_ID}" class="prs_actionDiscard"></div>
       <div id="prs_encryptAction${PLAYER_ID}" class="prs_encryptAction"></div>
     </div>
@@ -54,6 +55,7 @@
       </h3>
       <div id="prs_hand${PLAYER_ID}" class="prs_handContainer">
         <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
+        <div id="prs_archived${PLAYER_ID}"></div>
         <div id="prs_playedInfo${PLAYER_ID}" class="prs_playedInfo"></div>
         <div id="prs_playedAction${PLAYER_ID}" class="prs_playedAction"></div>
         <div
@@ -64,7 +66,7 @@
           id="prs_handOfInfo${PLAYER_ID}"
           class="prs_handOfInfo prs_hand"
         ></div>
-        <div id="prs_archived${PLAYER_ID}" class="prs_archived"></div>
+        <div id="prs_stored${PLAYER_ID}" class="prs_stored"></div>
         <div id="prs_actionDiscard${PLAYER_ID}" class="prs_actionDiscard"></div>
         <div id="prs_encryptAction${PLAYER_ID}" class="prs_encryptAction"></div>
       </div>
@@ -77,12 +79,12 @@
     <div id="prs_infoDeck" class="prs_infoDeck"></div>
     <div id="prs_keys" class="prs_keys"></div>
     <div id="prs_corporationDecks" class="prs_corporationDecks">
-      <div id="prs_corpDeck:1"></div>
-      <div id="prs_corpDeck:2"></div>
-      <div id="prs_corpDeck:3"></div>
-      <div id="prs_corpDeck:4"></div>
-      <div id="prs_corpDeck:5"></div>
-      <div id="prs_corpDeck:6"></div>
+      <div id="prs_corporationDeck:1"></div>
+      <div id="prs_corporationDeck:2"></div>
+      <div id="prs_corporationDeck:3"></div>
+      <div id="prs_corporationDeck:4"></div>
+      <div id="prs_corporationDeck:5"></div>
+      <div id="prs_corporationDeck:6"></div>
     </div>
   </div>
 </div>

@@ -105,7 +105,7 @@ class PersonaNonGrata extends Table
                 card_location_arg location_arg from corporation WHERE card_type_arg='$value' AND card_location='deck' AND card_type='$corporation_id'");
 
                 foreach ($cards as $card_id => $card) {
-                    $this->corporation_cards->insertCardOnExtremePosition($card_id, "corpdeck:" . $corporation_id, true);
+                    $this->corporation_cards->insertCardOnExtremePosition($card_id, "deck:" . $corporation_id, true);
                 }
             }
         }
@@ -182,8 +182,8 @@ class PersonaNonGrata extends Table
         $result["infoInMyHand"] = $this->getInfoInMyHand($current_player_id);
         $result["infoInOtherHands"] = $this->getInfoInOtherHands($current_player_id);
         $result["cardsPlayedByMe"] = $this->getCardsPlayedByMe($current_player_id);
-        $result["infoArchivedByMe"] = $this->getInfoArchivedByMe($current_player_id);
-        $result["infoArchivedByOthers"] = $this->getInfoArchivedByOthers($current_player_id);
+        $result["infoStoredByMe"] = $this->getInfoStoredByMe($current_player_id);
+        $result["infoStoredByOthers"] = $this->getInfoStoredByOthers($current_player_id);
         $result["actionsDiscarded"] = $this->getActionsDiscarded();
         $result["encryptActionUsed"] = $this->getEncryptActionUsed();
         return $result;
@@ -324,7 +324,7 @@ class PersonaNonGrata extends Table
         $corporation_cards = array();
 
         foreach ($this->corporations as $corporation_id => $corporation) {
-            $corporation_cards[$corporation_id] = $this->corporation_cards->getCardsInLocation("corpdeck:" . $corporation_id);
+            $corporation_cards[$corporation_id] = $this->corporation_cards->getCardsInLocation("deck:" . $corporation_id);
         }
 
         return $corporation_cards;
@@ -396,21 +396,21 @@ class PersonaNonGrata extends Table
         return $played_cards;
     }
 
-    function getInfoArchivedByMe(int $player_id): array
+    function getInfoStoredByMe(int $player_id): array
     {
-        $archived_cards = array();
+        $stored_cards = array();
 
-        $visible_cards = $this->information_cards->getCardsInLocation("archived", $player_id);
+        $visible_cards = $this->information_cards->getCardsInLocation("stored", $player_id);
         $encrypted_cards = $this->information_cards->getCardsInLocation("encrypted", $player_id);
 
-        $archived_cards = $visible_cards + $encrypted_cards;
+        $stored_cards = $visible_cards + $encrypted_cards;
 
-        return $archived_cards;
+        return $stored_cards;
     }
 
-    function getInfoArchivedByOthers(int $current_player_id): array
+    function getInfoStoredByOthers(int $current_player_id): array
     {
-        $archived_cards = array();
+        $stored_cards = array();
 
         $players = $this->loadPlayersBasicInfos();
 
@@ -419,14 +419,14 @@ class PersonaNonGrata extends Table
                 continue;
             }
 
-            $visible_cards = $this->information_cards->getCardsInLocation("archived", $player_id);
+            $visible_cards = $this->information_cards->getCardsInLocation("stored", $player_id);
             $encrypted_card = $this->getSingleCardInLocation($this->information_cards, "encrypted", $player_id, false);
 
-            $archived_cards[$player_id]["visible"] = $visible_cards;
-            $archived_cards[$player_id]["encrypted"] = $encrypted_card ? $this->hideCard($encrypted_card, true, -1) : null;
+            $stored_cards[$player_id]["visible"] = $visible_cards;
+            $stored_cards[$player_id]["encrypted"] = $encrypted_card ? $this->hideCard($encrypted_card, true, -1) : null;
         }
 
-        return $archived_cards;
+        return $stored_cards;
     }
 
     function getActionsDiscarded(): array
@@ -471,11 +471,11 @@ class PersonaNonGrata extends Table
     // action cards
     function download(array $info_card, int $player_id): void
     {
-        $this->information_cards->moveCard($info_card["id"], "archived", $player_id);
-        $info_card = $this->getSingleCardInLocation($this->information_cards, "archived", $player_id);
+        $this->information_cards->moveCard($info_card["id"], "stored", $player_id);
+        $info_card = $this->getSingleCardInLocation($this->information_cards, "stored", $player_id);
 
         $this->notifyAllPlayers(
-            "archive",
+            "store",
             "",
             array(
                 "player_id" => $player_id,
@@ -490,7 +490,7 @@ class PersonaNonGrata extends Table
         $info_card = $this->getSingleCardInLocation($this->information_cards, "encrypted", $player_id);
 
         $this->notifyAllPlayers(
-            "archive",
+            "store",
             "",
             array(
                 "player_id" => $player_id,
@@ -503,22 +503,22 @@ class PersonaNonGrata extends Table
     {
         $recipient_id = $this->getPlayerAfter($player_id);
 
-        $this->information_cards->moveCard($info_card["id"], "archived", $recipient_id);
-        $info_card = $this->getSingleCardInLocation($this->information_cards, "archived", $recipient_id);
+        $this->information_cards->moveCard($info_card["id"], "stored", $recipient_id);
+        $info_card = $this->getSingleCardInLocation($this->information_cards, "stored", $recipient_id);
 
         $info_id = $info_card["type_arg"];
-        $corp_id = intval($info_card["type"]);
+        $corporation_id = intval($info_card["type"]);
 
         $this->notifyAllPlayers(
-            "archive",
-            clienttranslate('${player_name2} sends a ${info_label} of ${corp_label} to ${player_name}'),
+            "store",
+            clienttranslate('${player_name2} sends a ${info_label} of ${corporation_label} to ${player_name}'),
             array(
                 "player_id" => $recipient_id,
                 "player_name" => $this->getPlayerNameById($recipient_id),
                 "player_id2" => $player_id,
                 "player_name2" => $this->getPlayerNameById($player_id),
                 "info_label" => $this->informations[$info_id]["name"],
-                "corp_label" => $this->corporations[$corp_id],
+                "corporation_label" => $this->corporations[$corporation_id],
                 "infoCard" => $info_card,
             )
         );
@@ -528,22 +528,22 @@ class PersonaNonGrata extends Table
     {
         $recipient_id = $this->getPlayerBefore($player_id);
 
-        $this->information_cards->moveCard($info_card["id"], "archived", $recipient_id);
-        $info_card = $this->getSingleCardInLocation($this->information_cards, "archived", $recipient_id);
+        $this->information_cards->moveCard($info_card["id"], "stored", $recipient_id);
+        $info_card = $this->getSingleCardInLocation($this->information_cards, "stored", $recipient_id);
 
         $info_id = $info_card["type_arg"];
-        $corp_id = intval($info_card["type"]);
+        $corporation_id = intval($info_card["type"]);
 
         $this->notifyAllPlayers(
-            "archive",
-            clienttranslate('${player_name2} sends a ${info_label} of ${corp_label} to ${player_name}'),
+            "store",
+            clienttranslate('${player_name2} sends a ${info_label} of ${corporation_label} to ${player_name}'),
             array(
                 "player_id" => $recipient_id,
                 "player_name" => $this->getPlayerNameById($recipient_id),
                 "player_id2" => $player_id,
                 "player_name2" => $this->getPlayerNameById($player_id),
                 "info_label" => $this->informations[$info_id]["name"],
-                "corp_label" => $this->corporations[$corp_id],
+                "corporation_label" => $this->corporations[$corporation_id],
                 "infoCard" => $info_card,
             )
         );
@@ -557,7 +557,7 @@ class PersonaNonGrata extends Table
 
         $action_id = $action_card["type_arg"];
         $info_id = $info_card["type_arg"];
-        $corp_id = intval($info_card["type"]);
+        $corporation_id = intval($info_card["type"]);
 
         $encrypt = $action_id == 2;
 
@@ -566,18 +566,18 @@ class PersonaNonGrata extends Table
         }
 
         $message =  $encrypt ? clienttranslate('${player_name} combines a ${action_label} to an information')
-            : clienttranslate('${player_name} combines a ${action_label} to a ${info_label} of ${corp_label}');
+            : clienttranslate('${player_name} combines a ${action_label} to a ${info_label} of ${corporation_label}');
 
         $this->notifyAllPlayers(
             "playCards",
             $message,
             array(
-                "i18n" => array("action_label", "info_label", "corp_label"),
+                "i18n" => array("action_label", "info_label", "corporation_label"),
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
                 "action_label" => $this->actions[$action_id],
                 "info_label" => $encrypt ? null : $this->informations[$info_id]["name"],
-                "corp_label" => $encrypt ? null : $this->corporations[$corp_id],
+                "corporation_label" => $encrypt ? null : $this->corporations[$corporation_id],
                 "actionCard" => $action_card,
                 "infoCard" => $info_card,
                 "encrypt" => $encrypt
@@ -631,56 +631,56 @@ class PersonaNonGrata extends Table
     {
         $info_card = $this->getSingleCardInLocation($this->information_cards, "encrypted", $player_id);
 
-        $this->information_cards->moveCard($info_card["id"], "archived", $player_id);
+        $this->information_cards->moveCard($info_card["id"], "stored", $player_id);
         $this->action_cards->moveAllCardsInLocation("encrypted", "discard", $player_id, $player_id);
 
         $info_card = $this->information_cards->getCard($info_card["id"]);
 
         $info_id = $info_card["type_arg"];
-        $corp_id = intval($info_card["type"]);
+        $corporation_id = intval($info_card["type"]);
 
         $this->notifyAllPlayers(
             "revealEncrypted",
-            clienttranslate('${player_name} reveals his encrypted card... It&apos;s a ${info_label} of ${corp_label}!'),
+            clienttranslate('${player_name} reveals his encrypted card... It&apos;s a ${info_label} of ${corporation_label}!'),
             array(
-                "i18n" => array("info_label", "corp_label"),
+                "i18n" => array("info_label", "corporation_label"),
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
                 "info_label" => $this->informations[$info_id]["name"],
-                "corp_label" => $this->corporations[$corp_id],
+                "corporation_label" => $this->corporations[$corporation_id],
                 "infoCard" => $info_card
             )
         );
     }
 
-    function archivePoints(int $corp_id): array
+    function storePoints(int $corporation_id): array
     {
         $players = $this->loadPlayersBasicInfos();
 
-        $archived_points = array();
+        $stored_points = array();
 
         foreach ($players as $player_id => $player) {
-            $archived_cards = $this->information_cards->getCardsInLocation("archived", $player_id);
+            $stored_cards = $this->information_cards->getCardsInLocation("stored", $player_id);
 
             $points = 0;
 
-            foreach ($archived_cards as $card_id => $card) {
-                if ($card["type"] == $corp_id) {
+            foreach ($stored_cards as $card_id => $card) {
+                if ($card["type"] == $corporation_id) {
                     $points += $card["type_arg"];
                 }
             }
 
-            $archived_points[$player_id] = $points;
+            $stored_points[$player_id] = $points;
 
             if ($points > 0) {
                 $this->notifyAllPlayers(
-                    "archivePoints",
-                    clienttranslate('${player_name} scores ${points} points for ${corp_label}'),
+                    "storePoints",
+                    clienttranslate('${player_name} scores ${points} points for ${corporation_label}'),
                     array(
-                        "i18n" => array("corp_label"),
+                        "i18n" => array("corporation_label"),
                         "player_id" => $player_id,
                         "player_name" => $this->getPlayerNameById($player_id),
-                        "corp_label" => $this->corporations[$corp_id],
+                        "corporation_label" => $this->corporations[$corporation_id],
                         "points" => $points
                     )
                 );
@@ -688,7 +688,26 @@ class PersonaNonGrata extends Table
         }
 
 
-        return $archived_points;
+        return $stored_points;
+    }
+
+    function obtainCorporation(int $corporation_id, int $player_id)
+    {
+        $corporation_card = $this->corporation_cards->pickCardForLocation("deck:" . $corporation_id, "archived", $player_id);
+        $value = $corporation_card["type_arg"];
+
+        $this->notifyAllPlayers(
+            "obtainCorporation",
+            clienttranslate('${player_name} obtains the corporation card ${corporation_label} with value ${value}'),
+            array(
+                "i18n" => array("corporation_label"),
+                "player_id" => $player_id,
+                "player_name" => $this->getPlayerNameById($player_id),
+                "corporation_label" => $this->corporations[$corporation_id],
+                "corporationCard" => $corporation_card,
+                "value" => $value
+            )
+        );
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -714,7 +733,7 @@ class PersonaNonGrata extends Table
 
         $action_id = $action_card["type_arg"];
         $info_id = $info_card["type_arg"];
-        $corp_id = intval($info_card["type"]);
+        $corporation_id = intval($info_card["type"]);
 
         $this->action_cards->moveCard($action_card_id, "played", $player_id);
         $this->information_cards->moveCard($info_card_id, "played", $player_id);
@@ -722,13 +741,13 @@ class PersonaNonGrata extends Table
         $this->notifyPlayer(
             $player_id,
             "playCards",
-            clienttranslate('You combine a ${action_label} to a ${info_label} of ${corp_label}'),
+            clienttranslate('You combine a ${action_label} to a ${info_label} of ${corporation_label}'),
             array(
-                "i18n" => array("action_label", "info_label", "corp_label"),
+                "i18n" => array("action_label", "info_label", "corporation_label"),
                 "player_id" => $player_id,
                 "action_label" => $this->actions[$action_id],
                 "info_label" => $this->informations[$info_id]["name"],
-                "corp_label" => $this->corporations[$corp_id],
+                "corporation_label" => $this->corporations[$corporation_id],
                 "actionCard" => $action_card,
                 "infoCard" => $info_card
             )
@@ -739,7 +758,7 @@ class PersonaNonGrata extends Table
         //     return;
         // }
 
-        $this->gamestate->setPlayerNonMultiactive($player_id, "infoArchiving");
+        $this->gamestate->setPlayerNonMultiactive($player_id, "endOfDay");
     }
 
     function changeMind()
@@ -787,7 +806,7 @@ class PersonaNonGrata extends Table
         $this->gamestate->initializePrivateStateForAllActivePlayers();
     }
 
-    function st_infoArchiving()
+    function st_endOfDay()
     {
         $players = $this->loadPlayersBasicInfos();
 
@@ -799,41 +818,41 @@ class PersonaNonGrata extends Table
 
         //tests
         if (count($this->getActionsInMyHand($player_id)) <= 3) {
-            $this->gamestate->nextState("weekend");
+            $this->gamestate->nextState("infoArchiving");
             return;
         }
 
         $this->gamestate->nextState("nextDay");
     }
 
-    function st_weekend()
+    function st_infoArchiving()
     {
         $players = $this->loadPlayersBasicInfos();
 
-        $corp_id = $this->getGameStateValue("currentCorporation");
+        $corporation_id = $this->getGameStateValue("currentCorporation");
         $this->incGameStateValue("currentCorporation", 1);
 
-        $corp_label = $this->corporations[$corp_id];
+        $corporation_label = $this->corporations[$corporation_id];
 
-        if ($corp_id == 1) {
+        if ($corporation_id == 1) {
             foreach ($players as $player_id => $player) {
                 $this->revealEncrypted($player_id);
             }
         }
 
-        $corporation_points = $this->archivePoints($corp_id);
+        $corporation_points = $this->storePoints($corporation_id);
         $most_points = max($corporation_points);
 
         if (!$most_points) {
             $this->notifyAllPlayers(
                 "tie",
-                clienttranslate('No player scored points with ${corp_label} in this round'),
+                clienttranslate('No player scored points with ${corporation_label} in this round'),
                 array(
-                    "i18n" => array("corp_label"),
-                    "corp_label" => $corp_label
+                    "i18n" => array("corporation_label"),
+                    "corporation_label" => $corporation_label
                 )
             );
-            $this->gamestate->nextState("weekend");
+            $this->gamestate->nextState("infoArchiving");
             return;
         }
 
@@ -846,29 +865,20 @@ class PersonaNonGrata extends Table
         if (count($winners) >= 2) {
             $this->notifyAllPlayers(
                 "tie",
-                clienttranslate('Two or more players are tied in the first-place for ${corp_label}'),
+                clienttranslate('Two or more players are tied in the first-place for ${corporation_label}'),
                 array(
-                    "i18n" => array("corp_label"),
-                    "corp_label" => $corp_label
+                    "i18n" => array("corporation_label"),
+                    "corporation_label" => $corporation_label
                 )
             );
             //tests
-            $this->gamestate->nextState("weekend");
+            $this->gamestate->nextState("infoArchiving");
             return;
         }
 
         $first = array_shift($winners);
 
-        $this->notifyAllPlayers(
-            "obtainCorporation",
-            clienttranslate('${player_name} obtains the corporation card of ${corp_label}'),
-            array(
-                "i18n" => array("corp_label"),
-                "player_id" => $first,
-                "player_name" => $this->getPlayerNameById($first),
-                "corp_label" => $corp_label
-            )
-        );
+        $this->obtainCorporation($corporation_id, $first);
 
         $second_most_points = max($corporation_points);
         $runner_ups = array_keys($corporation_points, $second_most_points);
@@ -876,15 +886,15 @@ class PersonaNonGrata extends Table
         if (count($runner_ups) >= 2 && $second_most_points) {
             $this->notifyAllPlayers(
                 "tie",
-                clienttranslate('Two or more players are tied in the second-place for ${corp_label}'),
+                clienttranslate('Two or more players are tied in the second-place for ${corporation_label}'),
                 array(
-                    "i18n" => array("corp_label"),
-                    "corp_label" => $corp_label
+                    "i18n" => array("corporation_label"),
+                    "corporation_label" => $corporation_label
                 )
             );
 
             //tests
-            $this->gamestate->nextState("weekend");
+            $this->gamestate->nextState("infoArchiving");
             return;
         }
 
@@ -897,21 +907,21 @@ class PersonaNonGrata extends Table
 
         $this->notifyAllPlayers(
             "obtainKey",
-            clienttranslate('${player_name} obtains the key of ${corp_label}'),
+            clienttranslate('${player_name} obtains the key of ${corporation_label}'),
             array(
-                "i18n" => array("corp_label"),
+                "i18n" => array("corporation_label"),
                 "player_id" => $second,
                 "player_name" => $this->getPlayerNameById($second),
-                "corp_label" => $corp_label
+                "corporation_label" => $corporation_label
             )
         );
 
-        if ($corp_id == 6) {
+        if ($corporation_id == 6) {
             $this->gamestate->nextState("nextWeek");
             return;
         }
 
-        $this->gamestate->nextState("weekend");
+        $this->gamestate->nextState("infoArchiving");
     }
 
     function zombieTurn($state, $active_player)
