@@ -81,7 +81,7 @@ class PersonaNonGrata extends Table
         foreach ($this->corporations as $corporation_id => $corporation) {
             $key_cards[] = array(
                 "type" => $corporation_id,
-                "type_arg" => 1,
+                "type_arg" => 2,
                 "nbr" => 1
             );
 
@@ -703,7 +703,7 @@ class PersonaNonGrata extends Table
 
         $this->notifyAllPlayers(
             "obtainCorporation",
-            clienttranslate('${player_name} obtains the corporation card of ${corporation_label} with value ${value}'),
+            clienttranslate('${player_name} obtains the Corporation card of ${corporation_label} with value ${value}'),
             array(
                 "i18n" => array("corporation_label"),
                 "player_id" => $player_id,
@@ -721,8 +721,8 @@ class PersonaNonGrata extends Table
         $this->corporation_cards->moveCard($key_card["id"], "archived", $player_id);
 
         $this->notifyAllPlayers(
-            "obtainCorporation",
-            clienttranslate('${player_name} obtains the key of ${corporation_label}'),
+            "obtainKey",
+            clienttranslate('${player_name} obtains the Key card of ${corporation_label}'),
             array(
                 "i18n" => array("corporation_label"),
                 "player_id" => $player_id,

@@ -26,7 +26,9 @@
     </h3>
     <div id="prs_hand${PLAYER_ID}" class="prs_myHand prs_handContainer">
       <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
-      <div id="prs_archived${PLAYER_ID}"></div>
+      <div id="prs_archivedInfo${PLAYER_ID}"></div>
+      <div id="prs_archivedCorporation${PLAYER_ID}"></div>
+      <div id="prs_archivedKey${PLAYER_ID}"></div>
       <div id="prs_playedInfo${PLAYER_ID}" class="prs_playedInfo"></div>
       <div id="prs_playedAction${PLAYER_ID}" class="prs_playedAction"></div>
       <div
@@ -55,7 +57,9 @@
       </h3>
       <div id="prs_hand${PLAYER_ID}" class="prs_handContainer">
         <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
-        <div id="prs_archived${PLAYER_ID}"></div>
+        <div id="prs_archivedInfo${PLAYER_ID}"></div>
+        <div id="prs_archivedCorporation${PLAYER_ID}"></div>
+        <div id="prs_archivedKey${PLAYER_ID}"></div>
         <div id="prs_playedInfo${PLAYER_ID}" class="prs_playedInfo"></div>
         <div id="prs_playedAction${PLAYER_ID}" class="prs_playedAction"></div>
         <div

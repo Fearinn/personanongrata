@@ -354,10 +354,27 @@ define([
 
         //archived
         const archivedCorporationControl = `archivedCorporationStock$${player_id}`;
-        this[archivedCorporationControl] = new LineStock(
+        this[archivedCorporationControl] = new SlotStock(
           this.corporationManager,
-          $(`prs_archived$${player_id}`),
-          { direction: "column", wrap: "nowrap" }
+          $(`prs_archivedCorporation$${player_id}`),
+          {
+            slotsIds: Object.keys(this.corporations),
+            mapCardToSlot: (card) => {
+              return card.type;
+            },
+          }
+        );
+
+        const archivedKeyControl = `archivedKeyStock$${player_id}`;
+        this[archivedKeyControl] = new SlotStock(
+          this.keyManager,
+          $(`prs_archivedKey$${player_id}`),
+          {
+            slotsIds: Object.keys(this.corporations),
+            mapCardToSlot: (card) => {
+              return card.type;
+            },
+          }
         );
 
         //end of players loop
@@ -857,11 +874,15 @@ define([
 
       const archivedCorporationControl = `archivedCorporationStock$${player_id}`;
       this[archivedCorporationControl].addCard(corporationCard);
-      this.setSlotOffset(
-        this[archivedCorporationControl].getCardElement(corporationCard)
-      );
     },
-    notif_obtainKey: function (notif) {},
+    notif_obtainKey: function (notif) {
+      const player_id = notif.args.player_id;
+      const keyCard = notif.args.keyCard;
+
+      const archivedKeyControl = `archivedKeyStock$${player_id}`;
+      this[archivedKeyControl].addCard(keyCard);
+    },
+
     notif_tie: function (notif) {},
   });
 });
