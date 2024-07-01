@@ -40,6 +40,9 @@ class PersonaNonGrata extends Table
 
         $this->corporation_cards = $this->getNew("module.common.deck");
         $this->corporation_cards->init("corporation");
+
+        $this->key_cards = $this->getNew("module.common.deck");
+        $this->key_cards->init("corporationKey");
     }
 
     protected function getGameName()
@@ -73,13 +76,16 @@ class PersonaNonGrata extends Table
 
         //corporations
         $corporation_cards = array();
+        $key_cards = array();
 
-        for ($value = 0; $value <= 4; $value++) {
-            if ($value === 3) {
-                continue;
-            }
+        foreach ($this->corporations as $corporation_id => $corporation) {
+            $key_cards[] = array(
+                "type" => $corporation_id,
+                "type_arg" => 1,
+                "nbr" => 1
+            );
 
-            foreach ($this->corporations as $corporation_id => $corporation) {
+            for ($value = 0; $value <= 4; $value += 2) {
                 $corporation_cards[] = array(
                     "type" => $corporation_id,
                     "type_arg" => $value,
@@ -89,22 +95,17 @@ class PersonaNonGrata extends Table
         }
 
         $this->corporation_cards->createCards($corporation_cards, "deck");
-
-        $keys = $this->getCardsByTypeArg("corporation", 1);
-        $key_ids = array_keys($keys);
-
-        $this->corporation_cards->moveCards($key_ids, "keysontable");
+        $this->key_cards->createCards($key_cards, "table");
 
         foreach ($this->corporations as $corporation_id => $corporation) {
-            for ($value = 0; $value <= 4; $value++) {
-                if ($value === 1 || $value === 3) {
-                    continue;
-                }
+            $key_card = $this->getKeyByCorporation($corporation_id);
+            $this->key_cards->moveCard($key_card["id"], "table", $corporation_id);
 
-                $cards = $this->getCollectionFromDB("SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, 
+            for ($value = 0; $value <= 4; $value += 2) {
+                $corporation_cards = $this->getCollectionFromDB("SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, 
                 card_location_arg location_arg from corporation WHERE card_type_arg='$value' AND card_location='deck' AND card_type='$corporation_id'");
 
-                foreach ($cards as $card_id => $card) {
+                foreach ($corporation_cards as $card_id => $card) {
                     $this->corporation_cards->insertCardOnExtremePosition($card_id, "deck:" . $corporation_id, true);
                 }
             }
@@ -174,7 +175,7 @@ class PersonaNonGrata extends Table
         $result["nextPlayer"] = $this->getPlayerAfter($current_player_id);
         $result["corporations"] = $this->corporations;
         $result["hackers"] = $this->getHackers();
-        $result["keys"] = $this->getKeys();
+        $result["keysOnTable"] = $this->getKeysOnTable();
         $result["corporationDecks"] = $this->getCorporationDecks();
         $result["actionsInMyHand"] = $this->getActionsInMyHand($current_player_id);
         $result["actionsInOtherHands"] = $this->getActionsInOtherHands($current_player_id);
@@ -208,16 +209,6 @@ class PersonaNonGrata extends Table
     function getCustomPlayerBefore(int $player_id): int
     {
         return $this->isClockwise() ? $this->getPlayerBefore($player_id) : $this->getPlayerAfter($player_id);
-    }
-
-    function getCardsByTypeArg(string $table, int $type_arg): array | null
-    {
-        $sql = "SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg 
-        from $table WHERE card_type_arg='$type_arg'";
-
-        $result = $this->getCollectionFromDB($sql);
-
-        return $result;
     }
 
     function getSingleCardInLocation(object $deck, string $location, int $location_arg = null, $showError = true): ?array
@@ -312,9 +303,23 @@ class PersonaNonGrata extends Table
         return $hackers;
     }
 
-    function getKeys(): array
+    function getKeyByCorporation(int $corporation_id): array
     {
-        $keys = $this->corporation_cards->getCardsInLocation("keysontable");
+        $sql = "SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg 
+        from corporationKey WHERE card_type='$corporation_id'";
+
+        $result = $this->getObjectFromDB($sql);
+
+        if ($result === null) {
+            throw new BgaVisibleSystemException("Key card not found");
+        }
+
+        return $result;
+    }
+
+    function getKeysOnTable(): array
+    {
+        $keys = $this->key_cards->getCardsInLocation("table");
 
         return $keys;
     }
@@ -698,7 +703,7 @@ class PersonaNonGrata extends Table
 
         $this->notifyAllPlayers(
             "obtainCorporation",
-            clienttranslate('${player_name} obtains the corporation card ${corporation_label} with value ${value}'),
+            clienttranslate('${player_name} obtains the corporation card of ${corporation_label} with value ${value}'),
             array(
                 "i18n" => array("corporation_label"),
                 "player_id" => $player_id,
@@ -706,6 +711,24 @@ class PersonaNonGrata extends Table
                 "corporation_label" => $this->corporations[$corporation_id],
                 "corporationCard" => $corporation_card,
                 "value" => $value
+            )
+        );
+    }
+
+    function obtainKey(int $corporation_id, int $player_id)
+    {
+        $key_card = $this->getKeyByCorporation($corporation_id);
+        $this->corporation_cards->moveCard($key_card["id"], "archived", $player_id);
+
+        $this->notifyAllPlayers(
+            "obtainCorporation",
+            clienttranslate('${player_name} obtains the key of ${corporation_label}'),
+            array(
+                "i18n" => array("corporation_label"),
+                "player_id" => $player_id,
+                "player_name" => $this->getPlayerNameById($player_id),
+                "corporation_label" => $this->corporations[$corporation_id],
+                "keyCard" => $key_card,
             )
         );
     }
@@ -832,6 +855,11 @@ class PersonaNonGrata extends Table
         $corporation_id = $this->getGameStateValue("currentCorporation");
         $this->incGameStateValue("currentCorporation", 1);
 
+        if ($corporation_id > 6) {
+            $this->gamestate->nextState("betweenWeeks");
+            return;
+        }
+
         $corporation_label = $this->corporations[$corporation_id];
 
         if ($corporation_id == 1) {
@@ -846,7 +874,7 @@ class PersonaNonGrata extends Table
         if (!$most_points) {
             $this->notifyAllPlayers(
                 "tie",
-                clienttranslate('No player scored points with ${corporation_label} in this round'),
+                clienttranslate('No player scored points with ${corporation_label} this round'),
                 array(
                     "i18n" => array("corporation_label"),
                     "corporation_label" => $corporation_label
@@ -899,29 +927,22 @@ class PersonaNonGrata extends Table
         }
 
         $second = array_shift($runner_ups);
-        $this->dump("second_points", $second_most_points);
 
         if (!$second_most_points) {
             $second = $first;
         }
 
-        $this->notifyAllPlayers(
-            "obtainKey",
-            clienttranslate('${player_name} obtains the key of ${corporation_label}'),
-            array(
-                "i18n" => array("corporation_label"),
-                "player_id" => $second,
-                "player_name" => $this->getPlayerNameById($second),
-                "corporation_label" => $corporation_label
-            )
-        );
-
-        if ($corporation_id == 6) {
-            $this->gamestate->nextState("nextWeek");
-            return;
-        }
+        $this->obtainKey($corporation_id, $second);
 
         $this->gamestate->nextState("infoArchiving");
+    }
+
+    function st_betweenWeeks()
+    {
+        $this->setGameStateValue("currentCorporation", 1);
+        $this->incGameStateValue("week", 1);
+
+        $this->gamestate->nextState("nextWeek");
     }
 
     function zombieTurn($state, $active_player)

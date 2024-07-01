@@ -75,7 +75,7 @@ $machinestates = array(
         "transitions" => array(
             "infoArchiving" => 4,
             "stealCard" => 41,
-            "nextWeek" => 2
+            "betweenWeeks" => 5
         ),
         "updateGameProgression" => true
     ),
@@ -88,8 +88,19 @@ $machinestates = array(
         "possibleactions" => array("stealCard"),
         "transitions" => array(
             "infoArchiving" => 4,
-            "nextWeek" => 2
+            "betweenWeeks" => 5
         )
+    ),
+
+    5 => array(
+        "name" => "betweenWeeks",
+        "description" => "",
+        "type" => "game",
+        "action" => "st_betweenWeeks",
+        "transitions" => array(
+            "nextWeek" => 2
+        ),
+        "updateGameProgression" => true
     ),
 
     // Final state.
