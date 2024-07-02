@@ -102,8 +102,7 @@ class PersonaNonGrata extends Table
             $this->key_cards->moveCard($key_card["id"], "table", $corporation_id);
 
             for ($value = 0; $value <= 4; $value += 2) {
-                $corporation_cards = $this->getCollectionFromDB("SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, 
-                card_location_arg location_arg from corporation WHERE card_type_arg='$value' AND card_location='deck' AND card_type='$corporation_id'");
+                $corporation_cards = $this->corporation_cards->getCardsOfTypeInLocation($corporation_id, $value, "deck");
 
                 foreach ($corporation_cards as $card_id => $card) {
                     $this->corporation_cards->insertCardOnExtremePosition($card_id, "deck:" . $corporation_id, true);
@@ -187,6 +186,8 @@ class PersonaNonGrata extends Table
         $result["infoStoredByOthers"] = $this->getInfoStoredByOthers($current_player_id);
         $result["actionsDiscarded"] = $this->getActionsDiscarded();
         $result["encryptActionUsed"] = $this->getEncryptActionUsed();
+        $result["keysArchived"] = $this->getKeysArchived();
+        $result["corporationsArchived"] = $this->getCorporationsArchived();
         return $result;
     }
 
@@ -308,20 +309,20 @@ class PersonaNonGrata extends Table
         $sql = "SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg 
         from corporationKey WHERE card_type='$corporation_id'";
 
-        $result = $this->getObjectFromDB($sql);
+        $key_card = $this->getObjectFromDB($sql);
 
-        if ($result === null) {
+        if ($key_card === null) {
             throw new BgaVisibleSystemException("Key card not found");
         }
 
-        return $result;
+        return $key_card;
     }
 
     function getKeysOnTable(): array
     {
-        $keys = $this->key_cards->getCardsInLocation("table");
+        $key_cards = $this->key_cards->getCardsInLocation("table");
 
-        return $keys;
+        return $key_cards;
     }
 
     function getCorporationDecks(): array
@@ -331,6 +332,8 @@ class PersonaNonGrata extends Table
         foreach ($this->corporations as $corporation_id => $corporation) {
             $corporation_cards[$corporation_id] = $this->corporation_cards->getCardsInLocation("deck:" . $corporation_id);
         }
+
+        $this->dump("corporationDecks", $corporation_cards);
 
         return $corporation_cards;
     }
@@ -458,6 +461,42 @@ class PersonaNonGrata extends Table
         }
 
         return $encrypt_cards;
+    }
+
+    function getKeysArchived(int $player_id = null): array
+    {
+        if ($player_id) {
+            return $this->key_cards->getCardsInLocation("archived", $player_id);
+        }
+
+        $archived_keys = array();
+
+        $players = $this->loadPlayersBasicInfos();
+
+        foreach ($players as $player_id => $player) {
+            $archived_keys[$player_id] = $this->key_cards->getCardsInLocation("archived", $player_id);
+        }
+
+        return $archived_keys;
+    }
+
+    function getCorporationsArchived(int $player_id = null): array
+    {
+        if ($player_id) {
+            return $this->corporation_cards->getCardsInLocation("archived", $player_id);
+        }
+
+        $archived_corporations = array();
+
+        $players = $this->loadPlayersBasicInfos();
+
+        foreach ($players as $player_id => $player) {
+            $archived_corporations[$player_id] = $this->corporation_cards->getCardsInLocation("archived", $player_id);
+        }
+
+        $this->dump("archived_corporations", $archived_corporations);
+
+        return $archived_corporations;
     }
 
     //checkers
@@ -699,6 +738,7 @@ class PersonaNonGrata extends Table
     function obtainCorporation(int $corporation_id, int $player_id)
     {
         $corporation_card = $this->corporation_cards->pickCardForLocation("deck:" . $corporation_id, "archived", $player_id);
+        $this->dump("corporation_card", $corporation_card);
         $value = $corporation_card["type_arg"];
 
         $this->notifyAllPlayers(
@@ -718,7 +758,7 @@ class PersonaNonGrata extends Table
     function obtainKey(int $corporation_id, int $player_id)
     {
         $key_card = $this->getKeyByCorporation($corporation_id);
-        $this->corporation_cards->moveCard($key_card["id"], "archived", $player_id);
+        $this->key_cards->moveCard($key_card["id"], "archived", $player_id);
 
         $this->notifyAllPlayers(
             "obtainKey",

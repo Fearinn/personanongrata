@@ -194,8 +194,8 @@ define([
       this.infoStoredByOthers = gamedatas.infoStoredByOthers;
       this.actionsDiscarded = gamedatas.actionsDiscarded;
       this.encryptActionUsed = gamedatas.encryptActionUsed;
-
-      console.log(this.keysOnTable);
+      this.keysArchived = gamedatas.keysArchived;
+      this.corporationsArchived = gamedatas.corporationsArchived;
 
       this.selectedAction = gamedatas.cardsPlayedByMe["action"];
       this.selectedInfo = gamedatas.cardsPlayedByMe["info"];
@@ -365,6 +365,14 @@ define([
           }
         );
 
+        const archivedCorporations = this.corporationsArchived[player_id];
+
+        for (const card_id in archivedCorporations) {
+          const card = archivedCorporations[card_id];
+
+          this[archivedCorporationControl].addCard(card);
+        }
+
         const archivedKeyControl = `archivedKeyStock$${player_id}`;
         this[archivedKeyControl] = new SlotStock(
           this.keyManager,
@@ -376,6 +384,14 @@ define([
             },
           }
         );
+
+        const archivedKeys = this.keysArchived[player_id];
+
+        for (const card_id in archivedKeys) {
+          const card = archivedKeys[card_id];
+
+          this[archivedKeyControl].addCard(card);
+        }
 
         //end of players loop
       }
@@ -487,7 +503,7 @@ define([
 
       for (const key_id in this.keysOnTable) {
         const keyCard = this.keysOnTable[key_id];
-        console.log(keyCard);
+
         this[keysControl].addCard(keyCard);
       }
 
