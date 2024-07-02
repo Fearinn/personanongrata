@@ -39,8 +39,9 @@ define([
         setupFrontDiv: (card, div) => {
           div.style.background = `url(${g_gamethemeurl}img/hackers.png)`;
           div.style.backgroundPosition = this.calcBackgroundPosition(
-            card.type_arg - 1
+            card.type_arg + 3
           );
+
           div.classList.add("prs_cardFace");
           div.dataset.direction = "backwards";
         },
@@ -48,7 +49,7 @@ define([
           div.dataset.direction = "forward";
           div.style.backgroundImage = `url(${g_gamethemeurl}img/hackers.png)`;
           div.style.backgroundPosition = this.calcBackgroundPosition(
-            card.type_arg + 3
+            card.type_arg - 1
           );
           div.classList.add("prs_cardFace");
         },
@@ -177,7 +178,7 @@ define([
       console.log("Starting game setup");
 
       this.players = gamedatas.players;
-      this.clockwise = false;
+      this.clockwise = gamedatas.clockwise;
       this.nextPlayer = gamedatas.nextPlayer;
       this.prevPlayer = gamedatas.prevPlayer;
 
@@ -217,12 +218,12 @@ define([
 
         this[hackerControl].addCard(hackerCard);
 
-        if (this.clockwise) {
+        if (!this.clockwise) {
           this[hackerControl].flipCard(hackerCard);
         }
 
-        //actions
         if (this.player_id != player_id) {
+          //actions
           const actionsInHandControl = `actionInHandStock$${player_id}`;
 
           this[actionsInHandControl] = new HandStock(
@@ -533,7 +534,6 @@ define([
         });
 
         cards.forEach((card) => {
-          console.log(card, card.location_arg, "order");
           this[corporationDeckControl].addCard(card);
         });
       }
@@ -778,6 +778,7 @@ define([
       this.notifqueue.setSynchronous("obtainKey", 1000);
       dojo.subscribe("tie", this, "notif_tie");
       this.notifqueue.setSynchronous("tie", 1000);
+      dojo.subscribe("flipHackers", this, "notif_flipHackers");
     },
 
     notif_playCards: function (notif) {
@@ -895,10 +896,7 @@ define([
       const player_id = notif.args.player_id;
       const corporationCard = notif.args.corporationCard;
 
-      console.log(notif);
-
       const archivedCorporationControl = `archivedCorporationStock$${player_id}`;
-      console.log(corporationCard, "card");
       this[archivedCorporationControl].addCard(corporationCard);
       this.setSlotOffset(
         this[archivedCorporationControl].getCardElement(corporationCard)
@@ -914,5 +912,14 @@ define([
     },
 
     notif_tie: function (notif) {},
+
+    notif_flipHackers: function (notif) {
+      for (const player_id in this.players) {
+        const hackerControl = `hackerStock$${player_id}`;
+
+        const hackerCard = this[hackerControl].getCards()[0];
+        this[hackerControl].flipCard(hackerCard);
+      }
+    },
   });
 });

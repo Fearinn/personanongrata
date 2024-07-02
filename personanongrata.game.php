@@ -504,7 +504,7 @@ class PersonaNonGrata extends Table
     {
         $week = $this->getGameStateValue("week");
 
-        return !($week % 2);
+        return $week != 2;
     }
 
     function cardInHand(array $card, int $player_id): bool
@@ -893,12 +893,13 @@ class PersonaNonGrata extends Table
         $players = $this->loadPlayersBasicInfos();
 
         $corporation_id = $this->getGameStateValue("currentCorporation");
-        $this->incGameStateValue("currentCorporation", 1);
 
-        if ($corporation_id > 6) {
+        if ($corporation_id == 6) {
             $this->gamestate->nextState("betweenWeeks");
             return;
         }
+
+        $this->incGameStateValue("currentCorporation", 1);
 
         $corporation_label = $this->corporations[$corporation_id];
 
@@ -981,6 +982,12 @@ class PersonaNonGrata extends Table
     {
         $this->setGameStateValue("currentCorporation", 1);
         $this->incGameStateValue("week", 1);
+
+        $this->notifyAllPlayers(
+            "flipHackers",
+            clienttranslate("A new week starts. Character cards are flipped"),
+            array()
+        );
 
         $this->gamestate->nextState("nextWeek");
     }
