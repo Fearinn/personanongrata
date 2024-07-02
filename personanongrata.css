@@ -19,6 +19,14 @@
   min-height: 330px;
 }
 
+.all-visible-deck {
+  position: relative !important;
+}
+
+.all-visible-deck > .card {
+  position: absolute !important;
+}
+
 .slot:empty {
   display: none;
 }
@@ -107,6 +115,14 @@
 .prs_publicZone .prs_zoneTitle {
   background-color: #fff;
   color: #000;
+}
+
+.prs_publicCards {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .prs_corporationDecks {

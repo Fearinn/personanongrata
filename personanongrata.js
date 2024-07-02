@@ -371,6 +371,9 @@ define([
           const card = archivedCorporations[card_id];
 
           this[archivedCorporationControl].addCard(card);
+          this.setSlotOffset(
+            this[archivedCorporationControl].getCardElement(card)
+          );
         }
 
         const archivedKeyControl = `archivedKeyStock$${player_id}`;
@@ -496,6 +499,7 @@ define([
       const keysControl = `keysStock`;
       this[keysControl] = new SlotStock(this.keyManager, $(`prs_keys`), {
         slotsIds: Object.keys(this.corporations),
+        slotClasses: ["prs_keySlot"],
         mapCardToSlot: (card) => {
           return card.type;
         },
@@ -517,18 +521,21 @@ define([
           cards.push(card);
         }
 
-        const corpControl = `corporationDeck:${corporation_id}`;
-        this[corpControl] = new Deck(
+        const corporationDeckControl = `corporationDeck:${corporation_id}`;
+        this[corporationDeckControl] = new AllVisibleDeck(
           this.corporationManager,
           $(`prs_corporationDeck:${corporation_id}`),
-          {}
+          { horizontalShift: "0px" }
         );
 
         cards.sort((a, b) => {
           return a.location_arg - b.location_arg;
         });
 
-        this[corpControl].addCards(cards, {}, { visible: true });
+        cards.forEach((card) => {
+          console.log(card, card.location_arg, "order");
+          this[corporationDeckControl].addCard(card);
+        });
       }
 
       //actions
@@ -888,9 +895,16 @@ define([
       const player_id = notif.args.player_id;
       const corporationCard = notif.args.corporationCard;
 
+      console.log(notif);
+
       const archivedCorporationControl = `archivedCorporationStock$${player_id}`;
+      console.log(corporationCard, "card");
       this[archivedCorporationControl].addCard(corporationCard);
+      this.setSlotOffset(
+        this[archivedCorporationControl].getCardElement(corporationCard)
+      );
     },
+
     notif_obtainKey: function (notif) {
       const player_id = notif.args.player_id;
       const keyCard = notif.args.keyCard;
