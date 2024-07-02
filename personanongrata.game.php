@@ -333,8 +333,6 @@ class PersonaNonGrata extends Table
             $corporation_cards[$corporation_id] = $this->corporation_cards->getCardsInLocation("deck:" . $corporation_id);
         }
 
-        $this->dump("corporationDecks", $corporation_cards);
-
         return $corporation_cards;
     }
 
@@ -437,6 +435,13 @@ class PersonaNonGrata extends Table
         return $stored_cards;
     }
 
+    function getStoredInfoByCorporation(int $corporation_id, int $player_id): array
+    {
+        $stored_cards = $this->information_cards->getCardsOfTypeInLocation($corporation_id, null, "stored", $player_id);
+
+        return $stored_cards;
+    }
+
     function getActionsDiscarded(): array
     {
         $discarded_cards = array();
@@ -494,8 +499,6 @@ class PersonaNonGrata extends Table
             $archived_corporations[$player_id] = $this->corporation_cards->getCardsInLocation("archived", $player_id);
         }
 
-        $this->dump("archived_corporations", $archived_corporations);
-
         return $archived_corporations;
     }
 
@@ -510,6 +513,23 @@ class PersonaNonGrata extends Table
     function cardInHand(array $card, int $player_id): bool
     {
         return $card["location"] === "hand" && $card["location_arg"] == $player_id;
+    }
+
+    function canSteal(int $corporation_id, int $current_player_id): bool
+    {
+        $canSteal = false;
+        $players = $this->loadPlayersBasicInfos();
+
+        foreach ($players as $player_id => $player) {
+            if ($current_player_id != $player_id) {
+                if ($this->getStoredInfoByCorporation($corporation_id, $player_id)) {
+                    $canSteal = true;
+                    break;
+                }
+            }
+        }
+
+        return $canSteal;
     }
 
     // action cards
@@ -854,9 +874,55 @@ class PersonaNonGrata extends Table
         $this->gamestate->initializePrivateState($player_id);
     }
 
+    function stealCard($card_id)
+    {
+        $this->checkAction("stealCard");
+
+        $player_id = $this->getActivePlayerId();
+        $corporation_id = $this->getGameStateValue("currentCorporation") - 1;
+
+        $card = $this->information_cards->getCard($card_id);
+        $opponent_id = $card["location_arg"];
+        $info_id = $card["type_arg"];
+
+        if ($card["location"] !== "stored" || $card["type"] != $corporation_id || $opponent_id == $player_id) {
+            throw new BgaVisibleSystemException("You can't take this card");
+        }
+
+        $this->information_cards->moveCard($card_id, "archived", $player_id);
+
+        $this->notifyAllPlayers(
+            "stealCard",
+            clienttranslate('${player_name} takes a of ${corporation_label} from ${player_name2} '),
+            array(
+                "i18n" => array("info_label", "corporation_label"),
+                "player_id" => $player_id,
+                "player_name" => $this->getPlayerNameById($player_id),
+                "player_id2" => $opponent_id,
+                "player_name2" => $this->getPlayerNameById($opponent_id),
+                "info_label" => $this->informations[$info_id]["name"],
+                "corporation_label" => $this->corporations[$corporation_id],
+            )
+        );
+
+        $this->gamestate->nextState("infoArchiving");
+    }
+
     //////////////////////////////////////////////////////////////////////////////
     //////////// Game state arguments
     ////////////
+
+    function arg_stealCard()
+    {
+        $corporation_id = $this->getGameStateValue("currentCorporation") - 1;
+        $corporation_label = $this->corporations[$corporation_id];
+
+        return array(
+            "i18n" => array("corporation_label"),
+            "corporation_label" => $corporation_label,
+            "corporationId" => $corporation_id
+        );
+    }
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Game state actions
@@ -963,8 +1029,8 @@ class PersonaNonGrata extends Table
             );
 
             //tests
-            $this->gamestate->nextState("infoArchiving");
-            return;
+            // $this->gamestate->nextState("infoArchiving");
+            // return;
         }
 
         $second = array_shift($runner_ups);
@@ -974,6 +1040,12 @@ class PersonaNonGrata extends Table
         }
 
         $this->obtainKey($corporation_id, $second);
+
+        if ($this->canSteal($corporation_id, $first)) {
+            $this->gamestate->changeActivePlayer($first);
+            $this->gamestate->nextState("stealCard");
+            return;
+        }
 
         $this->gamestate->nextState("infoArchiving");
     }
@@ -985,8 +1057,11 @@ class PersonaNonGrata extends Table
 
         $this->notifyAllPlayers(
             "flipHackers",
-            clienttranslate("A new week starts. Character cards are flipped"),
-            array()
+            clienttranslate('A new week starts. The game direction is now ${direction}'),
+            array(
+                "i18n" => array("direction"),
+                "direction" => $this->isClockwise() ? clienttranslate("clockwise") : clienttranslate('counterclockwise')
+            )
         );
 
         $this->gamestate->nextState("nextWeek");

@@ -290,6 +290,21 @@ define([
             }
           );
 
+          this[storedControl].onSelectionChange = (selection, lastChange) => {
+            if (
+              this.getStateName() === "stealCard" &&
+              this.isCurrentPlayerActive()
+            ) {
+              if (selection.length === 0) {
+                this.selectedInfo = null;
+              } else {
+                this.selectedInfo = lastChange;
+              }
+
+              this.handleConfirmationButton();
+            }
+          };
+
           const storedCards = this.infoStoredByOthers[player_id];
           const visibleStored = storedCards["visible"];
 
@@ -619,8 +634,32 @@ define([
       console.log("Entering state: " + stateName);
 
       if (stateName === "playCards") {
-        this["actionsInMyHandStock"].setSelectionMode("single");
-        this[`infoInHandStock$${this.player_id}`].setSelectionMode("single");
+        if (this.isCurrentPlayerActive()) {
+          this["actionsInMyHandStock"].setSelectionMode("single");
+          this[`infoInHandStock$${this.player_id}`].setSelectionMode("single");
+        }
+        return;
+      }
+
+      if (stateName === "stealCard") {
+        if (this.isCurrentPlayerActive()) {
+          const corporationId = args.args.corporationId;
+
+          for (const player_id in this.players) {
+            if (player_id != this.player_id) {
+              const storedControl = `storedStock$${player_id}`;
+              this[storedControl].setSelectionMode("single");
+
+              const selectableCards = this[storedControl]
+                .getCards()
+                .filter((card) => {
+                  return card.type == corporationId;
+                });
+
+              this[storedControl].setSelectableCards(selectableCards);
+            }
+          }
+        }
         return;
       }
     },
@@ -632,6 +671,13 @@ define([
         this["actionsInMyHandStock"].setSelectionMode("none");
         this[`infoInHandStock$${this.player_id}`].setSelectionMode("none");
         return;
+      }
+
+      if (stateName === "stealCard") {
+        for (const player_id in this.players) {
+          const storedControl = `storedStock$${player_id}`;
+          this[storedControl].setSelectionMode("none");
+        }
       }
     },
 
@@ -728,14 +774,29 @@ define([
     handleConfirmationButton: function () {
       this.removeActionButtons();
 
-      if (this.selectedAction && this.selectedInfo) {
-        this.addActionButton(
-          "prs_confirmationBtn",
-          _("Confirm selection"),
-          () => {
-            this.onPlayCards();
-          }
-        );
+      if (this.getStateName() === "day") {
+        if (this.selectedAction && this.selectedInfo) {
+          this.addActionButton(
+            "prs_confirmationBtn",
+            _("Confirm selection"),
+            () => {
+              this.onPlayCards();
+            }
+          );
+        }
+        return;
+      }
+
+      if (this.getStateName() === "stealCard") {
+        if (this.selectedInfo) {
+          this.addActionButton(
+            "prs_confirmationBtn",
+            _("Confirm selection"),
+            () => {
+              this.onStealCard();
+            }
+          );
+        }
       }
     },
 
@@ -756,6 +817,12 @@ define([
 
     onChangeMind() {
       this.sendAjaxCall("changeMind", {}, true);
+    },
+
+    onStealCard() {
+      this.sendAjaxCall("stealCard", {
+        card_id: this.selectedInfo.id,
+      });
     },
 
     ///////////////////////////////////////////////////
@@ -799,7 +866,6 @@ define([
         const randomCard = hand[randomIndex];
 
         this[infoInHandControl].removeCard(randomCard);
-        console.log(player_id, infoCard, randomCard);
       }
 
       const playedInfoControl = `playedInfoStock$${player_id}`;

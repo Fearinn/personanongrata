@@ -59,22 +59,22 @@ $this->informations = array(
   2 => array(
     "name" => clienttranslate("Worker"),
     "nbr" => 3,
-    "activators" => true,
+    "activator" => true,
   ),
   3 => array(
     "name" => clienttranslate("Assistant"),
     "nbr" => 4,
-    "activators" => false,
+    "activator" => false,
   ),
   4 => array(
     "name" => clienttranslate("Manager"),
     "nbr" => 2,
-    "activators" => false,
+    "activator" => false,
   ),
   5 => array(
     "name" => clienttranslate("Director"),
     "nbr" => 2,
-    "activators" => false,
+    "activator" => false,
   ),
   6 => array(
     "name" => clienttranslate("President"),
