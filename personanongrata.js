@@ -385,9 +385,6 @@ define([
           const card = archivedCorporations[card_id];
 
           this[archivedCorporationControl].addCard(card);
-          this.setSlotOffset(
-            this[archivedCorporationControl].getCardElement(card)
-          );
         }
 
         const archivedKeyControl = `archivedKeyStock$${player_id}`;
@@ -976,9 +973,6 @@ define([
 
       const archivedCorporationControl = `archivedCorporationStock$${player_id}`;
       this[archivedCorporationControl].addCard(corporationCard);
-      this.setSlotOffset(
-        this[archivedCorporationControl].getCardElement(corporationCard)
-      );
     },
 
     notif_obtainKey: function (notif) {
