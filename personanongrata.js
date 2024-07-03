@@ -35,6 +35,7 @@ define([
           div.style.width = "180px";
           div.style.height = "280px";
           div.style.position = "relative";
+          div.style.zIndex = 1;
         },
         setupFrontDiv: (card, div) => {
           div.style.background = `url(${g_gamethemeurl}img/hackers.png)`;
@@ -197,6 +198,7 @@ define([
       this.encryptActionUsed = gamedatas.encryptActionUsed;
       this.keysArchived = gamedatas.keysArchived;
       this.corporationsArchived = gamedatas.corporationsArchived;
+      this.archivedInfo = gamedatas.archivedInfo;
 
       this.selectedAction = gamedatas.cardsPlayedByMe["action"];
       this.selectedInfo = gamedatas.cardsPlayedByMe["info"];
@@ -211,7 +213,8 @@ define([
         const hackerControl = `hackerStock$${player_id}`;
         this[hackerControl] = new LineStock(
           this.hackerManager,
-          $(`prs_hacker$${player_id}`)
+          $(`prs_hacker$${player_id}`),
+          { direction: "column" }
         );
 
         const hackerCard = this.hackers[player_id];
@@ -405,11 +408,27 @@ define([
         );
 
         const archivedKeys = this.keysArchived[player_id];
-
         for (const card_id in archivedKeys) {
           const card = archivedKeys[card_id];
 
           this[archivedKeyControl].addCard(card);
+        }
+
+        const archivedInfoControl = `archivedInfoStock$${player_id}`;
+        this[archivedInfoControl] = new AllVisibleDeck(
+          this.informationManager,
+          $(`prs_archivedInfo$${player_id}`),
+          {}
+        );
+
+        const archivedInfo = this.archivedInfo[player_id];
+        for (const card_id in archivedInfo) {
+          const card = archivedInfo[card_id];
+          this[archivedInfoControl].addCard(card);
+          this[archivedInfoControl].setCardVisible(
+            card,
+            player_id == this.player_id
+          );
         }
 
         //end of players loop
@@ -642,9 +661,8 @@ define([
       }
 
       if (stateName === "stealCard") {
+        const corporationId = args.args.corporationId;
         if (this.isCurrentPlayerActive()) {
-          const corporationId = args.args.corporationId;
-
           for (const player_id in this.players) {
             if (player_id != this.player_id) {
               const storedControl = `storedStock$${player_id}`;
@@ -846,6 +864,7 @@ define([
       dojo.subscribe("tie", this, "notif_tie");
       this.notifqueue.setSynchronous("tie", 1000);
       dojo.subscribe("flipHackers", this, "notif_flipHackers");
+      dojo.subscribe("stealCard", this, "notif_stealCard");
     },
 
     notif_playCards: function (notif) {
@@ -986,6 +1005,16 @@ define([
         const hackerCard = this[hackerControl].getCards()[0];
         this[hackerControl].flipCard(hackerCard);
       }
+    },
+
+    notif_stealCard: function (notif) {
+      const player_id = notif.args.player_id;
+      const infoCard = notif.args.infoCard;
+      const isCurrentPlayer = player_id == this.player_id;
+
+      const archivedInfoControl = `archivedInfoStock$${player_id}`;
+      this[archivedInfoControl].addCard(infoCard, {});
+      this[archivedInfoControl].setCardVisible(infoCard, isCurrentPlayer);
     },
   });
 });

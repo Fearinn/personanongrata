@@ -188,6 +188,7 @@ class PersonaNonGrata extends Table
         $result["encryptActionUsed"] = $this->getEncryptActionUsed();
         $result["keysArchived"] = $this->getKeysArchived();
         $result["corporationsArchived"] = $this->getCorporationsArchived();
+        $result["archivedInfo"] = $this->getArchivedInfo();
         return $result;
     }
 
@@ -500,6 +501,23 @@ class PersonaNonGrata extends Table
         }
 
         return $archived_corporations;
+    }
+
+    function getArchivedInfo(int $player_id = null): array
+    {
+        if ($player_id) {
+            return $this->information_cards->getCardsInLocation("archived", $player_id);
+        }
+
+        $archived_informations = array();
+
+        $players = $this->loadPlayersBasicInfos();
+
+        foreach ($players as $player_id => $player) {
+            $archived_informations[$player_id] = $this->information_cards->getCardsInLocation("archived", $player_id);
+        }
+
+        return $archived_informations;
     }
 
     //checkers
@@ -902,6 +920,7 @@ class PersonaNonGrata extends Table
                 "player_name2" => $this->getPlayerNameById($opponent_id),
                 "info_label" => $this->informations[$info_id]["name"],
                 "corporation_label" => $this->corporations[$corporation_id],
+                "infoCard" => $card
             )
         );
 
