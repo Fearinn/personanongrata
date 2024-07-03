@@ -305,6 +305,13 @@ class PersonaNonGrata extends Table
         return $hackers;
     }
 
+    function getCardOfTheWeek(): int
+    {
+        $week = $this->getGameStateValue("week");
+
+        return $this->getCardOfTheWeek[$week];
+    }
+
     function getKeyByCorporation(int $corporation_id): array
     {
         $sql = "SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg 
@@ -776,21 +783,24 @@ class PersonaNonGrata extends Table
     function obtainCorporation(int $corporation_id, int $player_id)
     {
         $corporation_card = $this->corporation_cards->pickCardForLocation("deck:" . $corporation_id, "archived", $player_id);
-        $this->dump("corporation_card", $corporation_card);
-        $value = $corporation_card["type_arg"];
+        $card_value = $corporation_card["type_arg"];
 
         $this->notifyAllPlayers(
             "obtainCorporation",
-            clienttranslate('${player_name} obtains the Corporation card of ${corporation_label} with value ${value}'),
+            clienttranslate('${player_name} obtains the Corporation card of ${corporation_label} with value ${card_value}'),
             array(
                 "i18n" => array("corporation_label"),
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
                 "corporation_label" => $this->corporations[$corporation_id],
+                "card_value" => $card_value,
                 "corporationCard" => $corporation_card,
-                "value" => $value
             )
         );
+
+        if ($card_value != $this->getCardOfTheWeek()) {
+            $this->obtainCorporation($corporation_id, $player_id, true);
+        }
     }
 
     function obtainKey(int $corporation_id, int $player_id)

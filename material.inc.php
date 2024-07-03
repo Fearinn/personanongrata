@@ -82,3 +82,9 @@ $this->informations = array(
     "activactor" => false,
   )
 );
+
+$this->cardOfTheWeek = array(
+  1 => 4,
+  2 => 2,
+  3 => 0
+);

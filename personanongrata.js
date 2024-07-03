@@ -376,7 +376,7 @@ define([
         this[archivedCorporationControl] = new AllVisibleDeck(
           this.corporationManager,
           $(`prs_archivedCorporation$${player_id}`),
-          { horizontalShift: "32px" }
+          { horizontalShift: "32px", verticalShift: "0px" }
         );
 
         const archivedCorporations = this.corporationsArchived[player_id];
@@ -391,7 +391,7 @@ define([
         this[archivedKeyControl] = new AllVisibleDeck(
           this.keyManager,
           $(`prs_archivedKey$${player_id}`),
-          { horizontalShift: "32px" }
+          { horizontalShift: "32px", verticalShift: "0px" }
         );
 
         const archivedKeys = this.keysArchived[player_id];
@@ -405,7 +405,7 @@ define([
         this[archivedInfoControl] = new AllVisibleDeck(
           this.informationManager,
           $(`prs_archivedInfo$${player_id}`),
-          {}
+          { horizontalShift: "32px", verticalShift: "0px" }
         );
 
         const archivedInfo = this.archivedInfo[player_id];
