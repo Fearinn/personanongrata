@@ -194,7 +194,7 @@ define([
       this.infoInOtherHands = gamedatas.infoInOtherHands;
       this.infoStoredByMe = gamedatas.infoStoredByMe;
       this.infoStoredByOthers = gamedatas.infoStoredByOthers;
-      this.actionsDiscarded = gamedatas.actionsDiscarded;
+      this.discardedActions = gamedatas.discardedActions;
       this.encryptActionUsed = gamedatas.encryptActionUsed;
       this.keysArchived = gamedatas.keysArchived;
       this.corporationsArchived = gamedatas.corporationsArchived;
@@ -227,7 +227,7 @@ define([
 
         if (this.player_id != player_id) {
           //actions
-          const actionsInHandControl = `actionInHandStock$${player_id}`;
+          const actionsInHandControl = `actionsInHandStock$${player_id}`;
 
           this[actionsInHandControl] = new HandStock(
             this.actionManager,
@@ -343,32 +343,22 @@ define([
             );
           }
 
-          //discard
-          const actionsDiscardedControl = `actionsDiscardedStock$${player_id}`;
-          this[actionsDiscardedControl] = new ManualPositionStock(
-            this.actionManager,
-            $(`prs_actionDiscard$${player_id}`),
-            {},
-            (element, cards, lastCard, stock) => {
-              element.style.width = "180px";
-              element.style.height = 280 + 32 * cards.length + "px";
-
-              const index = cards.length - 1;
-
-              lastCardElement = stock.getCardElement(lastCard);
-              lastCardElement.style.position = "absolute";
-              lastCardElement.style.top = `${index * 32}px`;
-            }
-          );
-
-          const discardedCards = this.actionsDiscarded[player_id];
-
-          for (const card_id in discardedCards) {
-            const card = discardedCards[card_id];
-            this[actionsDiscardedControl].addCard(card);
-          }
-
           //end of current player excluding
+        }
+
+        //discard
+        const discardedActionsControl = `discardedActionsStock$${player_id}`;
+        this[discardedActionsControl] = new AllVisibleDeck(
+          this.actionManager,
+          $(`prs_actionDiscard$${player_id}`),
+          { horizontalShift: "32px", verticalShift: "0px" }
+        );
+
+        const discardedCards = this.discardedActions[player_id];
+
+        for (const card_id in discardedCards) {
+          const card = discardedCards[card_id];
+          this[discardedActionsControl].addCard(card);
         }
 
         //archived
@@ -497,32 +487,6 @@ define([
         );
       }
 
-      //discard
-      const actionsDiscardedControl = `actionsDiscardedStock$${this.player_id}`;
-      this[actionsDiscardedControl] = new ManualPositionStock(
-        this.actionManager,
-        $(`prs_actionDiscard$${this.player_id}`),
-        {},
-        (element, cards, lastCard, stock) => {
-          element.style.width = "180px";
-          element.style.height = 280 + 32 * cards.length + "px";
-
-          const index = cards.length - 1;
-
-          lastCardElement = stock.getCardElement(lastCard);
-          lastCardElement.style.position = "absolute";
-          lastCardElement.style.top = `${index * 32}px`;
-        }
-      );
-
-      const discardedCards = this.actionsDiscarded[this.player_id];
-
-      for (const card_id in discardedCards) {
-        const card = discardedCards[card_id];
-
-        this[actionsDiscardedControl].addCard(card);
-      }
-
       //keys
       const keysControl = `keysStock`;
       this[keysControl] = new SlotStock(this.keyManager, $(`prs_keys`), {
@@ -566,14 +530,14 @@ define([
       }
 
       //actions
-      const actionsInMyHandControl = "actionsInMyHandStock";
-      this[actionsInMyHandControl] = new HandStock(
+      const actionsInHandControl = `actionsInHandStock$${this.player_id}`;
+      this[actionsInHandControl] = new HandStock(
         this.actionManager,
         $(`prs_handOfActions$${this.player_id}`),
         { cardOverlap: "90px", sort: sortFunction("type_arg") }
       );
 
-      this[actionsInMyHandControl].onSelectionChange = (
+      this[actionsInHandControl].onSelectionChange = (
         selection,
         lastChange
       ) => {
@@ -590,8 +554,8 @@ define([
 
       for (const card_id in this.actionsInMyHand) {
         const card = this.actionsInMyHand[card_id];
-        this[actionsInMyHandControl].addCard(card);
-        this.updateHandWidth(this[actionsInMyHandControl]);
+        this[actionsInHandControl].addCard(card);
+        this.updateHandWidth(this[actionsInHandControl]);
       }
 
       //informations
@@ -666,7 +630,7 @@ define([
             this.onChangeMind();
           });
 
-          this["actionsInMyHandStock"].setSelectionMode("none");
+          this[`actionsInHandStock$${this.player_id}`].setSelectionMode("none");
           this[`infoInHandStock$${this.player_id}`].setSelectionMode("none");
         }
         return;
@@ -674,7 +638,9 @@ define([
 
       if (stateName === "playCards") {
         if (this.isCurrentPlayerActive()) {
-          this["actionsInMyHandStock"].setSelectionMode("single");
+          this[`actionsInHandStock$${this.player_id}`].setSelectionMode(
+            "single"
+          );
           this[`infoInHandStock$${this.player_id}`].setSelectionMode("single");
         }
         return;
@@ -842,19 +808,26 @@ define([
       this.notifqueue.setSynchronous("playCards", 1000);
       dojo.subscribe("changeMind", this, "notif_changeMind");
       dojo.subscribe("store", this, "notif_store");
-      this.notifqueue.setSynchronous("store", 1000);
       dojo.subscribe("activateActionCard", this, "notif_activateActionCard");
-      this.notifqueue.setSynchronous("activateActionCard", 1000);
       dojo.subscribe("revealEncrypted", this, "notif_revealEncrypted");
-      this.notifqueue.setSynchronous("revealEncrypted", 1000);
       dojo.subscribe("obtainCorporation", this, "notif_obtainCorporation");
-      this.notifqueue.setSynchronous("obtainCorporation", 1000);
       dojo.subscribe("obtainKey", this, "notif_obtainKey");
-      this.notifqueue.setSynchronous("obtainKey", 1000);
       dojo.subscribe("tie", this, "notif_tie");
-      this.notifqueue.setSynchronous("tie", 1000);
       dojo.subscribe("flipHackers", this, "notif_flipHackers");
       dojo.subscribe("stealCard", this, "notif_stealCard");
+      dojo.subscribe("resetActions", this, "notif_resetActions");
+      dojo.subscribe("discardLastInfo", this, "notif_discardLastInfo");
+      dojo.subscribe("drawNewInfo", this, "notif_drawNewInfo");
+
+      this.notifqueue.setSynchronous("store", 1000);
+      this.notifqueue.setSynchronous("activateActionCard", 1000);
+      this.notifqueue.setSynchronous("revealEncrypted", 1000);
+      this.notifqueue.setSynchronous("obtainCorporation", 1000);
+      this.notifqueue.setSynchronous("obtainKey", 1000);
+      this.notifqueue.setSynchronous("stealCard", 1000);
+      this.notifqueue.setSynchronous("resetActions", 1000);
+      this.notifqueue.setSynchronous("discardLastInfo", 1000);
+      this.notifqueue.setSynchronous("drawNewInfo", 1000);
     },
 
     notif_playCards: function (notif) {
@@ -893,9 +866,9 @@ define([
       const actionCard = notif.args.actionCard;
       const infoCard = notif.args.infoCard;
 
-      const actionsInMyHandControl = `actionsInMyHandStock`;
-      this[actionsInMyHandControl].addCard(actionCard);
-      this.updateHandWidth(this[actionsInMyHandControl]);
+      const actionsInHandControl = `actionsInMyHandStock`;
+      this[actionsInHandControl].addCard(actionCard);
+      this.updateHandWidth(this[actionsInHandControl]);
 
       const infoInHandControl = `infoInHandStock$${player_id}`;
       this[infoInHandControl].addCard(infoCard);
@@ -943,7 +916,7 @@ define([
         return;
       }
 
-      this[`actionsDiscardedStock$${player_id}`].addCard(actionCard);
+      this[`discardedActionsStock$${player_id}`].addCard(actionCard);
     },
 
     notif_revealEncrypted: function (notif) {
@@ -959,10 +932,10 @@ define([
 
       const actionCard = this[`encryptActionStock$${player_id}`].getCards()[0];
 
-      const actionsDiscardedControl = `actionsDiscardedStock$${player_id}`;
-      this[actionsDiscardedControl].addCard(actionCard);
+      const discardedActionsControl = `discardedActionsStock$${player_id}`;
+      this[discardedActionsControl].addCard(actionCard);
 
-      this[actionsDiscardedControl].getCardElement(
+      this[discardedActionsControl].getCardElement(
         actionCard
       ).style.marginTop = 0;
     },
@@ -1011,5 +984,22 @@ define([
       );
       this[archivedInfoControl].setCardVisible(infoCard, isCurrentPlayer);
     },
+
+    notif_discardLastInfo: function (notif) {},
+
+    notif_resetActions: function (notif) {
+      console.log("reset actions");
+      for (const player_id in this.players) {
+        const actionsInHandControl = `actionsInHandStock$${player_id}`;
+        const discardedActionsControl = `discardedActionsStock$${player_id}`;
+
+        this[discardedActionsControl].getCards().forEach((card) => {
+          this[actionsInHandControl].addCard(card);
+        });
+        this.updateHandWidth(this[actionsInHandControl]);
+      }
+    },
+
+    notif_drawNewInfo: function (notif) {},
   });
 });

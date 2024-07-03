@@ -184,7 +184,7 @@ class PersonaNonGrata extends Table
         $result["cardsPlayedByMe"] = $this->getCardsPlayedByMe($current_player_id);
         $result["infoStoredByMe"] = $this->getInfoStoredByMe($current_player_id);
         $result["infoStoredByOthers"] = $this->getInfoStoredByOthers($current_player_id);
-        $result["actionsDiscarded"] = $this->getActionsDiscarded();
+        $result["discardedActions"] = $this->getActionsDiscarded();
         $result["encryptActionUsed"] = $this->getEncryptActionUsed();
         $result["keysArchived"] = $this->getKeysArchived();
         $result["corporationsArchived"] = $this->getCorporationsArchived();
@@ -309,7 +309,7 @@ class PersonaNonGrata extends Table
     {
         $week = $this->getGameStateValue("week");
 
-        return $this->getCardOfTheWeek[$week];
+        return $this->cardOfTheWeek[$week];
     }
 
     function getKeyByCorporation(int $corporation_id): array
@@ -1082,6 +1082,28 @@ class PersonaNonGrata extends Table
     {
         $this->setGameStateValue("currentCorporation", 1);
         $this->incGameStateValue("week", 1);
+
+        $players = $this->loadPlayersBasicInfos();
+
+        foreach ($players as $player_id => $player) {
+            $this->action_cards->moveAllCardsInLocation("discard", "hand", $player_id, $player_id);
+            $this->information_cards->moveAllCardsInLocation("hand", "discard", $player_id);
+            $this->information_cards->pickCards(6, "deck", $player_id);
+        }
+
+        $this->notifyAllPlayers("discardLastInfo", "", array());
+
+        $this->notifyAllPlayers(
+            "resetActions",
+            clienttranslate('All players take their action cards back to their hands'),
+            array()
+        );
+
+        $this->notifyAllPlayers(
+            "drawNewInfo",
+            clienttranslate('Each player draws 6 new Information cards'),
+            array()
+        );
 
         $this->notifyAllPlayers(
             "flipHackers",
