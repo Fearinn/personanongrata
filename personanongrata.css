@@ -23,6 +23,10 @@
   position: relative !important;
 }
 
+.all-visible-deck:empty {
+  display: none;
+}
+
 .all-visible-deck > .card {
   position: absolute !important;
 }
@@ -115,6 +119,10 @@
 .prs_publicZone .prs_zoneTitle {
   background-color: #fff;
   color: #000;
+}
+
+.prs_hacker > div:not(:first-child) {
+  margin-top: 280px;
 }
 
 .prs_publicCards {

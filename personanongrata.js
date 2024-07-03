@@ -651,6 +651,33 @@ define([
 
     onEnteringState: function (stateName, args) {
       console.log("Entering state: " + stateName);
+    },
+
+    onLeavingState: function (stateName) {
+      console.log("Leaving state: " + stateName);
+
+      if (stateName === "stealCard") {
+        for (const player_id in this.players) {
+          const storedControl = `storedStock$${player_id}`;
+          this[storedControl].setSelectionMode("none");
+        }
+      }
+    },
+
+    onUpdateActionButtons: function (stateName, args) {
+      console.log("Update action buttons: " + stateName);
+
+      if (stateName === "day") {
+        if (!this.isCurrentPlayerActive()) {
+          this.addActionButton("prs_changeMind_btn", _("Change mind"), () => {
+            this.onChangeMind();
+          });
+
+          this["actionsInMyHandStock"].setSelectionMode("none");
+          this[`infoInHandStock$${this.player_id}`].setSelectionMode("none");
+        }
+        return;
+      }
 
       if (stateName === "playCards") {
         if (this.isCurrentPlayerActive()) {
@@ -677,36 +704,6 @@ define([
               this[storedControl].setSelectableCards(selectableCards);
             }
           }
-        }
-        return;
-      }
-    },
-
-    onLeavingState: function (stateName) {
-      console.log("Leaving state: " + stateName);
-
-      if (stateName === "playCards") {
-        this["actionsInMyHandStock"].setSelectionMode("none");
-        this[`infoInHandStock$${this.player_id}`].setSelectionMode("none");
-        return;
-      }
-
-      if (stateName === "stealCard") {
-        for (const player_id in this.players) {
-          const storedControl = `storedStock$${player_id}`;
-          this[storedControl].setSelectionMode("none");
-        }
-      }
-    },
-
-    onUpdateActionButtons: function (stateName, args) {
-      console.log("Update action buttons: " + stateName);
-
-      if (stateName === "day") {
-        if (!this.isCurrentPlayerActive()) {
-          this.addActionButton("prs_changeMind_btn", _("Change mind"), () => {
-            this.onChangeMind();
-          });
         }
         return;
       }
@@ -1012,8 +1009,16 @@ define([
       const infoCard = notif.args.infoCard;
       const isCurrentPlayer = player_id == this.player_id;
 
+      const hackerElement = isCurrentPlayer
+        ? undefined
+        : $(`prs_hacker$${player_id}`);
+
       const archivedInfoControl = `archivedInfoStock$${player_id}`;
-      this[archivedInfoControl].addCard(infoCard, {});
+      this[archivedInfoControl].addCard(
+        infoCard,
+        {},
+        { forceToElement: hackerElement }
+      );
       this[archivedInfoControl].setCardVisible(infoCard, isCurrentPlayer);
     },
   });
