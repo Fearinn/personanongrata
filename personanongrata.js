@@ -422,13 +422,19 @@ define([
         );
 
         const archivedInfo = this.archivedInfo[player_id];
+        const isCurrentPlayer = player_id == this.player_id;
+        const hackerElement = isCurrentPlayer
+          ? undefined
+          : $(`prs_hacker$${player_id}`);
+
         for (const card_id in archivedInfo) {
           const card = archivedInfo[card_id];
-          this[archivedInfoControl].addCard(card);
-          this[archivedInfoControl].setCardVisible(
+          this[archivedInfoControl].addCard(
             card,
-            player_id == this.player_id
+            {},
+            { forceToElement: hackerElement }
           );
+          this[archivedInfoControl].setCardVisible(card, isCurrentPlayer);
         }
 
         //end of players loop
@@ -688,7 +694,8 @@ define([
       }
 
       if (stateName === "stealCard") {
-        const corporationId = args.args.corporationId;
+        console.log(args);
+        const corporationId = args.corporationId;
         if (this.isCurrentPlayerActive()) {
           for (const player_id in this.players) {
             if (player_id != this.player_id) {
