@@ -121,14 +121,10 @@
   color: #000;
 }
 
-.prs_hacker > div:not(:first-child) {
-  margin-top: -292px !important;
-}
-
 .prs_publicCards {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 16px;
 }
@@ -143,9 +139,13 @@
 
 .prs_handContainer {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   flex-wrap: wrap;
   gap: 16px;
   width: 100%;
+}
+
+.prs_hacker > div:not(:first-child) {
+  margin-top: -292px !important;
 }

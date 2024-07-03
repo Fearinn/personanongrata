@@ -373,15 +373,10 @@ define([
 
         //archived
         const archivedCorporationControl = `archivedCorporationStock$${player_id}`;
-        this[archivedCorporationControl] = new SlotStock(
+        this[archivedCorporationControl] = new AllVisibleDeck(
           this.corporationManager,
           $(`prs_archivedCorporation$${player_id}`),
-          {
-            slotsIds: Object.keys(this.corporations),
-            mapCardToSlot: (card) => {
-              return card.type;
-            },
-          }
+          { horizontalShift: "32px" }
         );
 
         const archivedCorporations = this.corporationsArchived[player_id];
@@ -396,15 +391,10 @@ define([
         }
 
         const archivedKeyControl = `archivedKeyStock$${player_id}`;
-        this[archivedKeyControl] = new SlotStock(
+        this[archivedKeyControl] = new AllVisibleDeck(
           this.keyManager,
           $(`prs_archivedKey$${player_id}`),
-          {
-            slotsIds: Object.keys(this.corporations),
-            mapCardToSlot: (card) => {
-              return card.type;
-            },
-          }
+          { horizontalShift: "32px" }
         );
 
         const archivedKeys = this.keysArchived[player_id];
@@ -694,7 +684,6 @@ define([
       }
 
       if (stateName === "stealCard") {
-        console.log(args);
         const corporationId = args.corporationId;
         if (this.isCurrentPlayerActive()) {
           for (const player_id in this.players) {
