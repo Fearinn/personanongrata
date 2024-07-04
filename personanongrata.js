@@ -729,6 +729,10 @@ define([
       const width = 180 + (180 + shift - overlap) * cardNumber;
 
       stock.element.style.width = width + "px";
+
+      if (!cardNumber) {
+        stock.element.style.width = "0px";
+      }
     },
 
     setSlotOffset: function (cardElement, offset = 48) {
@@ -985,10 +989,18 @@ define([
       this[archivedInfoControl].setCardVisible(infoCard, isCurrentPlayer);
     },
 
-    notif_discardLastInfo: function (notif) {},
+    notif_discardLastInfo: function (notif) {
+      for (const player_id in this.players) {
+        const infoInHandControl = `infoInHandStock$${player_id}`;
+
+        this[infoInHandControl].getCards().forEach((card) => {
+          this[infoInHandControl].removeCard(card);
+        });
+        this.updateHandWidth(this[infoInHandControl]);
+      }
+    },
 
     notif_resetActions: function (notif) {
-      console.log("reset actions");
       for (const player_id in this.players) {
         const actionsInHandControl = `actionsInHandStock$${player_id}`;
         const discardedActionsControl = `discardedActionsStock$${player_id}`;
