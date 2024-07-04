@@ -822,6 +822,7 @@ define([
       dojo.subscribe("resetActions", this, "notif_resetActions");
       dojo.subscribe("discardLastInfo", this, "notif_discardLastInfo");
       dojo.subscribe("drawNewInfo", this, "notif_drawNewInfo");
+      dojo.subscribe("drawNewInfoPrivate", this, "notif_drawNewInfoPrivate");
 
       this.notifqueue.setSynchronous("store", 1000);
       this.notifqueue.setSynchronous("activateActionCard", 1000);
@@ -831,7 +832,7 @@ define([
       this.notifqueue.setSynchronous("stealCard", 1000);
       this.notifqueue.setSynchronous("resetActions", 1000);
       this.notifqueue.setSynchronous("discardLastInfo", 1000);
-      this.notifqueue.setSynchronous("drawNewInfo", 1000);
+      this.notifqueue.setSynchronous("drawNewInfoPrivate", 1000);
     },
 
     notif_playCards: function (notif) {
@@ -989,17 +990,6 @@ define([
       this[archivedInfoControl].setCardVisible(infoCard, isCurrentPlayer);
     },
 
-    notif_discardLastInfo: function (notif) {
-      for (const player_id in this.players) {
-        const infoInHandControl = `infoInHandStock$${player_id}`;
-
-        this[infoInHandControl].getCards().forEach((card) => {
-          this[infoInHandControl].removeCard(card);
-        });
-        this.updateHandWidth(this[infoInHandControl]);
-      }
-    },
-
     notif_resetActions: function (notif) {
       for (const player_id in this.players) {
         const actionsInHandControl = `actionsInHandStock$${player_id}`;
@@ -1012,6 +1002,60 @@ define([
       }
     },
 
-    notif_drawNewInfo: function (notif) {},
+    notif_discardLastInfo: function (notif) {
+      for (const player_id in this.players) {
+        const infoInHandControl = `infoInHandStock$${player_id}`;
+
+        this[infoInHandControl].getCards().forEach((card) => {
+          this[infoInHandControl].removeCard(card);
+        });
+        this.updateHandWidth(this[infoInHandControl]);
+      }
+    },
+
+    notif_drawNewInfo: function (notif) {
+      const newInfo = notif.args.newInfo;
+      const removedFromDeck = notif.args.removedFromDeck;
+
+      for (const player_id in newInfo) {
+        if (player_id == this.player_id) {
+          continue;
+        }
+
+        const infoInHandControl = `infoInHandStock$${player_id}`;
+        const infoCards = newInfo[player_id];
+        const cardsRemoved = removedFromDeck[player_id];
+
+        for (const card_id in infoCards) {
+          const card = infoCards[card_id];
+          this[infoInHandControl].addCard(
+            card,
+            {},
+            { fromElement: $("prs_infoDeck") }
+          );
+        }
+
+        for (const card_id in cardsRemoved) {
+          const card = cardsRemoved[card_id];
+          this["deckOfInformationsStock"].removeCard(card);
+        }
+
+        this.updateHandWidth(this[infoInHandControl]);
+      }
+    },
+
+    notif_drawNewInfoPrivate: function (notif) {
+      const player_id = notif.args.player_id;
+      const infoCards = notif.args.infoCards;
+
+      const infoInHandControl = `infoInHandStock$${player_id}`;
+
+      for (const card_id in infoCards) {
+        const card = infoCards[card_id];
+        this[infoInHandControl].addCard(card);
+      }
+
+      this.updateHandWidth(this[infoInHandControl]);
+    },
   });
 });

@@ -1085,12 +1085,6 @@ class PersonaNonGrata extends Table
 
         $players = $this->loadPlayersBasicInfos();
 
-        foreach ($players as $player_id => $player) {
-            $this->action_cards->moveAllCardsInLocation("discard", "hand", $player_id, $player_id);
-            $this->information_cards->moveAllCardsInLocation("hand", "discard", $player_id);
-            $this->information_cards->pickCards(6, "deck", $player_id);
-        }
-
         $this->notifyAllPlayers("discardLastInfo", "", array());
 
         $this->notifyAllPlayers(
@@ -1099,10 +1093,35 @@ class PersonaNonGrata extends Table
             array()
         );
 
+        $new_info = array();
+
+        foreach ($players as $player_id => $player) {
+            $this->action_cards->moveAllCardsInLocation("discard", "hand", $player_id, $player_id);
+            $this->information_cards->moveAllCardsInLocation("hand", "discard", $player_id);
+
+            $info_cards = $this->information_cards->pickCards(6, "deck", $player_id);
+            $new_info[$player_id] = $this->hideCards($info_cards, true, true);
+            $removed_from_deck = $this->hideCards($info_cards, true);
+
+            $this->notifyPlayer(
+                $player_id,
+                "drawNewInfoPrivate",
+                "TEST",
+                array(
+                    "player_id" => $player_id,
+                    "infoCards" => $info_cards,
+                )
+            );
+        }
+
         $this->notifyAllPlayers(
             "drawNewInfo",
             clienttranslate('Each player draws 6 new Information cards'),
-            array()
+            array(
+                "newInfo" => $new_info,
+                "removedFromDeck" => $removed_from_deck
+            )
+
         );
 
         $this->notifyAllPlayers(
