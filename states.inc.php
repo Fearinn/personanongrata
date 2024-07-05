@@ -34,8 +34,9 @@ $machinestates = array(
         "type" => "multipleactiveplayer",
         "action" => "st_day",
         "possibleactions" => array("changeMind"),
-        "transitions" => array("endOfDay" => 3),
-        "initialprivate" => 20
+        "transitions" => array("betweenDays" => 3),
+        "initialprivate" => 20,
+        "updateGameProgression" => true
     ),
 
     20 => array(
@@ -43,9 +44,8 @@ $machinestates = array(
         "description" => clienttranslate('Other player(s) must combine an Action card to an Information card'),
         "descriptionmyturn" => clienttranslate('${you} must combine an Action card to an Information card'),
         "type" => "private",
-        // "args" => "arg_playCards",
         "possibleactions" => array("playCards"),
-        "transitions" => array("discardCard" => 21, "endOfDay" => 3),
+        "transitions" => array("discardCard" => 21, "betweenDays" => 3),
     ),
 
     21 => array(
@@ -53,16 +53,15 @@ $machinestates = array(
         "description" => clienttranslate('Other player(s) must discard an Information card'),
         "descriptionmyturn" => clienttranslate('${you} must discard an Information card'),
         "type" => "private",
-        // "args" => "arg_discardCard",
         "possibleactions" => array("discardCard", "changeMind"),
         "transitions" => array("changeMind" => 20),
     ),
 
     3 => array(
-        "name" => "endOfDay",
+        "name" => "betweenDays",
         "description" => "",
         "type" => "game",
-        "action" => "st_endOfDay",
+        "action" => "st_betweenDays",
         "transitions" => array("nextDay" => 2, "infoArchiving" => 4),
         "updateGameProgression" => true
     ),
@@ -101,7 +100,6 @@ $machinestates = array(
         "transitions" => array(
             "nextWeek" => 2
         ),
-        "updateGameProgression" => true
     ),
 
     // Final state.

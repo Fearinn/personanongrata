@@ -29,7 +29,8 @@ class PersonaNonGrata extends Table
 
         $this->initGameStateLabels(array(
             "week" => 10,
-            "currentCorporation" => 11
+            "currentCorporation" => 11,
+            "day" => 12,
         ));
 
         $this->information_cards = $this->getNew("module.common.deck");
@@ -73,6 +74,7 @@ class PersonaNonGrata extends Table
 
         $this->setGameStateInitialValue("week", 1);
         $this->setGameStateInitialValue("currentCorporation", 1);
+        $this->setGameStateInitialValue("day", 1);
 
         //corporations
         $corporation_cards = array();
@@ -194,9 +196,10 @@ class PersonaNonGrata extends Table
 
     function getGameProgression()
     {
-        // TODO: compute and return the game progression
+        $day = $this->getGameStateValue("day");
+        $progression = 100 / 15 * ($day - 1);
 
-        return 0;
+        return round($progression);
     }
 
 
@@ -865,7 +868,7 @@ class PersonaNonGrata extends Table
                     "keyCard" => $key_card,
                 )
             );
-            
+
             return;
         }
 
@@ -932,7 +935,7 @@ class PersonaNonGrata extends Table
         //     return;
         // }
 
-        $this->gamestate->setPlayerNonMultiactive($player_id, "endOfDay");
+        $this->gamestate->setPlayerNonMultiactive($player_id, "betweenDays");
     }
 
     function changeMind()
@@ -1027,9 +1030,11 @@ class PersonaNonGrata extends Table
         $this->gamestate->initializePrivateStateForAllActivePlayers();
     }
 
-    function st_endOfDay()
+    function st_betweenDays()
     {
         $players = $this->loadPlayersBasicInfos();
+
+        $this->incGameStateValue("day", 1);
 
         foreach ($players as $player_id => $player) {
             $this->revealPlayed($player_id);
