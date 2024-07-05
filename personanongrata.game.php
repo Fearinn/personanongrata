@@ -72,7 +72,7 @@ class PersonaNonGrata extends Table
 
         /************ Start the game initialization *****/
 
-        $this->setGameStateInitialValue("week", 1);
+        $this->setGameStateInitialValue("week", 3);
         $this->setGameStateInitialValue("currentCorporation", 1);
         $this->setGameStateInitialValue("day", 1);
 
@@ -887,6 +887,112 @@ class PersonaNonGrata extends Table
         );
     }
 
+    function discardActivator(int $corporation_id, int $player_id): bool
+    {
+        $activators = array();
+
+        for ($value = 0; $value <= 4; $value += 2) {
+            $corporations_of_value =  $this->corporation_cards->getCardsOfTypeInLocation($corporation_id, $value, "archived", $player_id);
+            $activators[$value] = array_shift($corporations_of_value);
+        }
+
+        foreach ($activators as $value => $card) {
+            if ($value == 4) {
+                continue;
+            }
+
+            if ($card) {
+                $this->corporation_cards->moveCard($card["id"], "discard");
+
+                $this->notifyAllPlayers(
+                    "discardActivator",
+                    clienttranslate('${player_name} discards the Corporation card of value ${value} to activate ${corporation_label}'),
+                    array(
+                        "i18n" => array("corporation_label"),
+                        "player_name" => $this->getPlayerNameById($player_id),
+                        "corporation_label" => $this->corporations[$corporation_id],
+                        "value" => $card["type_arg"]
+                    )
+                );
+
+                return true;
+            }
+        }
+
+        $workers = $this->information_cards->getCardsOfTypeInLocation($corporation_id, 2, "archived", $player_id);
+        $worker = array_shift($workers);
+
+        if ($worker) {
+            $this->information_cards->moveCard($worker["id"], "discard");
+
+            $this->notifyAllPlayers(
+                "discardActivator",
+                clienttranslate('${player_name} discards the Corporation card of value ${value} to activate ${corporation_label}'),
+                array(
+                    "i18n" => array("corporation_label"),
+                    "player_name" => $this->getPlayerNameById($player_id),
+                    "corporation_label" => $this->corporations[$corporation_id],
+                    "value" => $worker["type_arg"]
+                )
+            );
+
+            return true;
+        }
+
+        $last_activator = $activators[4];
+
+        if ($last_activator) {
+            $this->corporation_cards->moveCard($last_activator["id"], "discard");
+
+            $this->notifyAllPlayers(
+                "discardActivator",
+                clienttranslate('${player_name} discards the Corporation card of value ${value} to activate ${corporation_label}'),
+                array(
+                    "i18n" => array("corporation_label"),
+                    "player_name" => $this->getPlayerNameById($player_id),
+                    "corporation_label" => $this->corporations[$corporation_id],
+                    "value" => $last_activator["type_arg"]
+                )
+            );
+
+            return true;
+        }
+
+        return false;
+    }
+
+    function computeArchivedPoints(int $corporation_id, int $player_id): int
+    {
+        $points = 0;
+
+        $archived_corporations = $this->corporation_cards->getCardsOfTypeInLocation($corporation_id, null, "archived", $player_id);
+
+        foreach ($archived_corporations as $card) {
+            $points += $card["type_arg"];
+        }
+
+        $archived_info = $this->information_cards->getCardsOfTypeInLocation($corporation_id, null, "archived", $player_id);
+
+        foreach ($archived_corporations as $card) {
+            $points += $card["type_arg"];
+        }
+
+        $this->notifyAllPlayers(
+            "computeArchivedPoints",
+            clienttranslate('${player_name} scores ${points} points with ${corporation_label}'),
+            array(
+                "i18n" => array("corporation_label"),
+                "player_id" => $player_id,
+                "player_name" => $this->getPlayerNameById($player_id),
+                "corporation_label" => $this->corporations[$corporation_id],
+                "corporationId" => $corporation_id,
+                "points" => $points
+            )
+        );
+
+        return $points;
+    }
+
     //////////////////////////////////////////////////////////////////////////////
     //////////// Player actions
     //////////// 
@@ -1150,8 +1256,14 @@ class PersonaNonGrata extends Table
 
     function st_betweenWeeks()
     {
+        if ($this->getGameStateValue("week") == 3) {
+            $this->gamestate->nextState("finalPoints");
+            return;
+        }
+
         $this->setGameStateValue("currentCorporation", 1);
         $this->incGameStateValue("week", 1);
+
 
         $players = $this->loadPlayersBasicInfos();
 
@@ -1204,6 +1316,27 @@ class PersonaNonGrata extends Table
         );
 
         $this->gamestate->nextState("nextWeek");
+    }
+
+    function st_finalPoints()
+    {
+        $players = $this->loadPlayersBasicInfos();
+
+        $points = array();
+
+        foreach ($players as $player_id => $player) {
+            foreach ($this->corporations as $corporation_id => $corporation) {
+                $points[$player_id][$corporation_id] = 0;
+
+                if (!$this->discardActivator($corporation_id, $player_id)) {
+                    continue;
+                };
+
+                $this->computeArchivedPoints($corporation_id, $player_id);
+            }
+        }
+
+        $this->gamestate->nextState("gameEnd");
     }
 
     function zombieTurn($state, $active_player)

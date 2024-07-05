@@ -98,7 +98,18 @@ $machinestates = array(
         "type" => "game",
         "action" => "st_betweenWeeks",
         "transitions" => array(
-            "nextWeek" => 2
+            "nextWeek" => 2,
+            "finalPoints" => 6
+        ),
+    ),
+
+    6 => array(
+        "name" => "finalPoints",
+        "description" => "",
+        "type" => "game",
+        "action" => "st_finalPoints",
+        "transitions" => array(
+            "gameEnd" => 99
         ),
     ),
 
