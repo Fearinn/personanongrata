@@ -200,6 +200,7 @@ class PersonaNonGrata extends Table
     }
 
 
+
     //////////////////////////////////////////////////////////////////////////////
     //////////// Utility functions
     ////////////
@@ -716,6 +717,51 @@ class PersonaNonGrata extends Table
         );
     }
 
+    function passHands()
+    {
+        $players = $this->loadPlayersBasicInfos();
+
+        $senders = array();
+
+        foreach ($players as $player_id => $player) {
+            $recipient_id = $this->isClockwise() ? $this->getPlayerAfter($player_id) : $this->getPlayerBefore($player_id);
+            $this->information_cards->moveAllCardsInLocation("hand", "preHand", $player_id, $recipient_id);
+
+            $senders[$recipient_id] = $player_id;
+        }
+
+        foreach ($senders as $player_id => $sender_id) {
+            $this->information_cards->moveAllCardsInLocation("preHand", "hand", $player_id, $player_id);
+
+            $info_cards = $this->information_cards->getCardsInLocation("hand", $player_id);
+
+            $new_info[$player_id] = $this->hideCards($info_cards, true, true);
+
+            $this->notifyPlayer(
+                $player_id,
+                "receiveNewInfo",
+                "",
+                array(
+                    "player_id" => $player_id,
+                    "player_id2" => $sender_id,
+                    "infoCards" => $info_cards,
+                    "removeFromSender" => $this->getPlayersNumber() == 2,
+                )
+            );
+        }
+
+        $this->notifyAllPlayers(
+            "passHands",
+            clienttranslate('All players pass the remaining Information ${direction}'),
+            array(
+                "i18n" => array("direction"),
+                "direction" => $this->isClockwise() ? clienttranslate("clockwise") : clienttranslate("counterclockwise"),
+                "senders" => $senders,
+                "newInfo" => $new_info,
+            )
+        );
+    }
+
     function revealEncrypted(int $player_id): void
     {
         $info_card = $this->getSingleCardInLocation($this->information_cards, "encrypted", $player_id);
@@ -806,6 +852,23 @@ class PersonaNonGrata extends Table
     function obtainKey(int $corporation_id, int $player_id)
     {
         $key_card = $this->getKeyByCorporation($corporation_id);
+
+        if ($player_id == $key_card["location_arg"]) {
+            $this->notifyAllPlayers(
+                "keepKey",
+                clienttranslate('${player_name} keeps the Key card of ${corporation_label}'),
+                array(
+                    "i18n" => array("corporation_label"),
+                    "player_id" => $player_id,
+                    "player_name" => $this->getPlayerNameById($player_id),
+                    "corporation_label" => $this->corporations[$corporation_id],
+                    "keyCard" => $key_card,
+                )
+            );
+            
+            return;
+        }
+
         $this->key_cards->moveCard($key_card["id"], "archived", $player_id);
 
         $this->notifyAllPlayers(
@@ -975,10 +1038,12 @@ class PersonaNonGrata extends Table
         }
 
         //tests
-        if (count($this->getActionsInMyHand($player_id)) <= 3) {
+        if (count($this->getActionsInMyHand($player_id)) <= 4) {
             $this->gamestate->nextState("infoArchiving");
             return;
         }
+
+        $this->passHands();
 
         $this->gamestate->nextState("nextDay");
     }
@@ -1106,7 +1171,7 @@ class PersonaNonGrata extends Table
             $this->notifyPlayer(
                 $player_id,
                 "drawNewInfoPrivate",
-                "TEST",
+                "",
                 array(
                     "player_id" => $player_id,
                     "infoCards" => $info_cards,

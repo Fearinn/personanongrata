@@ -809,7 +809,6 @@ define([
     setupNotifications: function () {
       console.log("notifications subscriptions setup");
       dojo.subscribe("playCards", this, "notif_playCards");
-      this.notifqueue.setSynchronous("playCards", 1000);
       dojo.subscribe("changeMind", this, "notif_changeMind");
       dojo.subscribe("store", this, "notif_store");
       dojo.subscribe("activateActionCard", this, "notif_activateActionCard");
@@ -823,7 +822,10 @@ define([
       dojo.subscribe("discardLastInfo", this, "notif_discardLastInfo");
       dojo.subscribe("drawNewInfo", this, "notif_drawNewInfo");
       dojo.subscribe("drawNewInfoPrivate", this, "notif_drawNewInfoPrivate");
+      dojo.subscribe("passHands", this, "notif_passHands");
+      dojo.subscribe("receiveNewInfo", this, "notif_receiveNewInfo");
 
+      this.notifqueue.setSynchronous("playCards", 1000);
       this.notifqueue.setSynchronous("store", 1000);
       this.notifqueue.setSynchronous("activateActionCard", 1000);
       this.notifqueue.setSynchronous("revealEncrypted", 1000);
@@ -833,6 +835,7 @@ define([
       this.notifqueue.setSynchronous("resetActions", 1000);
       this.notifqueue.setSynchronous("discardLastInfo", 1000);
       this.notifqueue.setSynchronous("drawNewInfoPrivate", 1000);
+      this.notifqueue.setSynchronous("passHands", 1000);
     },
 
     notif_playCards: function (notif) {
@@ -844,7 +847,7 @@ define([
       const playedActionControl = `playedActionStock$${player_id}`;
       this[playedActionControl].addCard(actionCard);
 
-      const actionsInHandControl = `actionsInMyHandStock`;
+      const actionsInHandControl = `actionsInHandStock$${player_id}`;
       const infoInHandControl = `infoInHandStock$${player_id}`;
 
       if (!isCurrentPlayer) {
@@ -871,7 +874,7 @@ define([
       const actionCard = notif.args.actionCard;
       const infoCard = notif.args.infoCard;
 
-      const actionsInHandControl = `actionsInMyHandStock`;
+      const actionsInHandControl = `actionsInHandStock$${player_id}`;
       this[actionsInHandControl].addCard(actionCard);
       this.updateHandWidth(this[actionsInHandControl]);
 
@@ -1006,9 +1009,7 @@ define([
       for (const player_id in this.players) {
         const infoInHandControl = `infoInHandStock$${player_id}`;
 
-        this[infoInHandControl].getCards().forEach((card) => {
-          this[infoInHandControl].removeCard(card);
-        });
+        this[infoInHandControl].removeAll();
         this.updateHandWidth(this[infoInHandControl]);
       }
     },
@@ -1028,11 +1029,9 @@ define([
 
         for (const card_id in infoCards) {
           const card = infoCards[card_id];
-          this[infoInHandControl].addCard(
-            card,
-            {},
-            { fromElement: $("prs_infoDeck") }
-          );
+          this[infoInHandControl].addCard(card, {
+            fromElement: $("prs_infoDeck"),
+          });
         }
 
         for (const card_id in cardsRemoved) {
@@ -1056,6 +1055,59 @@ define([
       }
 
       this.updateHandWidth(this[infoInHandControl]);
+    },
+
+    notif_receiveNewInfo: function (notif) {
+      const player_id = notif.args.player_id;
+      const sender_id = notif.args.player_id2;
+      const infoCards = notif.args.infoCards;
+      const removeFromSender = notif.args.removeFromSender;
+
+      const infoInHandControl = `infoInHandStock$${player_id}`;
+
+      this[infoInHandControl].removeAll();
+
+      for (const card_id in infoCards) {
+        const card = infoCards[card_id];
+        this[infoInHandControl].addCard(card, {
+          fromElement: $(`prs_handOfInfo$${sender_id}`),
+        });
+      }
+
+      if (removeFromSender) {
+        this[`infoInHandStock$${sender_id}`].removeAll();
+      }
+
+      this.updateHandWidth(this[infoInHandControl]);
+    },
+
+    notif_passHands: function (notif) {
+      const newInfo = notif.args.newInfo;
+      const senders = notif.args.senders;
+
+      for (const player_id in this.players) {
+        if (player_id == this.player_id) {
+          continue;
+        }
+
+        const sender_id = senders[player_id];
+
+        const infoInHandControl = `infoInHandStock$${player_id}`;
+        const infoCards = newInfo[player_id];
+
+        for (const card_id in infoCards) {
+          const card = infoCards[card_id];
+          this[infoInHandControl].addCard(card, {
+            fromElement: $(`prs_handOfInfo$${sender_id}`),
+          });
+        }
+
+        this.updateHandWidth(this[infoInHandControl]);
+
+        if (sender_id != this.player_id) {
+          this[`infoInHandStock$${sender_id}`].removeAll();
+        }
+      }
     },
   });
 });
