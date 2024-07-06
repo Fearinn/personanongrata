@@ -853,7 +853,7 @@ define([
       this.notifqueue.setSynchronous("discardLastInfo", 1000);
       this.notifqueue.setSynchronous("drawNewInfoPrivate", 1000);
       this.notifqueue.setSynchronous("passHands", 1000);
-      this.notifqueue.setSynchronous("computeArchivedPoints", 5000);
+      this.notifqueue.setSynchronous("computeArchivedPoints", 1000);
     },
 
     notif_playCards: function (notif) {

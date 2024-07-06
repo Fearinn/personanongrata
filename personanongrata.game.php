@@ -77,10 +77,14 @@ class PersonaNonGrata extends Table
         $this->setGameStateInitialValue("day", 1);
 
         //corporations
+        if (count($players) < 4) {
+            unset($this->corporations[6]);
+        }
+
         $corporation_cards = array();
         $key_cards = array();
 
-        foreach ($this->corporations as $corporation_id => $corporation) {
+        foreach ($this->corporations($players) as $corporation_id => $corporation) {
             $key_cards[] = array(
                 "type" => $corporation_id,
                 "type_arg" => 2,
@@ -99,7 +103,7 @@ class PersonaNonGrata extends Table
         $this->corporation_cards->createCards($corporation_cards, "deck");
         $this->key_cards->createCards($key_cards, "table");
 
-        foreach ($this->corporations as $corporation_id => $corporation) {
+        foreach ($this->corporations($players) as $corporation_id => $corporation) {
             $key_card = $this->getKeyByCorporation($corporation_id);
             $this->key_cards->moveCard($key_card["id"], "table", $corporation_id);
 
@@ -144,7 +148,7 @@ class PersonaNonGrata extends Table
         //informations
         $information_cards = array();
 
-        foreach ($this->corporations as $corporation_id => $corporation) {
+        foreach ($this->corporations($players) as $corporation_id => $corporation) {
             foreach ($this->informations as $information_id => $information) {
                 $information_cards[] = array(
                     "type" => $corporation_id,
@@ -174,7 +178,7 @@ class PersonaNonGrata extends Table
         $result["clockwise"] = $this->isClockwise();
         $result["prevPlayer"] = $this->getPlayerBefore($current_player_id);
         $result["nextPlayer"] = $this->getPlayerAfter($current_player_id);
-        $result["corporations"] = $this->corporations;
+        $result["corporations"] = $this->corporations();
         $result["hackers"] = $this->getHackers();
         $result["keysOnTable"] = $this->getKeysOnTable();
         $result["corporationDecks"] = $this->getCorporationDecks();
@@ -207,6 +211,22 @@ class PersonaNonGrata extends Table
     //////////////////////////////////////////////////////////////////////////////
     //////////// Utility functions
     ////////////
+
+    function corporations(array $players = null): array
+    {
+        if (!key_exists(6, $this->corporations())) {
+            return $this->corporations;
+        }
+
+        $playersNumber = $players ? count($players) : $this->getPlayersNumber();
+
+        if ($playersNumber < 4) {
+            unset($this->corporations[6]);
+        }
+
+        return $this->corporations;
+    }
+
     function getCustomPlayerAfter(int $player_id): int
     {
         return $this->isClockwise() ? $this->getPlayerAfter($player_id) : $this->getPlayerBefore($player_id);
@@ -345,7 +365,7 @@ class PersonaNonGrata extends Table
     {
         $corporation_cards = array();
 
-        foreach ($this->corporations as $corporation_id => $corporation) {
+        foreach ($this->corporations() as $corporation_id => $corporation) {
             $corporation_cards[$corporation_id] = $this->corporation_cards->getCardsInLocation("deck:" . $corporation_id);
         }
 
@@ -628,7 +648,7 @@ class PersonaNonGrata extends Table
                 "player_id2" => $player_id,
                 "player_name2" => $this->getPlayerNameById($player_id),
                 "info_label" => $this->informations[$info_id]["name"],
-                "corporation_label" => $this->corporations[$corporation_id],
+                "corporation_label" => $this->corporations()[$corporation_id],
                 "infoCard" => $info_card,
             )
         );
@@ -653,7 +673,7 @@ class PersonaNonGrata extends Table
                 "player_id2" => $player_id,
                 "player_name2" => $this->getPlayerNameById($player_id),
                 "info_label" => $this->informations[$info_id]["name"],
-                "corporation_label" => $this->corporations[$corporation_id],
+                "corporation_label" => $this->corporations()[$corporation_id],
                 "infoCard" => $info_card,
             )
         );
@@ -687,7 +707,7 @@ class PersonaNonGrata extends Table
                 "player_name" => $this->getPlayerNameById($player_id),
                 "action_label" => $this->actions[$action_id],
                 "info_label" => $encrypt ? null : $this->informations[$info_id]["name"],
-                "corporation_label" => $encrypt ? null : $this->corporations[$corporation_id],
+                "corporation_label" => $encrypt ? null : $this->corporations()[$corporation_id],
                 "actionCard" => $action_card,
                 "infoCard" => $info_card,
                 "encrypt" => $encrypt
@@ -802,7 +822,7 @@ class PersonaNonGrata extends Table
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
                 "info_label" => $this->informations[$info_id]["name"],
-                "corporation_label" => $this->corporations[$corporation_id],
+                "corporation_label" => $this->corporations()[$corporation_id],
                 "infoCard" => $info_card
             )
         );
@@ -835,7 +855,7 @@ class PersonaNonGrata extends Table
                         "i18n" => array("corporation_label"),
                         "player_id" => $player_id,
                         "player_name" => $this->getPlayerNameById($player_id),
-                        "corporation_label" => $this->corporations[$corporation_id],
+                        "corporation_label" => $this->corporations()[$corporation_id],
                         "points" => $points
                     )
                 );
@@ -858,7 +878,7 @@ class PersonaNonGrata extends Table
                 "i18n" => array("corporation_label"),
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
-                "corporation_label" => $this->corporations[$corporation_id],
+                "corporation_label" => $this->corporations()[$corporation_id],
                 "card_value" => $card_value,
                 "corporationCard" => $corporation_card,
             )
@@ -881,7 +901,7 @@ class PersonaNonGrata extends Table
                     "i18n" => array("corporation_label"),
                     "player_id" => $player_id,
                     "player_name" => $this->getPlayerNameById($player_id),
-                    "corporation_label" => $this->corporations[$corporation_id],
+                    "corporation_label" => $this->corporations()[$corporation_id],
                     "keyCard" => $key_card,
                 )
             );
@@ -898,7 +918,7 @@ class PersonaNonGrata extends Table
                 "i18n" => array("corporation_label"),
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
-                "corporation_label" => $this->corporations[$corporation_id],
+                "corporation_label" => $this->corporations()[$corporation_id],
                 "keyCard" => $key_card,
             )
         );
@@ -927,7 +947,7 @@ class PersonaNonGrata extends Table
                     array(
                         "i18n" => array("corporation_label"),
                         "player_name" => $this->getPlayerNameById($player_id),
-                        "corporation_label" => $this->corporations[$corporation_id],
+                        "corporation_label" => $this->corporations()[$corporation_id],
                         "value" => $card["type_arg"]
                     )
                 );
@@ -948,7 +968,7 @@ class PersonaNonGrata extends Table
                 array(
                     "i18n" => array("corporation_label"),
                     "player_name" => $this->getPlayerNameById($player_id),
-                    "corporation_label" => $this->corporations[$corporation_id],
+                    "corporation_label" => $this->corporations()[$corporation_id],
                     "value" => $worker["type_arg"]
                 )
             );
@@ -967,7 +987,7 @@ class PersonaNonGrata extends Table
                 array(
                     "i18n" => array("corporation_label"),
                     "player_name" => $this->getPlayerNameById($player_id),
-                    "corporation_label" => $this->corporations[$corporation_id],
+                    "corporation_label" => $this->corporations()[$corporation_id],
                     "value" => $last_activator["type_arg"]
                 )
             );
@@ -1002,7 +1022,7 @@ class PersonaNonGrata extends Table
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
                 "player_color" => $this->getPlayerColorById($player_id),
-                "corporation_label" => $this->corporations[$corporation_id],
+                "corporation_label" => $this->corporations()[$corporation_id],
                 "corporationId" => $corporation_id,
                 "points" => $points,
                 "corporationCards" => $archived_corporations,
@@ -1050,7 +1070,7 @@ class PersonaNonGrata extends Table
                 "player_id" => $player_id,
                 "action_label" => $this->actions[$action_id],
                 "info_label" => $this->informations[$info_id]["name"],
-                "corporation_label" => $this->corporations[$corporation_id],
+                "corporation_label" => $this->corporations()[$corporation_id],
                 "actionCard" => $action_card,
                 "infoCard" => $info_card
             )
@@ -1121,7 +1141,7 @@ class PersonaNonGrata extends Table
                 "player_id2" => $opponent_id,
                 "player_name2" => $this->getPlayerNameById($opponent_id),
                 "info_label" => $this->informations[$info_id]["name"],
-                "corporation_label" => $this->corporations[$corporation_id],
+                "corporation_label" => $this->corporations()[$corporation_id],
                 "infoCard" => $card
             )
         );
@@ -1136,7 +1156,7 @@ class PersonaNonGrata extends Table
     function arg_stealCard()
     {
         $corporation_id = $this->getGameStateValue("currentCorporation") - 1;
-        $corporation_label = $this->corporations[$corporation_id];
+        $corporation_label = $this->corporations()[$corporation_id];
 
         return array(
             "i18n" => array("corporation_label"),
@@ -1186,12 +1206,12 @@ class PersonaNonGrata extends Table
         $corporation_id = $this->getGameStateValue("currentCorporation");
         $this->incGameStateValue("currentCorporation", 1);
 
-        if ($corporation_id > 6) {
+        if ($corporation_id > count($this->corporations())) {
             $this->gamestate->nextState("betweenWeeks");
             return;
         }
 
-        $corporation_label = $this->corporations[$corporation_id];
+        $corporation_label = $this->corporations()[$corporation_id];
 
         if ($corporation_id == 1) {
             foreach ($players as $player_id => $player) {
@@ -1205,7 +1225,7 @@ class PersonaNonGrata extends Table
         if (!$most_points) {
             $this->notifyAllPlayers(
                 "tie",
-                clienttranslate('No player scored points with ${corporation_label} this round'),
+                clienttranslate('No player scores points with ${corporation_label} this round'),
                 array(
                     "i18n" => array("corporation_label"),
                     "corporation_label" => $corporation_label
@@ -1344,7 +1364,7 @@ class PersonaNonGrata extends Table
         $points = array();
 
         foreach ($players as $player_id => $player) {
-            foreach ($this->corporations as $corporation_id => $corporation) {
+            foreach ($this->corporations() as $corporation_id => $corporation) {
                 $points[$player_id][$corporation_id] = 0;
 
                 if (!$this->discardActivator($corporation_id, $player_id)) {
