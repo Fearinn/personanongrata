@@ -72,7 +72,7 @@ class PersonaNonGrata extends Table
 
         /************ Start the game initialization *****/
 
-        $this->setGameStateInitialValue("week", 3);
+        $this->setGameStateInitialValue("week", 1);
         $this->setGameStateInitialValue("currentCorporation", 1);
         $this->setGameStateInitialValue("day", 1);
 
@@ -973,7 +973,7 @@ class PersonaNonGrata extends Table
 
         $archived_info = $this->information_cards->getCardsOfTypeInLocation($corporation_id, null, "archived", $player_id);
 
-        foreach ($archived_corporations as $card) {
+        foreach ($archived_info as $card) {
             $points += $card["type_arg"];
         }
 
@@ -984,9 +984,12 @@ class PersonaNonGrata extends Table
                 "i18n" => array("corporation_label"),
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
+                "player_color" => $this->getPlayerColorById($player_id),
                 "corporation_label" => $this->corporations[$corporation_id],
                 "corporationId" => $corporation_id,
-                "points" => $points
+                "points" => $points,
+                "corporationCards" => $archived_corporations,
+                "infoCards" => $archived_info,
             )
         );
 
@@ -1263,7 +1266,6 @@ class PersonaNonGrata extends Table
 
         $this->setGameStateValue("currentCorporation", 1);
         $this->incGameStateValue("week", 1);
-
 
         $players = $this->loadPlayersBasicInfos();
 

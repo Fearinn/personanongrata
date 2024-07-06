@@ -249,7 +249,7 @@ define([
           this[infoInHandControl] = new HandStock(
             this.informationManager,
             $(`prs_handOfInfo$${player_id}`),
-            { cardOverlap: "160px", sort: sortFunction("type_arg", "type") }
+            { cardOverlap: "160px", sort: sortFunction("type", "type_arg") }
           );
 
           const infoCards = this.infoInOtherHands[player_id];
@@ -366,7 +366,11 @@ define([
         this[archivedCorporationControl] = new AllVisibleDeck(
           this.corporationManager,
           $(`prs_archivedCorporation$${player_id}`),
-          { horizontalShift: "32px", verticalShift: "0px" }
+          {
+            horizontalShift: "32px",
+            verticalShift: "0px",
+            sort: sortFunction("type, type_arg"),
+          }
         );
 
         const archivedCorporations = this.corporationsArchived[player_id];
@@ -395,7 +399,11 @@ define([
         this[archivedInfoControl] = new AllVisibleDeck(
           this.informationManager,
           $(`prs_archivedInfo$${player_id}`),
-          { horizontalShift: "32px", verticalShift: "0px" }
+          {
+            horizontalShift: "32px",
+            verticalShift: "0px",
+            sort: sortFunction("type", "type_arg"),
+          }
         );
 
         const archivedInfo = this.archivedInfo[player_id];
@@ -577,7 +585,7 @@ define([
       this[infoInHandControl] = new HandStock(
         this.informationManager,
         $(`prs_handOfInfo$${this.player_id}`),
-        { cardOverlap: "90px", sort: sortFunction("type_arg", "type") }
+        { cardOverlap: "90px", sort: sortFunction("type", "type_arg") }
       );
 
       for (const card_id in this.infoInMyHand) {
@@ -824,6 +832,11 @@ define([
       dojo.subscribe("drawNewInfoPrivate", this, "notif_drawNewInfoPrivate");
       dojo.subscribe("passHands", this, "notif_passHands");
       dojo.subscribe("receiveNewInfo", this, "notif_receiveNewInfo");
+      dojo.subscribe(
+        "computeArchivedPoints",
+        this,
+        "notif_computeArchivedPoints"
+      );
 
       this.notifqueue.setSynchronous("playCards", 1000);
       this.notifqueue.setSynchronous("store", 1000);
@@ -836,6 +849,7 @@ define([
       this.notifqueue.setSynchronous("discardLastInfo", 1000);
       this.notifqueue.setSynchronous("drawNewInfoPrivate", 1000);
       this.notifqueue.setSynchronous("passHands", 1000);
+      this.notifqueue.setSynchronous("computeArchivedPoints", 5000);
     },
 
     notif_playCards: function (notif) {
@@ -1108,6 +1122,41 @@ define([
           this[`infoInHandStock$${sender_id}`].removeAll();
         }
       }
+    },
+
+    notif_computeArchivedPoints: function (notif) {
+      const player_id = notif.args.player_id;
+      const player_color = notif.args.player_color;
+      const points = notif.args.points;
+      const corporationCards = notif.args.corporationCards;
+      const infoCards = notif.args.infoCards;
+
+      const archivedCorporationControl = `archivedCorporationStock$${player_id}`;
+      this[archivedCorporationControl].removeAll();
+
+      for (const card_id in corporationCards) {
+        const card = corporationCards[card_id];
+        this[archivedCorporationControl].addCard(card);
+        this[archivedCorporationControl].setCardVisible(card, true);
+
+        const cardElement =
+          this[archivedCorporationControl].getCardElement(card);
+        this.displayScoring(cardElement, player_color, card.type_arg);
+      }
+
+      const archivedInfoControl = `archivedInfoStock$${player_id}`;
+      this[archivedInfoControl].removeAll();
+
+      for (const card_id in infoCards) {
+        const card = infoCards[card_id];
+        this[archivedInfoControl].addCard(card);
+        this[archivedInfoControl].setCardVisible(card, true);
+
+        const cardElement = this[archivedInfoControl].getCardElement(card);
+        this.displayScoring(cardElement, player_color, card.type_arg);
+      }
+
+      this.scoreCtrl[player_id].toValue(points);
     },
   });
 });
