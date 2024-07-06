@@ -821,6 +821,7 @@ define([
       dojo.subscribe("revealPlayed", this, "notif_revealPlayed");
       dojo.subscribe("changeMind", this, "notif_changeMind");
       dojo.subscribe("store", this, "notif_store");
+      dojo.subscribe("storePrivate", this, "notif_storePrivate");
       dojo.subscribe("activateActionCard", this, "notif_activateActionCard");
       dojo.subscribe("revealEncrypted", this, "notif_revealEncrypted");
       dojo.subscribe("obtainCorporation", this, "notif_obtainCorporation");
@@ -842,6 +843,7 @@ define([
 
       this.notifqueue.setSynchronous("revealPlayed", 1000);
       this.notifqueue.setSynchronous("store", 1000);
+      this.notifqueue.setSynchronous("storePrivate", 1000);
       this.notifqueue.setSynchronous("activateActionCard", 1000);
       this.notifqueue.setSynchronous("revealEncrypted", 1000);
       this.notifqueue.setSynchronous("obtainCorporation", 1000);
@@ -926,15 +928,33 @@ define([
       const card = notif.args.infoCard;
       const encrypt = notif.args.encrypt;
 
+      if (encrypt && player_id == this.player_id) {
+        return;
+      }
+
       if (encrypt) {
         const playedInfoControl = `playedInfoStock$${player_id}`;
         this[playedInfoControl].removeAll();
       }
 
       const storedControl = `storedStock$${player_id}`;
+
       this[storedControl].addCard(card, {
         fromElement: encrypt ? $(`prs_playedInfo$${player_id}`) : undefined,
       });
+
+      this.setSlotOffset(this[storedControl].getCardElement(card));
+    },
+
+    notif_storePrivate: function (notif) {
+      const player_id = notif.args.player_id;
+      const card = notif.args.infoCard;
+
+      const storedControl = `storedStock$${player_id}`;
+
+      this[storedControl].addCard(card);
+      this[storedControl].setCardVisible(card, false);
+
       this.setSlotOffset(this[storedControl].getCardElement(card));
     },
 
@@ -1035,6 +1055,10 @@ define([
 
         this[discardedActionsControl].getCards().forEach((card) => {
           this[actionsInHandControl].addCard(card);
+          this[actionsInHandControl].setCardVisible(
+            card,
+            player_id == this.player_id
+          );
         });
         this.updateHandWidth(this[actionsInHandControl]);
       }

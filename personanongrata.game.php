@@ -589,6 +589,16 @@ class PersonaNonGrata extends Table
         $this->information_cards->moveCard($info_card["id"], "encrypted", $player_id);
         $info_card = $this->getSingleCardInLocation($this->information_cards, "encrypted", $player_id);
 
+        $this->notifyPlayer(
+            $player_id,
+            "storePrivate",
+            "",
+            array(
+                "player_id" => $player_id,
+                "infoCard" => $info_card
+            )
+        );
+
         $this->notifyAllPlayers(
             "store",
             "",
