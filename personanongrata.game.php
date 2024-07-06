@@ -230,7 +230,7 @@ class PersonaNonGrata extends Table
         return $card;
     }
 
-    function hideCard(array $card, bool $hideType = false, string | int $fake_id = null): array
+    function hideCard(array $card, bool $hideType = false, string | int $fake_id = null, string $fake_location = null): array
     {
         $hidden_card = array(
             "id" => $card["id"],
@@ -246,10 +246,14 @@ class PersonaNonGrata extends Table
             $hidden_card["id"] = $fake_id . ":" . $card["location_arg"];
         }
 
+        if ($fake_location) {
+            $hidden_card["location"] = $fake_location;
+        }
+
         return $hidden_card;
     }
 
-    function hideCards(array $cards, bool $hideType = false, bool $hideId = false): array
+    function hideCards(array $cards, bool $hideType = false, bool $hideId = false, string $fake_location = null): array
     {
         $hidden_cards = array();
 
@@ -266,7 +270,7 @@ class PersonaNonGrata extends Table
                 $card_id = $fake_id;
             }
 
-            $hidden_cards[$card_id] = $this->hideCard($card, $hideType, $fake_id);
+            $hidden_cards[$card_id] = $this->hideCard($card, $hideType, $fake_id, $fake_location);
         }
 
         return $hidden_cards;
@@ -363,8 +367,10 @@ class PersonaNonGrata extends Table
         foreach ($players as $player_id => $player) {
             if ($player_id !== $current_player_id) {
                 $cards = $this->action_cards->getCardsInLocation("hand", $player_id);
+                $cards += $this->action_cards->getCardsInLocation("played", $player_id);
 
-                $hands[$player_id] = $cards;
+
+                $hands[$player_id] = $this->hideCards($cards, false, false, "hand");
             }
         }
 
@@ -375,7 +381,7 @@ class PersonaNonGrata extends Table
     {
         $deck = $this->information_cards->getCardsInLocation("deck");
 
-        $hidden_deck = $this->hideCards($deck);
+        $hidden_deck = $this->hideCards($deck, true);
 
         return $hidden_deck;
     }
@@ -396,8 +402,9 @@ class PersonaNonGrata extends Table
         foreach ($players as $player_id => $player) {
             if ($player_id !== $current_player_id) {
                 $cards = $this->information_cards->getCardsInLocation("hand", $player_id);
+                $cards += $this->information_cards->getCardsInLocation("played", $player_id);
 
-                $hands[$player_id] = $this->hideCards($cards, true, true);
+                $hands[$player_id] = $this->hideCards($cards, true, true, "hand");
             }
         }
 
@@ -662,7 +669,7 @@ class PersonaNonGrata extends Table
             : clienttranslate('${player_name} combines a ${action_label} to a ${info_label} of ${corporation_label}');
 
         $this->notifyAllPlayers(
-            "playCards",
+            "revealPlayed",
             $message,
             array(
                 "i18n" => array("action_label", "info_label", "corporation_label"),
@@ -1152,7 +1159,7 @@ class PersonaNonGrata extends Table
         }
 
         //tests
-        if (count($this->getActionsInMyHand($player_id)) <= 4) {
+        if (count($this->getActionsInMyHand($player_id)) <= 3) {
             $this->gamestate->nextState("infoArchiving");
             return;
         }

@@ -241,6 +241,7 @@ define([
             const card = actionCards[card_id];
 
             this[actionsInHandControl].addCard(card);
+            this[actionsInHandControl].setCardVisible(card, false);
             this.updateHandWidth(this[actionsInHandControl]);
           }
 
@@ -817,6 +818,7 @@ define([
     setupNotifications: function () {
       console.log("notifications subscriptions setup");
       dojo.subscribe("playCards", this, "notif_playCards");
+      dojo.subscribe("revealPlayed", this, "notif_revealPlayed");
       dojo.subscribe("changeMind", this, "notif_changeMind");
       dojo.subscribe("store", this, "notif_store");
       dojo.subscribe("activateActionCard", this, "notif_activateActionCard");
@@ -838,7 +840,7 @@ define([
         "notif_computeArchivedPoints"
       );
 
-      this.notifqueue.setSynchronous("playCards", 1000);
+      this.notifqueue.setSynchronous("revealPlayed", 1000);
       this.notifqueue.setSynchronous("store", 1000);
       this.notifqueue.setSynchronous("activateActionCard", 1000);
       this.notifqueue.setSynchronous("revealEncrypted", 1000);
@@ -856,7 +858,28 @@ define([
       const player_id = notif.args.player_id;
       const actionCard = notif.args.actionCard;
       const infoCard = notif.args.infoCard;
-      const isCurrentPlayer = this.player_id == player_id;
+
+      const playedActionControl = `playedActionStock$${player_id}`;
+      const playedInfoControl = `playedInfoStock$${player_id}`;
+
+      this[playedActionControl].addCard(actionCard);
+      this[playedInfoControl].addCard(infoCard);
+
+      const actionsInHandControl = `actionsInHandStock$${player_id}`;
+      const infoInHandControl = `infoInHandStock$${player_id}`;
+
+      this.updateHandWidth(this[actionsInHandControl]);
+      this.updateHandWidth(this[infoInHandControl]);
+    },
+
+    notif_revealPlayed: function (notif) {
+      const player_id = notif.args.player_id;
+      const actionCard = notif.args.actionCard;
+      const infoCard = notif.args.infoCard;
+
+      if (player_id == this.player_id) {
+        return;
+      }
 
       const playedActionControl = `playedActionStock$${player_id}`;
       this[playedActionControl].addCard(actionCard);
@@ -864,19 +887,17 @@ define([
       const actionsInHandControl = `actionsInHandStock$${player_id}`;
       const infoInHandControl = `infoInHandStock$${player_id}`;
 
-      if (!isCurrentPlayer) {
-        const hand = this[infoInHandControl].getCards();
-        const randomIndex = Math.floor(Math.random() * hand.length);
-        const randomCard = hand[randomIndex];
+      const hand = this[infoInHandControl].getCards();
+      const randomIndex = Math.floor(Math.random() * hand.length);
+      const randomCard = hand[randomIndex];
 
-        this[infoInHandControl].removeCard(randomCard);
-      }
+      this[infoInHandControl].removeCard(randomCard);
 
       const playedInfoControl = `playedInfoStock$${player_id}`;
       this[playedInfoControl].removeAll();
 
       this[playedInfoControl].addCard(infoCard, {
-        fromElement: $(`prs_playedInfo$${player_id}`),
+        fromElement: $(`prs_infoInHand$${player_id}`),
       });
 
       this.updateHandWidth(this[actionsInHandControl]);
