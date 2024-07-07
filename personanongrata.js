@@ -26,6 +26,15 @@ define([
     constructor: function () {
       console.log("personanongrata constructor");
 
+      this.corporationColors = {
+        1: "35a7dd",
+        2: "652b80",
+        3: "029447",
+        4: "c4c02f",
+        5: "936036",
+        6: "bc2026",
+      };
+
       this.hackerManager = new CardManager(this, {
         cardHeight: 280,
         cardWidth: 180,
@@ -1272,6 +1281,37 @@ define([
       }
 
       this.scoreCtrl[player_id].toValue(points);
+    },
+
+    //Style logs
+    // @Override
+    format_string_recursive: function (log, args) {
+      try {
+        if (log && args && !args.processed) {
+          args.processed = true;
+
+          console.log(args, args.corporationId, args.corporation_label, "args");
+
+          if (args.corporationId) {
+            const corporationId = args.corporationId;
+            const corporationColor = this.corporationColors[corporationId];
+
+            console.log(corporationColor);
+
+            if (args.corporation_label) {
+              args.corporation_label = `<span style="color: #${corporationColor}">${args.corporation_label}</span>`;
+            }
+
+            if (args.info_label) {
+              args.info_label = `<span style="color: #${corporationColor}">${args.info_label}</span>`;
+            }
+          }
+        }
+      } catch (e) {
+        console.error(log, args, "Exception thrown", e.stack);
+      }
+
+      return this.inherited(arguments);
     },
   });
 });

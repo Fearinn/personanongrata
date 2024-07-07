@@ -682,12 +682,14 @@ class PersonaNonGrata extends Table
             "store",
             clienttranslate('${player_name2} sends a ${info_label} of ${corporation_label} to ${player_name}'),
             array(
+                "preserve" => array("corporationId"),
                 "player_id" => $recipient_id,
                 "player_name" => $this->getPlayerNameById($recipient_id),
                 "player_id2" => $player_id,
                 "player_name2" => $this->getPlayerNameById($player_id),
                 "info_label" => $this->informations[$info_id]["name"],
                 "corporation_label" => $this->corporations()[$corporation_id],
+                "corporationId" => $corporation_id,
                 "infoCard" => $info_card,
             )
         );
@@ -707,12 +709,14 @@ class PersonaNonGrata extends Table
             "store",
             clienttranslate('${player_name2} sends a ${info_label} of ${corporation_label} to ${player_name}'),
             array(
+                "preserve" => array("corporationId"),
                 "player_id" => $recipient_id,
                 "player_name" => $this->getPlayerNameById($recipient_id),
                 "player_id2" => $player_id,
                 "player_name2" => $this->getPlayerNameById($player_id),
                 "info_label" => $this->informations[$info_id]["name"],
                 "corporation_label" => $this->corporations()[$corporation_id],
+                "corporationId" => $corporation_id,
                 "infoCard" => $info_card,
             )
         );
@@ -741,12 +745,14 @@ class PersonaNonGrata extends Table
             "revealPlayed",
             $message,
             array(
-                "i18n" => array("action_label", "info_label", "corporation_label"),
+                "preserve" => array("corporationId"),
+                "i18n" => array("action_label", "info_label"),
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
                 "action_label" => $this->actions[$action_id],
                 "info_label" => $encrypt ? null : $this->informations[$info_id]["name"],
                 "corporation_label" => $encrypt ? null : $this->corporations()[$corporation_id],
+                "corporationId" => $corporation_id,
                 "actionCard" => $action_card,
                 "infoCard" => $info_card,
                 "encrypt" => $encrypt
@@ -857,11 +863,13 @@ class PersonaNonGrata extends Table
             "revealEncrypted",
             clienttranslate('${player_name} reveals his encrypted card... It&apos;s a ${info_label} of ${corporation_label}!'),
             array(
-                "i18n" => array("info_label", "corporation_label"),
+                "preserve" => array("corporationId"),
+                "i18n" => array("info_label"),
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
                 "info_label" => $this->informations[$info_id]["name"],
                 "corporation_label" => $this->corporations()[$corporation_id],
+                "corporationId" => $corporation_id,
                 "infoCard" => $info_card
             )
         );
@@ -891,10 +899,11 @@ class PersonaNonGrata extends Table
                     "storePoints",
                     clienttranslate('${player_name} scores ${points} points for ${corporation_label}'),
                     array(
-                        "i18n" => array("corporation_label"),
+                        "preserve" => array("corporationId"),
                         "player_id" => $player_id,
                         "player_name" => $this->getPlayerNameById($player_id),
                         "corporation_label" => $this->corporations()[$corporation_id],
+                        "corporationId" => $corporation_id,
                         "points" => $points
                     )
                 );
@@ -914,11 +923,12 @@ class PersonaNonGrata extends Table
             "obtainCorporation",
             clienttranslate('${player_name} obtains the Corporation card of ${corporation_label} with value ${card_value}'),
             array(
-                "i18n" => array("corporation_label"),
+                "preserve" => array("corporationId"),
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
-                "corporation_label" => $this->corporations()[$corporation_id],
                 "card_value" => $card_value,
+                "corporation_label" => $this->corporations()[$corporation_id],
+                "corporationId" => $corporation_id,
                 "corporationCard" => $corporation_card,
             )
         );
@@ -937,10 +947,11 @@ class PersonaNonGrata extends Table
                 "keepKey",
                 clienttranslate('${player_name} keeps the Key card of ${corporation_label}'),
                 array(
-                    "i18n" => array("corporation_label"),
+                    "preserve" => array("corporationId"),
                     "player_id" => $player_id,
                     "player_name" => $this->getPlayerNameById($player_id),
                     "corporation_label" => $this->corporations()[$corporation_id],
+                    "corporationId" => $corporation_id,
                     "keyCard" => $key_card,
                 )
             );
@@ -954,10 +965,11 @@ class PersonaNonGrata extends Table
             "obtainKey",
             clienttranslate('${player_name} obtains the Key card of ${corporation_label}'),
             array(
-                "i18n" => array("corporation_label"),
+                "preserve" => array("corporationId"),
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
                 "corporation_label" => $this->corporations()[$corporation_id],
+                "corporationId" => $corporation_id,
                 "keyCard" => $key_card,
             )
         );
@@ -984,10 +996,12 @@ class PersonaNonGrata extends Table
                     "discardActivator",
                     clienttranslate('${player_name} discards the Corporation card of value ${value} to activate ${corporation_label}'),
                     array(
-                        "i18n" => array("corporation_label"),
+                        "preserve" => array("corporationId"),
+
                         "player_name" => $this->getPlayerNameById($player_id),
+                        "value" => $card["type_arg"],
                         "corporation_label" => $this->corporations()[$corporation_id],
-                        "value" => $card["type_arg"]
+                        "corporationId" => $corporation_id
                     )
                 );
 
@@ -1005,10 +1019,11 @@ class PersonaNonGrata extends Table
                 "discardActivator",
                 clienttranslate('${player_name} discards the Corporation card of value ${value} to activate ${corporation_label}'),
                 array(
-                    "i18n" => array("corporation_label"),
+                    "preserve" => array("corporationId"),
                     "player_name" => $this->getPlayerNameById($player_id),
+                    "value" => $worker["type_arg"],
                     "corporation_label" => $this->corporations()[$corporation_id],
-                    "value" => $worker["type_arg"]
+                    "corporationId" => $corporation_id
                 )
             );
 
@@ -1024,10 +1039,11 @@ class PersonaNonGrata extends Table
                 "discardActivator",
                 clienttranslate('${player_name} discards the Corporation card of value ${value} to activate ${corporation_label}'),
                 array(
-                    "i18n" => array("corporation_label"),
+                    "preserve" => array("corporationId"),
                     "player_name" => $this->getPlayerNameById($player_id),
+                    "value" => $last_activator["type_arg"],
                     "corporation_label" => $this->corporations()[$corporation_id],
-                    "value" => $last_activator["type_arg"]
+                    "corporationId" => $corporation_id
                 )
             );
 
@@ -1065,7 +1081,7 @@ class PersonaNonGrata extends Table
             "computeArchivedPoints",
             clienttranslate('${player_name} scores ${points} points with ${corporation_label}'),
             array(
-                "i18n" => array("corporation_label"),
+                "preserve" => array("corporationId"),
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
                 "player_color" => $this->getPlayerColorById($player_id),
@@ -1114,11 +1130,13 @@ class PersonaNonGrata extends Table
             "playCards",
             clienttranslate('You combine a ${action_label} to a ${info_label} of ${corporation_label}'),
             array(
+                "preserve" => array("corporationId"),
                 "i18n" => array("action_label", "info_label"),
                 "player_id" => $player_id,
                 "action_label" => $this->actions[$action_id],
                 "info_label" => $this->informations[$info_id]["name"],
                 "corporation_label" => $this->corporations()[$corporation_id],
+                "corporationId" => $corporation_id,
                 "actionCard" => $action_card,
                 "infoCard" => $info_card
             )
@@ -1183,6 +1201,7 @@ class PersonaNonGrata extends Table
             "stealCard",
             clienttranslate('${player_name} takes a of ${corporation_label} from ${player_name2} '),
             array(
+                "preserve" => array("corporationId"),
                 "i18n" => array("info_label"),
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
@@ -1190,6 +1209,7 @@ class PersonaNonGrata extends Table
                 "player_name2" => $this->getPlayerNameById($opponent_id),
                 "info_label" => $this->informations[$info_id]["name"],
                 "corporation_label" => $this->corporations()[$corporation_id],
+                "corporationId" => $corporation_id,
                 "infoCard" => $card
             )
         );
@@ -1221,11 +1241,13 @@ class PersonaNonGrata extends Table
             "breakTie",
             clienttranslate('${player_name} picks ${player_name2} to obtain the Key of ${corporation_label}'),
             array(
+                "preserve" => array("corporationId"),
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
                 "player_id2" => $opponent_id,
                 "player_name2" => $this->getPlayerNameById($opponent_id),
-                "corporation_label" => $this->corporations()[$corporation_id]
+                "corporation_label" => $this->corporations()[$corporation_id],
+                "corporationId" => $corporation_id
             )
         );
 
@@ -1328,8 +1350,9 @@ class PersonaNonGrata extends Table
                 "tie",
                 clienttranslate('No player scores points with ${corporation_label} this week'),
                 array(
-                    "i18n" => array("corporation_label"),
-                    "corporation_label" => $corporation_label
+                    "preserve" => array("corporationId"),
+                    "corporation_label" => $corporation_label,
+                    "corporationId" => $corporation_id,
                 )
             );
             $this->gamestate->nextState("infoArchiving");
@@ -1347,7 +1370,9 @@ class PersonaNonGrata extends Table
                 "tie",
                 clienttranslate('Two or more players are tied in the first-place for ${corporation_label}'),
                 array(
-                    "corporation_label" => $corporation_label
+                    "preserve" => array("corporationId"),
+                    "corporation_label" => $corporation_label,
+                    "corporationId" => $corporation_id
                 )
             );
 
@@ -1371,8 +1396,9 @@ class PersonaNonGrata extends Table
                 "tie",
                 clienttranslate('Two or more players are tied in the second-place for ${corporation_label}'),
                 array(
-                    "i18n" => array("corporation_label"),
-                    "corporation_label" => $corporation_label
+                    "preserve" => array("corporationId"),
+                    "corporation_label" => $corporation_label,
+                    "corporationId" => $corporation_id
                 )
             );
 
