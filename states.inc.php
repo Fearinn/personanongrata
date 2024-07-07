@@ -45,7 +45,10 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must combine an Action card to an Information card'),
         "type" => "private",
         "possibleactions" => array("playCards"),
-        "transitions" => array("discardCard" => 21, "betweenDays" => 3),
+        "transitions" => array(
+            "discardCard" => 21,
+            "betweenDays" => 3
+        ),
     ),
 
     21 => array(
@@ -53,7 +56,10 @@ $machinestates = array(
         "description" => clienttranslate('Other player(s) must discard an Information card'),
         "descriptionmyturn" => clienttranslate('${you} must discard an Information card'),
         "type" => "private",
-        "possibleactions" => array("discardCard", "changeMind"),
+        "possibleactions" => array(
+            "discardCard",
+            "changeMind"
+        ),
         "transitions" => array("changeMind" => 20),
     ),
 
@@ -62,7 +68,10 @@ $machinestates = array(
         "description" => "",
         "type" => "game",
         "action" => "st_betweenDays",
-        "transitions" => array("nextDay" => 2, "infoArchiving" => 4),
+        "transitions" => array(
+            "nextDay" => 2,
+            "infoArchiving" => 4
+        ),
         "updateGameProgression" => true
     ),
 
@@ -74,6 +83,7 @@ $machinestates = array(
         "transitions" => array(
             "infoArchiving" => 4,
             "stealCard" => 41,
+            "breakTie" => 42,
             "betweenWeeks" => 5
         ),
         "updateGameProgression" => true
@@ -88,7 +98,18 @@ $machinestates = array(
         "args" => "arg_stealCard",
         "transitions" => array(
             "infoArchiving" => 4,
-            "betweenWeeks" => 5
+        )
+    ),
+
+    42 => array(
+        "name" => "breakTie",
+        "description" => clienttranslate('${actplayer} must pick who obtains the Key of ${corporation_label} this week'),
+        "descriptionmyturn" => clienttranslate('${you} must pick who obtains the Key of ${corporation_label} this week'),
+        "type" => "activeplayer",
+        "possibleactions" => array("breakTie"),
+        "args" => "arg_breakTie",
+        "transitions" => array(
+            "infoArchiving" => 4,
         )
     ),
 

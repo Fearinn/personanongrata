@@ -29,6 +29,7 @@ define([
       this.hackerManager = new CardManager(this, {
         cardHeight: 280,
         cardWidth: 180,
+        selectedCardClass: "prs_selected",
         getId: (card) => `hacker-${card.id}`,
         setupDiv: (card, div) => {
           div.classList.add("prs_card");
@@ -216,6 +217,22 @@ define([
           $(`prs_hacker$${player_id}`),
           { direction: "column" }
         );
+
+        this[hackerControl].onSelectionChange = (selection, lastChange) => {
+          if (
+            this.getStateName() === "breakTie" &&
+            this.isCurrentPlayerActive()
+          ) {
+            if (selection.length === 0) {
+              this.selectedTieWinner = null;
+            } else {
+              console.log(lastChange);
+              this.selectedTieWinner = lastChange.location_arg;
+            }
+
+            this.handleConfirmationButton();
+          }
+        };
 
         const hackerCard = this.hackers[player_id];
 
@@ -628,6 +645,13 @@ define([
           this[storedControl].setSelectionMode("none");
         }
       }
+
+      if (stateName === "breakTie") {
+        for (const player_id in this.players) {
+          const hackerControl = `hackerStock$${player_id}`;
+          this[hackerControl].setSelectionMode("none");
+        }
+      }
     },
 
     onUpdateActionButtons: function (stateName, args) {
@@ -670,6 +694,21 @@ define([
                 });
 
               this[storedControl].setSelectableCards(selectableCards);
+            }
+          }
+        }
+        return;
+      }
+
+      if (stateName === "breakTie") {
+        const tiedPlayers = args.tiedPlayers;
+        if (this.isCurrentPlayerActive()) {
+          for (const player_id in this.players) {
+            const hackerControl = `hackerStock$${player_id}`;
+            this[hackerControl].setSelectionMode("single");
+
+            if (!tiedPlayers[player_id]) {
+              this[hackerControl].setSelectableCards([]);
             }
           }
         }
@@ -785,6 +824,18 @@ define([
           );
         }
       }
+
+      if (this.getStateName() === "breakTie") {
+        if (this.selectedTieWinner) {
+          this.addActionButton(
+            "prs_confirmationBtn",
+            _("Confirm selection"),
+            () => {
+              this.onBreakTie();
+            }
+          );
+        }
+      }
     },
 
     ///////////////////////////////////////////////////
@@ -809,6 +860,12 @@ define([
     onStealCard() {
       this.sendAjaxCall("stealCard", {
         card_id: this.selectedInfo.id,
+      });
+    },
+
+    onBreakTie() {
+      this.sendAjaxCall("breakTie", {
+        tie_winner: this.selectedTieWinner,
       });
     },
 

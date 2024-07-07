@@ -214,7 +214,7 @@ class PersonaNonGrata extends Table
 
     function corporations(array $players = null): array
     {
-        if (!key_exists(6, $this->corporations())) {
+        if (!key_exists(6, $this->corporations)) {
             return $this->corporations;
         }
 
@@ -327,7 +327,10 @@ class PersonaNonGrata extends Table
         foreach ($players as $player_id => $player) {
             $player_color = $this->getPlayerColorById($player_id);
 
-            $hackers[$player_id] = $this->getHackerByColor($player_color);
+            $hacker = $this->getHackerByColor($player_color);
+            $hacker["location_arg"] = $player_id;
+
+            $hackers[$player_id] = $hacker;
         }
 
         return $hackers;
@@ -556,6 +559,20 @@ class PersonaNonGrata extends Table
         }
 
         return $archived_informations;
+    }
+
+    //key tie break
+
+    function setKeyTiedPlayer($player_id, $tied = 1): void
+    {
+        $this->DbQuery("UPDATE player SET player_tied=$tied WHERE player_id='$player_id'");
+    }
+
+    function getKeyTiedPlayers(): array
+    {
+        $tied_players = $this->getCollectionFromDB("SELECT player_id id from player WHERE player_tied=1");
+
+        return $tied_players;
     }
 
     //checkers
@@ -1066,7 +1083,7 @@ class PersonaNonGrata extends Table
             "playCards",
             clienttranslate('You combine a ${action_label} to a ${info_label} of ${corporation_label}'),
             array(
-                "i18n" => array("action_label", "info_label", "corporation_label"),
+                "i18n" => array("action_label", "info_label"),
                 "player_id" => $player_id,
                 "action_label" => $this->actions[$action_id],
                 "info_label" => $this->informations[$info_id]["name"],
@@ -1135,7 +1152,7 @@ class PersonaNonGrata extends Table
             "stealCard",
             clienttranslate('${player_name} takes a of ${corporation_label} from ${player_name2} '),
             array(
-                "i18n" => array("info_label", "corporation_label"),
+                "i18n" => array("info_label"),
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
                 "player_id2" => $opponent_id,
@@ -1145,6 +1162,45 @@ class PersonaNonGrata extends Table
                 "infoCard" => $card
             )
         );
+
+        $this->gamestate->nextState("infoArchiving");
+    }
+
+    function breakTie($opponent_id)
+    {
+        $this->checkAction("breakTie");
+
+        $player_id = $this->getActivePlayerId();
+        $corporation_id = $this->getGameStateValue("currentCorporation") - 1;
+
+        $tied_players = $this->getKeyTiedPlayers($corporation_id);
+
+        $this->dump("opponent", $opponent_id);
+        $this->dump("tied", $tied_players);
+
+        if (!key_exists($opponent_id, $tied_players)) {
+            throw new BgaVisibleSystemException("You can't pick this player as tie winner");
+        }
+
+        $key_card = $this->getKeyByCorporation($corporation_id);
+
+        $this->key_cards->moveCard($key_card["id"], "archived", $opponent_id);
+
+        $this->notifyAllPlayers(
+            "breakTie",
+            clienttranslate('${player_name} picks ${player_name2} to obtain the Key of ${corporation_label}'),
+            array(
+                "player_id" => $player_id,
+                "player_name" => $this->getPlayerNameById($player_id),
+                "player_id2" => $opponent_id,
+                "player_name2" => $this->getPlayerNameById($opponent_id),
+                "corporation_label" => $this->corporations()[$corporation_id]
+            )
+        );
+
+        foreach ($tied_players as $player_id => $player) {
+            $this->setKeyTiedPlayer($player_id, 0);
+        }
 
         $this->gamestate->nextState("infoArchiving");
     }
@@ -1159,9 +1215,22 @@ class PersonaNonGrata extends Table
         $corporation_label = $this->corporations()[$corporation_id];
 
         return array(
-            "i18n" => array("corporation_label"),
             "corporation_label" => $corporation_label,
             "corporationId" => $corporation_id
+        );
+    }
+
+    function arg_breakTie()
+    {
+        $corporation_id = $this->getGameStateValue("currentCorporation") - 1;
+        $corporation_label = $this->corporations()[$corporation_id];
+
+        $tied_players = $this->getKeyTiedPlayers();
+
+        return array(
+            "corporation_label" => $corporation_label,
+            "corporationId" => $corporation_id,
+            "tiedPlayers" => $tied_players
         );
     }
 
@@ -1188,8 +1257,10 @@ class PersonaNonGrata extends Table
             $this->activateActionCard($player_id);
         }
 
+        $hand_actions_count = $this->action_cards->countCardsInLocation("hand");
+
         //tests
-        if (count($this->getActionsInMyHand($player_id)) <= 3) {
+        if ($hand_actions_count <= 12) {
             $this->gamestate->nextState("infoArchiving");
             return;
         }
@@ -1225,7 +1296,7 @@ class PersonaNonGrata extends Table
         if (!$most_points) {
             $this->notifyAllPlayers(
                 "tie",
-                clienttranslate('No player scores points with ${corporation_label} this round'),
+                clienttranslate('No player scores points with ${corporation_label} this week'),
                 array(
                     "i18n" => array("corporation_label"),
                     "corporation_label" => $corporation_label
@@ -1246,11 +1317,10 @@ class PersonaNonGrata extends Table
                 "tie",
                 clienttranslate('Two or more players are tied in the first-place for ${corporation_label}'),
                 array(
-                    "i18n" => array("corporation_label"),
                     "corporation_label" => $corporation_label
                 )
             );
-            //tests
+
             $this->gamestate->nextState("infoArchiving");
             return;
         }
@@ -1263,6 +1333,10 @@ class PersonaNonGrata extends Table
         $runner_ups = array_keys($corporation_points, $second_most_points);
 
         if (count($runner_ups) >= 2 && $second_most_points) {
+            foreach ($runner_ups as $player_id) {
+                $this->setKeyTiedPlayer($player_id);
+            }
+
             $this->notifyAllPlayers(
                 "tie",
                 clienttranslate('Two or more players are tied in the second-place for ${corporation_label}'),
@@ -1272,9 +1346,9 @@ class PersonaNonGrata extends Table
                 )
             );
 
-            //tests
-            // $this->gamestate->nextState("infoArchiving");
-            // return;
+            $this->gamestate->changeActivePlayer($first);
+            $this->gamestate->nextState("breakTie");
+            return;
         }
 
         $second = array_shift($runner_ups);

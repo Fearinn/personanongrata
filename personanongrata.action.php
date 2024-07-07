@@ -64,4 +64,14 @@ class action_personanongrata extends APP_GameAction
 
     $this->ajaxResponse();
   }
+
+  public function breakTie()
+  {
+    $this->setAjaxMode();
+
+    $tie_winner = $this->getArg("tie_winner", AT_int, true);
+    $this->game->breakTie($tie_winner);
+
+    $this->ajaxResponse();
+  }
 }
