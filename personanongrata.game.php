@@ -1053,6 +1053,12 @@ class PersonaNonGrata extends Table
             $points += $card["type_arg"];
         }
 
+        $archived_keys = $this->key_cards->getCardsOfTypeInLocation($corporation_id, null, "archived", $player_id);
+
+        foreach ($archived_keys as $card) {
+            $points += 2;
+        }
+
         $this->dbIncScore($player_id, $points);
 
         $this->notifyAllPlayers(
@@ -1068,6 +1074,7 @@ class PersonaNonGrata extends Table
                 "points" => $points,
                 "corporationCards" => $archived_corporations,
                 "infoCards" => $archived_info,
+                "keyCards" => $archived_keys
             )
         );
 
@@ -1283,8 +1290,7 @@ class PersonaNonGrata extends Table
 
         $hand_actions_count = $this->action_cards->countCardsInLocation("hand");
 
-        //tests
-        if ($hand_actions_count <= 12) {
+        if ($hand_actions_count == 0) {
             $this->gamestate->nextState("infoArchiving");
             return;
         }

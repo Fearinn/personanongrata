@@ -380,8 +380,8 @@ define([
         }
 
         //archived
-        const archivedCorporationControl = `archivedCorporationStock$${player_id}`;
-        this[archivedCorporationControl] = new AllVisibleDeck(
+        const archivedCorporationsControl = `archivedCorporationStock$${player_id}`;
+        this[archivedCorporationsControl] = new AllVisibleDeck(
           this.corporationManager,
           $(`prs_archivedCorporation$${player_id}`),
           {
@@ -396,10 +396,10 @@ define([
         for (const card_id in archivedCorporations) {
           const card = archivedCorporations[card_id];
 
-          this[archivedCorporationControl].addCard(card);
+          this[archivedCorporationsControl].addCard(card);
         }
 
-        const archivedKeyControl = `archivedKeyStock$${player_id}`;
+        const archivedKeyControl = `archivedKeysStock$${player_id}`;
         this[archivedKeyControl] = new AllVisibleDeck(
           this.keyManager,
           $(`prs_archivedKey$${player_id}`),
@@ -1064,15 +1064,15 @@ define([
       const player_id = notif.args.player_id;
       const corporationCard = notif.args.corporationCard;
 
-      const archivedCorporationControl = `archivedCorporationStock$${player_id}`;
-      this[archivedCorporationControl].addCard(corporationCard);
+      const archivedCorporationsControl = `archivedCorporationStock$${player_id}`;
+      this[archivedCorporationsControl].addCard(corporationCard);
     },
 
     notif_obtainKey: function (notif) {
       const player_id = notif.args.player_id;
       const keyCard = notif.args.keyCard;
 
-      const archivedKeyControl = `archivedKeyStock$${player_id}`;
+      const archivedKeyControl = `archivedKeysStock$${player_id}`;
       this[archivedKeyControl].addCard(keyCard);
     },
 
@@ -1232,17 +1232,18 @@ define([
       const points = notif.args.points;
       const corporationCards = notif.args.corporationCards;
       const infoCards = notif.args.infoCards;
+      const keyCards = notif.args.keyCards;
 
-      const archivedCorporationControl = `archivedCorporationStock$${player_id}`;
-      this[archivedCorporationControl].removeAll();
+      const archivedCorporationsControl = `archivedCorporationStock$${player_id}`;
+      this[archivedCorporationsControl].removeAll();
 
       for (const card_id in corporationCards) {
         const card = corporationCards[card_id];
-        this[archivedCorporationControl].addCard(card);
-        this[archivedCorporationControl].setCardVisible(card, true);
+        this[archivedCorporationsControl].addCard(card);
+        this[archivedCorporationsControl].setCardVisible(card, true);
 
         const cardElement =
-          this[archivedCorporationControl].getCardElement(card);
+          this[archivedCorporationsControl].getCardElement(card);
         this.displayScoring(cardElement, player_color, card.type_arg);
       }
 
@@ -1255,6 +1256,18 @@ define([
         this[archivedInfoControl].setCardVisible(card, true);
 
         const cardElement = this[archivedInfoControl].getCardElement(card);
+        this.displayScoring(cardElement, player_color, card.type_arg);
+      }
+
+      const archivedKeysControl = `archivedKeysStock$${player_id}`;
+      this[archivedKeysControl].removeAll();
+
+      for (const card_id in keyCards) {
+        const card = keyCards[card_id];
+        this[archivedKeysControl].addCard(card);
+        this[archivedKeysControl].setCardVisible(card, true);
+
+        const cardElement = this[archivedKeysControl].getCardElement(card);
         this.displayScoring(cardElement, player_color, card.type_arg);
       }
 
