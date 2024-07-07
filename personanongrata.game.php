@@ -193,7 +193,7 @@ class PersonaNonGrata extends Table
         $result["discardedActions"] = $this->getActionsDiscarded();
         $result["encryptActionUsed"] = $this->getEncryptActionUsed();
         $result["keysArchived"] = $this->getKeysArchived();
-        $result["corporationsArchived"] = $this->getCorporationsArchived();
+        $result["archivedCorporations"] = $this->getArchivedCorporations();
         $result["archivedInfo"] = $this->getArchivedInfo();
         return $result;
     }
@@ -206,11 +206,51 @@ class PersonaNonGrata extends Table
         return round($progression);
     }
 
-
-
     //////////////////////////////////////////////////////////////////////////////
     //////////// Utility functions
     ////////////
+
+    //scoring helpers
+    function dbGetScore($player_id)
+    {
+        return $this->getUniqueValueFromDB("SELECT player_score FROM player WHERE player_id='$player_id'");
+    }
+
+    function dbSetScore($player_id, $count)
+    {
+        $this->DbQuery("UPDATE player SET player_score='$count' WHERE player_id='$player_id'");
+    }
+
+    function dbSetAuxScore($player_id, $score)
+    {
+        $this->DbQuery("UPDATE player SET player_score_aux=$score WHERE player_id='$player_id'");
+    }
+
+    function dbIncScore($player_id, $inc)
+    {
+        $count = $this->dbGetScore($player_id);
+        if ($inc != 0) {
+            $count += $inc;
+            $this->dbSetScore($player_id, $count);
+        }
+        return $count;
+    }
+
+    //deck helpers
+    function getSingleCardInLocation(object $deck, string $location, int $location_arg = null, $showError = true): ?array
+    {
+        $location_cards = $deck->getCardsInLocation($location, $location_arg);
+
+        $card = array_shift($location_cards);
+
+        if ($card === null && $showError) {
+            throw new BgaVisibleSystemException("Card not found");
+        }
+
+        return $card;
+    }
+
+    ////////////////////////////////////////////////////
 
     function corporations(array $players = null): array
     {
@@ -230,24 +270,6 @@ class PersonaNonGrata extends Table
     function getCustomPlayerAfter(int $player_id): int
     {
         return $this->isClockwise() ? $this->getPlayerAfter($player_id) : $this->getPlayerBefore($player_id);
-    }
-
-    function getCustomPlayerBefore(int $player_id): int
-    {
-        return $this->isClockwise() ? $this->getPlayerBefore($player_id) : $this->getPlayerAfter($player_id);
-    }
-
-    function getSingleCardInLocation(object $deck, string $location, int $location_arg = null, $showError = true): ?array
-    {
-        $location_cards = $deck->getCardsInLocation($location, $location_arg);
-
-        $card = array_shift($location_cards);
-
-        if ($card === null && $showError) {
-            throw new BgaVisibleSystemException("Card not found");
-        }
-
-        return $card;
     }
 
     function hideCard(array $card, bool $hideType = false, string | int $fake_id = null, string $fake_location = null): array
@@ -296,7 +318,6 @@ class PersonaNonGrata extends Table
         return $hidden_cards;
     }
 
-    //getters
     function getHackerByColor(string $color): array
     {
         $hacker_card = null;
@@ -318,6 +339,15 @@ class PersonaNonGrata extends Table
         return $hacker_card;
     }
 
+    function getCardOfTheWeek(): int
+    {
+        $week = $this->getGameStateValue("week");
+
+        return $this->cardOfTheWeek[$week];
+    }
+
+    //gamedatas getters
+
     function getHackers(): array
     {
         $players = $this->loadPlayersBasicInfos();
@@ -334,13 +364,6 @@ class PersonaNonGrata extends Table
         }
 
         return $hackers;
-    }
-
-    function getCardOfTheWeek(): int
-    {
-        $week = $this->getGameStateValue("week");
-
-        return $this->cardOfTheWeek[$week];
     }
 
     function getKeyByCorporation(int $corporation_id): array
@@ -527,7 +550,7 @@ class PersonaNonGrata extends Table
         return $archived_keys;
     }
 
-    function getCorporationsArchived(int $player_id = null): array
+    function getArchivedCorporations(int $player_id = null): array
     {
         if ($player_id) {
             return $this->corporation_cards->getCardsInLocation("archived", $player_id);
@@ -562,7 +585,6 @@ class PersonaNonGrata extends Table
     }
 
     //key tie break
-
     function setKeyTiedPlayer($player_id, $tied = 1): void
     {
         $this->DbQuery("UPDATE player SET player_tied=$tied WHERE player_id='$player_id'");
@@ -781,7 +803,7 @@ class PersonaNonGrata extends Table
         $senders = array();
 
         foreach ($players as $player_id => $player) {
-            $recipient_id = $this->isClockwise() ? $this->getPlayerAfter($player_id) : $this->getPlayerBefore($player_id);
+            $recipient_id = $this->getCustomPlayerAfter($player_id);
             $this->information_cards->moveAllCardsInLocation("hand", "preHand", $player_id, $recipient_id);
 
             $senders[$recipient_id] = $player_id;
@@ -1030,6 +1052,8 @@ class PersonaNonGrata extends Table
         foreach ($archived_info as $card) {
             $points += $card["type_arg"];
         }
+
+        $this->dbIncScore($player_id, $points);
 
         $this->notifyAllPlayers(
             "computeArchivedPoints",

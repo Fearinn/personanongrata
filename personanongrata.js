@@ -198,7 +198,7 @@ define([
       this.discardedActions = gamedatas.discardedActions;
       this.encryptActionUsed = gamedatas.encryptActionUsed;
       this.keysArchived = gamedatas.keysArchived;
-      this.corporationsArchived = gamedatas.corporationsArchived;
+      this.archivedCorporations = gamedatas.archivedCorporations;
       this.archivedInfo = gamedatas.archivedInfo;
 
       this.selectedAction = gamedatas.cardsPlayedByMe["action"];
@@ -391,7 +391,7 @@ define([
           }
         );
 
-        const archivedCorporations = this.corporationsArchived[player_id];
+        const archivedCorporations = this.archivedCorporations[player_id];
 
         for (const card_id in archivedCorporations) {
           const card = archivedCorporations[card_id];
