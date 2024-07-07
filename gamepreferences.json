@@ -1,10 +1,22 @@
 {
   "100": {
     "name": "Thematic background",
-    "needReload": true,
     "values": {
       "0": { "name": "Disabled" },
       "1": { "name": "Enabled", "cssPref": "prs_darkTheme", "default": true }
-    }
+    },
+    "needReload": true
+  },
+  "101": {
+    "name": "Sort hand by",
+    "values": {
+      "1": {
+        "name": "Corporation, then Information value"
+      },
+      "2": {
+        "name": "Information value, then Corporation"
+      }
+    },
+    "needReload": true
   }
 }

@@ -188,6 +188,11 @@ define([
     setup: function (gamedatas) {
       console.log("Starting game setup");
 
+      this.infoSortFunction =
+        this.getGameUserPreference("101") == 1
+          ? sortFunction("type", "type_arg")
+          : sortFunction("type_arg", "type");
+
       this.players = gamedatas.players;
       this.clockwise = gamedatas.clockwise;
       this.nextPlayer = gamedatas.nextPlayer;
@@ -258,7 +263,7 @@ define([
           this[actionsInHandControl] = new HandStock(
             this.actionManager,
             $(`prs_handOfActions$${player_id}`),
-            { cardOverlap: "160px", sort: sortFunction("type", "type_arg") }
+            { cardOverlap: "160px", sort: sortFunction("type_arg") }
           );
 
           const actionCards = this.actionsInOtherHands[player_id];
@@ -276,7 +281,7 @@ define([
           this[infoInHandControl] = new HandStock(
             this.informationManager,
             $(`prs_handOfInfo$${player_id}`),
-            { cardOverlap: "160px", sort: sortFunction("type", "type_arg") }
+            { cardOverlap: "160px", sort: this.infoSortFunction }
           );
 
           const infoCards = this.infoInOtherHands[player_id];
@@ -612,7 +617,7 @@ define([
       this[infoInHandControl] = new HandStock(
         this.informationManager,
         $(`prs_handOfInfo$${this.player_id}`),
-        { cardOverlap: "90px", sort: sortFunction("type", "type_arg") }
+        { cardOverlap: "90px", sort: this.infoSortFunction }
       );
 
       for (const card_id in this.infoInMyHand) {
@@ -1289,8 +1294,6 @@ define([
       try {
         if (log && args && !args.processed) {
           args.processed = true;
-
-          console.log(args, args.corporationId, args.corporation_label, "args");
 
           if (args.corporationId) {
             const corporationId = args.corporationId;
