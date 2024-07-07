@@ -204,9 +204,9 @@ define([
       this.selectedAction = gamedatas.cardsPlayedByMe["action"];
       this.selectedInfo = gamedatas.cardsPlayedByMe["info"];
 
-      $(`prs_playerZone$${this.player_id}`).style.order = 0;
-      $(`prs_playerZone$${this.prevPlayer}`).style.order = -1;
-      $(`prs_playerZone$${this.nextPlayer}`).style.order = 1;
+      $(`prs_playerArea$${this.player_id}`).style.order = 0;
+      $(`prs_playerArea$${this.prevPlayer}`).style.order = -1;
+      $(`prs_playerArea$${this.nextPlayer}`).style.order = 1;
 
       for (const player_id in this.players) {
         const player = this.players[player_id];

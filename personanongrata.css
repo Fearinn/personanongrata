@@ -49,12 +49,13 @@
   align-items: stretch;
   justify-content: center;
   flex-wrap: wrap;
-  column-gap: 16px;
+  gap: 16px;
   width: 100%;
 }
 
 .prs_gameArea *:not(.prs_card) {
   box-sizing: border-box;
+  margin: 0;
 }
 
 .prs_selected {
@@ -68,7 +69,7 @@
   border-radius: 12px;
 }
 
-.prs_playerZones {
+.prs_playerAreas {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -78,36 +79,21 @@
   width: 100%;
 }
 
-.prs_playerZones .prs_playerZone {
-  flex-grow: 1;
-  order: 2;
-}
-
-.prs_zone {
+.prs_area {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 16px;
   border: 3px solid #000;
   border-radius: 8px;
   box-shadow: 5px 5px 5px 0 rgba(0, 0, 0, 0.2);
   outline: 2px solid #000;
-  gap: 16px;
-  min-width: 480px;
-}
-
-.prs_playerZone {
-  max-width: 2560px;
-}
-
-.prs_myZone {
+  padding: 16px;
   width: 100%;
 }
 
-.prs_publicZone {
-  outline-color: #fff;
-}
-
-.prs_zoneTitle {
+.prs_areaTitle {
   display: inline-block;
   align-self: flex-start;
   background-color: #000;
@@ -116,9 +102,37 @@
   padding: 4px;
 }
 
-.prs_publicZone .prs_zoneTitle {
+.prs_area:not(.prs_myArea) {
+  order: 2;
+}
+
+.prs_publicArea {
+  outline-color: #fff;
+}
+
+.prs_publicArea .prs_areaTitle {
   background-color: #fff;
   color: #000;
+}
+
+.prs_playerZones {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.prs_zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  border-radius: 8px;
+  padding: 8px;
+  min-height: 280px;
+  min-width: 180px;
 }
 
 .prs_publicCards {
@@ -134,15 +148,6 @@
   justify-content: center;
   flex-wrap: wrap;
   gap: 8px;
-  width: 100%;
-}
-
-.prs_handContainer {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 16px;
   width: 100%;
 }
 
