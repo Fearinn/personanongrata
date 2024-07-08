@@ -42,8 +42,8 @@ $this->hackers = array(
 $this->actions = array(
   1 => clienttranslate("Download"),
   2 => clienttranslate("Encrypt"),
-  3 => clienttranslate("Send to Right"),
-  4 => clienttranslate("Send to Left"),
+  3 => clienttranslate("Send Right"),
+  4 => clienttranslate("Send Left"),
 );
 
 $this->corporations = array(
@@ -51,8 +51,8 @@ $this->corporations = array(
   2 => "Cosmoco",
   3 => "Jihui",
   4 => "Delacruz",
-  5 => "Lumni",
-  6 => "SJT"
+  5 => "SJT",
+  6 => "Lumni",
 );
 
 $this->informations = array(

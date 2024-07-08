@@ -31,8 +31,8 @@ define([
         2: "652b80",
         3: "029447",
         4: "c4c02f",
-        5: "936036",
-        6: "bc2026",
+        5: "bc2026",
+        6: "936036",
       };
 
       this.hackerManager = new CardManager(this, {
@@ -48,7 +48,7 @@ define([
           div.style.zIndex = 1;
         },
         setupFrontDiv: (card, div) => {
-          div.style.background = `url(${g_gamethemeurl}img/hackers.png)`;
+          div.style.background = `url(${g_gamethemeurl}img/hackers.jpg)`;
           div.style.backgroundPosition = this.calcBackgroundPosition(
             card.type_arg + 3
           );
@@ -58,7 +58,7 @@ define([
         },
         setupBackDiv: (card, div) => {
           div.dataset.direction = "forward";
-          div.style.backgroundImage = `url(${g_gamethemeurl}img/hackers.png)`;
+          div.style.backgroundImage = `url(${g_gamethemeurl}img/hackers.jpg)`;
           div.style.backgroundPosition = this.calcBackgroundPosition(
             card.type_arg - 1
           );
@@ -77,19 +77,18 @@ define([
           div.style.position = "relative";
         },
         setupFrontDiv: (card, div) => {
-          div.style.background = `url(${g_gamethemeurl}img/corporations.png)`;
+          div.style.background = `url(${g_gamethemeurl}img/corporations.jpg)`;
 
           const type = Number(card.type);
           const type_arg = Number(card.type_arg);
 
-          const valueShift = type_arg == 4 ? 3 : type_arg;
-          const position = (type - 1) * 4 + valueShift;
+          const position = (type - 1) * 3 + type_arg / 2;
 
           div.style.backgroundPosition = this.calcBackgroundPosition(position);
           div.classList.add("prs_cardFace");
         },
         setupBackDiv: (card, div) => {
-          div.style.backgroundImage = `url(${g_gamethemeurl}img/corporations.png)`;
+          div.style.backgroundImage = `url(${g_gamethemeurl}img/corporations.jpg)`;
           div.style.backgroundPosition = this.calcBackgroundPosition(24);
           div.classList.add("prs_cardFace");
         },
@@ -106,16 +105,16 @@ define([
           div.style.position = "relative";
         },
         setupFrontDiv: (card, div) => {
-          div.style.background = `url(${g_gamethemeurl}img/corporations.png)`;
+          div.style.background = `url(${g_gamethemeurl}img/corporations.jpg)`;
 
           const type = Number(card.type);
-          const position = type * 4 - 3;
+          const position = type + 17;
 
           div.style.backgroundPosition = this.calcBackgroundPosition(position);
           div.classList.add("prs_cardFace");
         },
         setupBackDiv: (card, div) => {
-          div.style.backgroundImage = `url(${g_gamethemeurl}img/corporations.png)`;
+          div.style.backgroundImage = `url(${g_gamethemeurl}img/corporations.jpg)`;
           div.style.backgroundPosition = this.calcBackgroundPosition(24);
           div.classList.add("prs_cardFace");
         },
@@ -133,7 +132,7 @@ define([
           div.style.position = "relative";
         },
         setupFrontDiv: (card, div) => {
-          div.style.background = `url(${g_gamethemeurl}img/actions.png)`;
+          div.style.background = `url(${g_gamethemeurl}img/actions.jpg)`;
 
           const type = Number(card.type);
           const type_arg = Number(card.type_arg);
@@ -144,7 +143,7 @@ define([
           div.classList.add("prs_cardFace");
         },
         setupBackDiv: (card, div) => {
-          div.style.backgroundImage = `url(${g_gamethemeurl}img/actions.png)`;
+          div.style.backgroundImage = `url(${g_gamethemeurl}img/actions.jpg)`;
 
           const type = Number(card.type);
 
@@ -178,8 +177,8 @@ define([
           div.classList.add("prs_cardFace");
         },
         setupBackDiv: (card, div) => {
-          div.style.backgroundImage = `url(${g_gamethemeurl}img/informations.jpg)`;
-          div.style.backgroundPosition = this.calcBackgroundPosition(30);
+          div.style.backgroundImage = `url(${g_gamethemeurl}img/corporations.jpg)`;
+          div.style.backgroundPosition = this.calcBackgroundPosition(24);
           div.classList.add("prs_cardFace");
         },
       });
@@ -1298,8 +1297,6 @@ define([
           if (args.corporationId) {
             const corporationId = args.corporationId;
             const corporationColor = this.corporationColors[corporationId];
-
-            console.log(corporationColor);
 
             if (args.corporation_label) {
               args.corporation_label = `<span style="color: #${corporationColor}">${args.corporation_label}</span>`;
