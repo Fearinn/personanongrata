@@ -1394,11 +1394,11 @@ define([
             const corporationColor = this.corporationColors[corporationId];
 
             if (args.corporation_label) {
-              args.corporation_label = `<span style="color: #${corporationColor}">${args.corporation_label}</span>`;
+              args.corporation_label = `<span style="color: #${corporationColor}; font-weight: bold">${args.corporation_label}</span>`;
             }
 
             if (args.info_label) {
-              args.info_label = `<span style="color: #${corporationColor}">${args.info_label}</span>`;
+              args.info_label = `<span style="color: #${corporationColor}; font-weight: bold">${args.info_label}</span>`;
             }
           }
         }
