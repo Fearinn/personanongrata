@@ -87,7 +87,7 @@ class PersonaNonGrata extends Table
         foreach ($this->corporations($players) as $corporation_id => $corporation) {
             $key_cards[] = array(
                 "type" => $corporation_id,
-                "type_arg" => 2,
+                "type_arg" => 1,
                 "nbr" => 1
             );
 
@@ -1069,17 +1069,9 @@ class PersonaNonGrata extends Table
             $points += $card["type_arg"];
         }
 
-        $archived_keys = $this->key_cards->getCardsOfTypeInLocation($corporation_id, null, "archived", $player_id);
-
-        foreach ($archived_keys as $card) {
-            $points += 2;
-        }
-
-        $this->dbIncScore($player_id, $points);
-
         $this->notifyAllPlayers(
             "computeArchivedPoints",
-            clienttranslate('${player_name} scores ${points} points with ${corporation_label}'),
+            clienttranslate('${player_name} scores ${points} points with ${corporation_label} from archived cards'),
             array(
                 "preserve" => array("corporationId"),
                 "player_id" => $player_id,
@@ -1090,11 +1082,34 @@ class PersonaNonGrata extends Table
                 "points" => $points,
                 "corporationCards" => $archived_corporations,
                 "infoCards" => $archived_info,
-                "keyCards" => $archived_keys
             )
         );
 
         return $points;
+    }
+
+
+    function computeKeyPoint(int $corporation_id, int $player_id)
+    {
+        $archived_keys = $this->key_cards->getCardsOfTypeInLocation($corporation_id, null, "archived", $player_id);
+
+        foreach ($archived_keys as $card) {
+            $this->dbIncScore($player_id, 1);
+
+            $this->notifyAllPlayers(
+                "computeKeyPoint",
+                clienttranslate('${player_name} scores 1 point with ${corporation_label} from its Key'),
+                array(
+                    "preserve" => array("corporationId"),
+                    "player_id" => $player_id,
+                    "player_name" => $this->getPlayerNameById($player_id),
+                    "player_color" => $this->getPlayerColorById($player_id),
+                    "corporation_label" => $this->corporations()[$corporation_id],
+                    "corporationId" => $corporation_id,
+                    "keyCard" => $card,
+                )
+            );
+        }
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -1496,6 +1511,8 @@ class PersonaNonGrata extends Table
         foreach ($players as $player_id => $player) {
             foreach ($this->corporations() as $corporation_id => $corporation) {
                 $points[$player_id][$corporation_id] = 0;
+
+                $this->computeKeyPoint($corporation_id, $player_id);
 
                 if (!$this->discardActivator($corporation_id, $player_id)) {
                     continue;

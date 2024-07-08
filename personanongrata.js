@@ -1272,19 +1272,18 @@ define([
         this.displayScoring(cardElement, player_color, card.type_arg);
       }
 
-      const archivedKeysControl = `archivedKeysStock$${player_id}`;
-      this[archivedKeysControl].removeAll();
-
-      for (const card_id in keyCards) {
-        const card = keyCards[card_id];
-        this[archivedKeysControl].addCard(card);
-        this[archivedKeysControl].setCardVisible(card, true);
-
-        const cardElement = this[archivedKeysControl].getCardElement(card);
-        this.displayScoring(cardElement, player_color, card.type_arg);
-      }
-
       this.scoreCtrl[player_id].toValue(points);
+    },
+
+    notif_computeKeyPoint: function (notif) {
+      const player_id = notif.args.player_id;
+      const player_color = notif.args.player_color;
+      const keyCard = notif.args.keyCard;
+
+      const archivedKeysControl = `archivedKeysStock$${player_id}`;
+
+      const cardElement = this[archivedKeysControl].getCardElement(keyCard);
+      this.displayScoring(cardElement, player_color, keyCard.type_arg);
     },
 
     //Style logs
