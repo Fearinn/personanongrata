@@ -210,7 +210,7 @@ define([
       this.infoStoredByOthers = gamedatas.infoStoredByOthers;
       this.discardedActions = gamedatas.discardedActions;
       this.encryptActionUsed = gamedatas.encryptActionUsed;
-      this.keysArchived = gamedatas.keysArchived;
+      this.archivedKeys = gamedatas.archivedKeys;
       this.archivedCorporations = gamedatas.archivedCorporations;
       this.archivedInfo = gamedatas.archivedInfo;
 
@@ -233,7 +233,29 @@ define([
 
         this[hackerControl].onSelectionChange = (selection, lastChange) => {
           if (
-            this.getStateName() === "breakTie" &&
+            this.getStateName() === "breakFirstTie" &&
+            this.isCurrentPlayerActive()
+          ) {
+            this.handleSelectedTie(selection, lastChange, this[hackerControl]);
+
+            this.handleConfirmationButton(
+              this.format_string_recursive(
+                _(
+                  "Corporation card to ${selectedTieWinner} | Key to ${selectedTieRunner}"
+                ),
+                {
+                  selectedTieWinner:
+                    this.players[this.selectedTieWinner]?.name || "",
+                  selectedTieRunner:
+                    this.players[this.selectedTieRunner]?.name || "",
+                }
+              )
+            );
+            return;
+          }
+
+          if (
+            this.getStateName() === "breakSecondTie" &&
             this.isCurrentPlayerActive()
           ) {
             if (selection.length === 0) {
@@ -419,7 +441,7 @@ define([
           { horizontalShift: "32px", verticalShift: "0px" }
         );
 
-        const archivedKeys = this.keysArchived[player_id];
+        const archivedKeys = this.archivedKeys[player_id];
         for (const card_id in archivedKeys) {
           const card = archivedKeys[card_id];
 
@@ -659,7 +681,14 @@ define([
         }
       }
 
-      if (stateName === "breakTie") {
+      if (stateName === "breakFirstTie") {
+        for (const player_id in this.players) {
+          const hackerControl = `hackerStock$${player_id}`;
+          this[hackerControl].setSelectionMode("none");
+        }
+      }
+
+      if (stateName === "breakSecondTie") {
         for (const player_id in this.players) {
           const hackerControl = `hackerStock$${player_id}`;
           this[hackerControl].setSelectionMode("none");
@@ -713,7 +742,22 @@ define([
         return;
       }
 
-      if (stateName === "breakTie") {
+      if (stateName === "breakFirstTie") {
+        const tiedPlayers = args.tiedPlayers;
+        if (this.isCurrentPlayerActive()) {
+          for (const player_id in this.players) {
+            const hackerControl = `hackerStock$${player_id}`;
+            this[hackerControl].setSelectionMode("single");
+
+            if (!tiedPlayers[player_id]) {
+              this[hackerControl].setSelectableCards([]);
+            }
+          }
+        }
+        return;
+      }
+
+      if (stateName === "breakSecondTie") {
         const tiedPlayers = args.tiedPlayers;
         if (this.isCurrentPlayerActive()) {
           for (const player_id in this.players) {
@@ -810,44 +854,87 @@ define([
       cardElement.style.marginTop = -280 + offset + "px";
     },
 
-    handleConfirmationButton: function () {
+    handleConfirmationButton: function (content = _("Confirm selection")) {
       this.removeActionButtons();
 
       if (this.getStateName() === "day") {
         if (this.selectedAction && this.selectedInfo) {
-          this.addActionButton(
-            "prs_confirmationBtn",
-            _("Confirm selection"),
-            () => {
-              this.onPlayCards();
-            }
-          );
+          this.addActionButton("prs_confirmationBtn", content, () => {
+            this.onPlayCards();
+          });
         }
         return;
       }
 
       if (this.getStateName() === "stealCard") {
         if (this.selectedInfo) {
-          this.addActionButton(
-            "prs_confirmationBtn",
-            _("Confirm selection"),
-            () => {
-              this.onStealCard();
-            }
-          );
+          this.addActionButton("prs_confirmationBtn", content, () => {
+            this.onStealCard();
+          });
         }
       }
 
-      if (this.getStateName() === "breakTie") {
-        if (this.selectedTieWinner) {
-          this.addActionButton(
-            "prs_confirmationBtn",
-            _("Confirm selection"),
-            () => {
-              this.onBreakTie();
-            }
-          );
+      if (this.getStateName() === "breakFirstTie") {
+        if (this.selectedTieWinner && this.selectedTieRunner) {
+          this.addActionButton("prs_confirmationBtn", content, () => {
+            this.onBreakFirstTie();
+          });
         }
+      }
+
+      if (this.getStateName() === "breakSecondTie") {
+        if (this.selectedTieWinner) {
+          this.addActionButton("prs_confirmationBtn", content, () => {
+            this.onBreakSecondTie();
+          });
+        }
+      }
+    },
+
+    unselectAllHackers: function () {
+      for (const player_id in this.players) {
+        const hackerControl = `hackerStock$${player_id}`;
+        this[hackerControl].unselectAll(true);
+      }
+    },
+
+    handleSelectedTie: function (selection, lastChange, stock) {
+      if (this.selectedTieWinner) {
+        if (selection.length == 0) {
+          if (lastChange.location_arg == this.selectedTieWinner) {
+            this.selectedTieWinner = null;
+            this.selectedTieRunner = null;
+            this.unselectAllHackers();
+          } else {
+            this.selectedTieRunner = null;
+          }
+        }
+
+        if (selection.length > 0) {
+          this.selectedTieRunner = lastChange.location_arg;
+          stock.getCardElement(lastChange).style.borderColor = "orange";
+        }
+        return;
+      }
+
+      if (this.selectedTieRunner) {
+        if (selection.length == 0) {
+          this.selectedTieWinner = null;
+        }
+
+        if (selection.length > 0) {
+          this.selectedTieRunner = lastChange.location_arg;
+          stock.getCardElement(lastChange).style.borderColor = "orange";
+        }
+        return;
+      }
+
+      if (selection.length == 0) {
+        this.selectedTieWinner = null;
+      }
+
+      if (selection.length > 0) {
+        this.selectedTieWinner = lastChange.location_arg;
       }
     },
 
@@ -876,8 +963,15 @@ define([
       });
     },
 
-    onBreakTie() {
-      this.sendAjaxCall("breakTie", {
+    onBreakFirstTie() {
+      this.sendAjaxCall("breakFirstTie", {
+        tie_winner: this.selectedTieWinner,
+        tie_runner: this.selectedTieRunner,
+      });
+    },
+
+    onBreakSecondTie() {
+      this.sendAjaxCall("breakSecondTie", {
         tie_winner: this.selectedTieWinner,
       });
     },
@@ -910,6 +1004,7 @@ define([
         this,
         "notif_computeArchivedPoints"
       );
+      dojo.subscribe("computeKeyPoint", this, "notif_computeKeyPoint");
 
       this.notifqueue.setSynchronous("revealPlayed", 1000);
       this.notifqueue.setSynchronous("store", 1000);
@@ -924,6 +1019,7 @@ define([
       this.notifqueue.setSynchronous("drawNewInfoPrivate", 1000);
       this.notifqueue.setSynchronous("passHands", 1000);
       this.notifqueue.setSynchronous("computeArchivedPoints", 1000);
+      this.notifqueue.setSynchronous("computeKeyPoint", 1000);
     },
 
     notif_playCards: function (notif) {

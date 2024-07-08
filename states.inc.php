@@ -83,7 +83,8 @@ $machinestates = array(
         "transitions" => array(
             "infoArchiving" => 4,
             "stealCard" => 41,
-            "breakTie" => 42,
+            "breakFirstTie" => 42,
+            "breakSecondTie" => 43,
             "betweenWeeks" => 5
         ),
         "updateGameProgression" => true
@@ -102,12 +103,24 @@ $machinestates = array(
     ),
 
     42 => array(
-        "name" => "breakTie",
+        "name" => "breakFirstTie",
+        "description" => clienttranslate('${actplayer} must pick who obtains the Corporation card and the Key of ${corporation_label} this week'),
+        "descriptionmyturn" => clienttranslate('${you} must pick who obtains the Corporation card and the Key of ${corporation_label} this week'),
+        "type" => "activeplayer",
+        "possibleactions" => array("breakFirstTie"),
+        "args" => "arg_breakFirstTie",
+        "transitions" => array(
+            "infoArchiving" => 4,
+        )
+    ),
+
+    43 => array(
+        "name" => "breakSecondTie",
         "description" => clienttranslate('${actplayer} must pick who obtains the Key of ${corporation_label} this week'),
         "descriptionmyturn" => clienttranslate('${you} must pick who obtains the Key of ${corporation_label} this week'),
         "type" => "activeplayer",
-        "possibleactions" => array("breakTie"),
-        "args" => "arg_breakTie",
+        "possibleactions" => array("breakSecondTie"),
+        "args" => "arg_breakSecondTie",
         "transitions" => array(
             "infoArchiving" => 4,
         )
