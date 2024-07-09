@@ -992,7 +992,7 @@ define([
       dojo.subscribe("obtainKey", this, "notif_obtainKey");
       dojo.subscribe("tie", this, "notif_tie");
       dojo.subscribe("flipHackers", this, "notif_flipHackers");
-      dojo.subscribe("stealCard", this, "notif_stealCard");
+      dojo.subscribe("archiveInfo", this, "notif_archiveInfo");
       dojo.subscribe("resetActions", this, "notif_resetActions");
       dojo.subscribe("discardLastInfo", this, "notif_discardLastInfo");
       dojo.subscribe("drawNewInfo", this, "notif_drawNewInfo");
@@ -1013,7 +1013,7 @@ define([
       this.notifqueue.setSynchronous("revealEncrypted", 1000);
       this.notifqueue.setSynchronous("obtainCorporation", 1000);
       this.notifqueue.setSynchronous("obtainKey", 1000);
-      this.notifqueue.setSynchronous("stealCard", 1000);
+      this.notifqueue.setSynchronous("archiveInfo", 1000);
       this.notifqueue.setSynchronous("resetActions", 1000);
       this.notifqueue.setSynchronous("discardLastInfo", 1000);
       this.notifqueue.setSynchronous("drawNewInfoPrivate", 1000);
@@ -1196,22 +1196,28 @@ define([
       }
     },
 
-    notif_stealCard: function (notif) {
+    notif_archiveInfo: function (notif) {
       const player_id = notif.args.player_id;
-      const infoCard = notif.args.infoCard;
+      const infoCards = notif.args.infoCards;
+      const isStolen = notif.args.stolen;
       const isCurrentPlayer = player_id == this.player_id;
 
-      const hackerElement = isCurrentPlayer
-        ? undefined
-        : $(`prs_hacker$${player_id}`);
+      const hackerElement =
+        !isCurrentPlayer && isStolen
+          ? undefined
+          : $(`prs_hacker$${player_id}`);
 
       const archivedInfoControl = `archivedInfoStock$${player_id}`;
-      this[archivedInfoControl].addCard(
-        infoCard,
-        {},
-        { forceToElement: hackerElement }
-      );
-      this[archivedInfoControl].setCardVisible(infoCard, isCurrentPlayer);
+
+      for (const card_id in infoCards) {
+        const card = infoCards[card_id];
+        this[archivedInfoControl].addCard(
+          card,
+          {},
+          { forceToElement: hackerElement }
+        );
+        this[archivedInfoControl].setCardVisible(card, isCurrentPlayer);
+      }
     },
 
     notif_resetActions: function (notif) {

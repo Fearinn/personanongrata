@@ -1213,7 +1213,7 @@ class PersonaNonGrata extends Table
         $this->information_cards->moveCard($card_id, "archived", $player_id);
 
         $this->notifyAllPlayers(
-            "stealCard",
+            "archiveInfo",
             clienttranslate('${player_name} takes a ${info_label} of ${corporation_label} from ${player_name2} and archives it'),
             array(
                 "preserve" => array("corporationId"),
@@ -1225,7 +1225,8 @@ class PersonaNonGrata extends Table
                 "info_label" => $this->informations[$info_id]["name"],
                 "corporation_label" => $this->corporations()[$corporation_id],
                 "corporationId" => $corporation_id,
-                "infoCard" => $card
+                "infoCards" => array($card_id => $card),
+                "isStolen" => true
             )
         );
 
@@ -1398,8 +1399,7 @@ class PersonaNonGrata extends Table
 
         $hand_actions_count = $this->action_cards->countCardsInLocation("hand");
 
-        //tests
-        if ($hand_actions_count == 12) {
+        if ($hand_actions_count == 0) {
             $this->gamestate->nextState("infoArchiving");
             return;
         }
@@ -1525,7 +1525,7 @@ class PersonaNonGrata extends Table
 
     function st_betweenWeeks()
     {
-        if ($this->getGameStateValue("week") == 3) {
+        if ($this->getGameStateValue("week") >= 1) {
             $this->gamestate->nextState("finalPoints");
             return;
         }
@@ -1593,7 +1593,20 @@ class PersonaNonGrata extends Table
         $points = array();
 
         foreach ($players as $player_id => $player) {
+            $information_cards = $this->information_cards->getCardsInLocation("stored", $player_id);
             $this->information_cards->moveAllCardsInLocation("stored", "archived", $player_id, $player_id);
+
+            $this->notifyAllPlayers(
+                "archiveInfo",
+                clienttranslate('${player_name} archives all cards from his play area'),
+                array(
+                    "preserve" => array("corporationId"),
+                    "i18n" => array("info_label"),
+                    "player_id" => $player_id,
+                    "player_name" => $this->getPlayerNameById($player_id),
+                    "infoCards" => $information_cards
+                )
+            );
 
             foreach ($this->corporations() as $corporation_id => $corporation) {
                 $points[$player_id][$corporation_id] = 0;

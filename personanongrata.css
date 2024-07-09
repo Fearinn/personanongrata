@@ -82,7 +82,7 @@
 .prs_area {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   gap: 16px;
   border: 3px solid #000;
