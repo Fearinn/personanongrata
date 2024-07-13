@@ -46,18 +46,18 @@ $machinestates = array(
         "type" => "private",
         "possibleactions" => array("playCards"),
         "transitions" => array(
-            "discardCard" => 21,
+            "discardInfo" => 21,
             "betweenDays" => 3
         ),
     ),
 
     21 => array(
-        "name" => "discardCard",
+        "name" => "discardInfo",
         "description" => clienttranslate('Other player(s) must discard an Information card'),
         "descriptionmyturn" => clienttranslate('${you} must discard an Information card'),
         "type" => "private",
         "possibleactions" => array(
-            "discardCard",
+            "discardInfo",
             "changeMind"
         ),
         "transitions" => array("changeMind" => 20),

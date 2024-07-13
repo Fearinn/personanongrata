@@ -602,14 +602,16 @@ define([
         selection,
         lastChange
       ) => {
-        if (this.getStateName() === "day" && this.isCurrentPlayerActive()) {
-          if (selection.length === 0) {
-            this.selectedAction = null;
-          } else {
-            this.selectedAction = lastChange;
-          }
+        if (this.isCurrentPlayerActive()) {
+          if (this.getStateName() === "playCards") {
+            if (selection.length === 0) {
+              this.selectedAction = null;
+            } else {
+              this.selectedAction = lastChange;
+            }
 
-          this.handleConfirmationButton();
+            this.handleConfirmationButton();
+          }
         }
       };
 
@@ -641,13 +643,11 @@ define([
         { cardOverlap: "90px", sort: this.infoSortFunction }
       );
 
-      for (const card_id in this.infoInMyHand) {
-        const card = this.infoInMyHand[card_id];
-        this[infoInHandControl].addCard(card);
-        this.updateHandWidth(this[infoInHandControl]);
+      this[infoInHandControl].onSelectionChange = (selection, lastChange) => {
+        console.log(this.getStateName());
 
-        this[infoInHandControl].onSelectionChange = (selection, lastChange) => {
-          if (this.getStateName() === "day" && this.isCurrentPlayerActive()) {
+        if (this.isCurrentPlayerActive()) {
+          if (this.getStateName() === "playCards") {
             if (selection.length === 0) {
               this.selectedInfo = null;
             } else {
@@ -656,7 +656,23 @@ define([
 
             this.handleConfirmationButton();
           }
-        };
+
+          if (this.getStateName() === "discardInfo") {
+            if (selection.length === 0) {
+              this.selectedInfo = null;
+            } else {
+              this.selectedInfo = lastChange;
+            }
+
+            this.handleConfirmationButton();
+          }
+        }
+      };
+
+      for (const card_id in this.infoInMyHand) {
+        const card = this.infoInMyHand[card_id];
+        this[infoInHandControl].addCard(card);
+        this.updateHandWidth(this[infoInHandControl]);
       }
 
       this.setupNotifications();
@@ -673,6 +689,20 @@ define([
 
     onLeavingState: function (stateName) {
       console.log("Leaving state: " + stateName);
+
+      if (stateName === "playCards") {
+        if (!this.isCurrentPlayerActive()) {
+          this.addActionButton("prs_changeMind_btn", _("Change mind"), () => {
+            this.onChangeMind();
+          });
+
+          this[`actionsInHandStock$${this.player_id}`].setSelectionMode("none");
+
+          this.selectedAction = null;
+          this.selectedInfo = null;
+        }
+        return;
+      }
 
       if (stateName === "stealCard") {
         for (const player_id in this.players) {
@@ -699,23 +729,19 @@ define([
     onUpdateActionButtons: function (stateName, args) {
       console.log("Update action buttons: " + stateName);
 
-      if (stateName === "day") {
-        if (!this.isCurrentPlayerActive()) {
-          this.addActionButton("prs_changeMind_btn", _("Change mind"), () => {
-            this.onChangeMind();
-          });
-
-          this[`actionsInHandStock$${this.player_id}`].setSelectionMode("none");
-          this[`infoInHandStock$${this.player_id}`].setSelectionMode("none");
-        }
-        return;
-      }
-
       if (stateName === "playCards") {
         if (this.isCurrentPlayerActive()) {
           this[`actionsInHandStock$${this.player_id}`].setSelectionMode(
             "single"
           );
+          this[`infoInHandStock$${this.player_id}`].setSelectionMode("single");
+        }
+        return;
+      }
+
+      if (stateName === "discardInfo") {
+        if (this.isCurrentPlayerActive()) {
+          this[`actionsInHandStock$${this.player_id}`].setSelectionMode("none");
           this[`infoInHandStock$${this.player_id}`].setSelectionMode("single");
         }
         return;
@@ -777,7 +803,13 @@ define([
     //// Utility methods
 
     getStateName: function () {
-      return this.gamedatas.gamestate.name;
+      const state = this.gamedatas.gamestate;
+
+      if (state.private_state) {
+        return state.private_state.name;
+      }
+
+      return state.name;
     },
 
     sendAjaxCall: function (action, args = {}, allowInactive = false) {
@@ -856,11 +888,22 @@ define([
 
     handleConfirmationButton: function (content = _("Confirm selection")) {
       this.removeActionButtons();
+      console.log(this.getStateName());
 
-      if (this.getStateName() === "day") {
+      if (this.getStateName() === "playCards") {
         if (this.selectedAction && this.selectedInfo) {
           this.addActionButton("prs_confirmationBtn", content, () => {
             this.onPlayCards();
+          });
+        }
+        return;
+      }
+
+      if (this.getStateName() === "discardInfo") {
+        console.log(this.selectedInfo);
+        if (this.selectedInfo) {
+          this.addActionButton("prs_confirmationBtn", content, () => {
+            this.onDiscardInfo();
           });
         }
         return;
@@ -953,6 +996,15 @@ define([
       });
     },
 
+    onDiscardInfo() {
+      if (!this.selectedAction || !this.selectedInfo) {
+        this.showMessage(_("Please select both cards first"), "error");
+        return;
+      }
+
+      this.sendAjaxCall("discardInfo", { card_id: this.selectedInfo.id });
+    },
+
     onChangeMind() {
       this.sendAjaxCall("changeMind", {}, true);
     },
@@ -1038,6 +1090,15 @@ define([
 
       this.updateHandWidth(this[actionsInHandControl]);
       this.updateHandWidth(this[infoInHandControl]);
+    },
+
+    notif_discardInfo: function (notif) {
+      const player_id = notif.args.player_id;
+
+      const infoInHandControl = `infoInHandStock$${player_id}`;
+
+      const infoCard = this[infoInHandControl].getCards()[0];
+      this[infoInHandControl].removeCard(infoCard);
     },
 
     notif_revealPlayed: function (notif) {
@@ -1203,9 +1264,7 @@ define([
       const isCurrentPlayer = player_id == this.player_id;
 
       const hackerElement =
-        !isCurrentPlayer && isStolen
-          ? undefined
-          : $(`prs_hacker$${player_id}`);
+        !isCurrentPlayer && isStolen ? undefined : $(`prs_hacker$${player_id}`);
 
       const archivedInfoControl = `archivedInfoStock$${player_id}`;
 
@@ -1237,12 +1296,15 @@ define([
     },
 
     notif_discardLastInfo: function (notif) {
-      for (const player_id in this.players) {
-        const infoInHandControl = `infoInHandStock$${player_id}`;
+      const player_id = notif.args.player_id;
+      const infoCard = notif.args.infoCard;
 
-        this[infoInHandControl].removeAll();
-        this.updateHandWidth(this[infoInHandControl]);
-      }
+      const infoInHandControl = `infoInHandStock$${player_id}`;
+
+      this[infoInHandControl].removeAll();
+      this[infoInHandControl].addCard(infoCard);
+      this[infoInHandControl].removeCard(infoCard);
+      this.updateHandWidth(this[infoInHandControl]);
     },
 
     notif_drawNewInfo: function (notif) {

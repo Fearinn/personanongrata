@@ -1157,10 +1157,47 @@ class PersonaNonGrata extends Table
             )
         );
 
-        // if ($this->getPlayersNumber() === 2) {
-        //     $this->gamestate->nextPrivateState($player_id, "discardCard");
-        //     return;
-        // }
+        if ($this->getPlayersNumber() === 2) {
+            $this->gamestate->nextPrivateState($player_id, "discardInfo");
+            return;
+        }
+
+        $this->gamestate->setPlayerNonMultiactive($player_id, "betweenDays");
+    }
+
+    function discardInfo($card_id)
+    {
+        $this->checkAction("discardInfo");
+
+        $player_id = $this->getCurrentPlayerId();
+
+        $this->information_cards->moveCard($card_id, "discard");
+        $info_card = $this->information_cards->getCard($card_id);
+
+        $info_id = $info_card["type_arg"];
+        $corporation_id = $info_card["type"];
+
+        $this->notifyPlayer(
+            $player_id,
+            "discardInfoPrivately",
+            clienttranslate('You discard a ${info_label} of ${corporation_label}'),
+            array(
+                "i18n" => array("info_label"),
+                "info_label" => $this->informations[$info_id]["name"],
+                "corporation_label" => $this->corporations[$corporation_id],
+                "corporationId" => $corporation_id,
+                "infoCard" => $info_card,
+            )
+        );
+
+        $this->notifyAllPlayers(
+            "discardInfo",
+            clienttranslate('${player_name} discards an information'),
+            array(
+                "player_id" => $player_id,
+                "player_name" => $this->getPlayerNameById($player_id)
+            )
+        );
 
         $this->gamestate->setPlayerNonMultiactive($player_id, "betweenDays");
     }
@@ -1399,7 +1436,8 @@ class PersonaNonGrata extends Table
 
         $hand_actions_count = $this->action_cards->countCardsInLocation("hand");
 
-        if ($hand_actions_count == 0) {
+        //tests
+        if ($hand_actions_count >= 12) {
             $this->gamestate->nextState("infoArchiving");
             return;
         }
@@ -1535,7 +1573,26 @@ class PersonaNonGrata extends Table
 
         $players = $this->loadPlayersBasicInfos();
 
-        $this->notifyAllPlayers("discardLastInfo", "", array());
+        foreach ($players as $player_id => $player) {
+            $info_card = $this->getSingleCardInLocation($this->informations, "hand", $player_id);
+
+            $corporation_id = $info_card["type"];
+            $info_id = $info_card["type_arg"];
+
+            $this->notifyAllPlayers(
+                "discardLastInfo",
+                clienttranslate('${player_name} discards the ${info_label} of ${corporation_label}'),
+                array(
+                    "i18n" => array("info_label"),
+                    "player_id" => $player_id,
+                    "player_name" => $this->getPlayerNameById($player_id),
+                    "info_label" => $this->informations[$info_id],
+                    "corporation_label" => $this->corporations[$corporation_id],
+                    "corporationId" => $corporation_id,
+                    "infoCard" => $info_card
+                )
+            );
+        }
 
         $this->notifyAllPlayers(
             "resetActions",

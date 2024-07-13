@@ -65,6 +65,16 @@ class action_personanongrata extends APP_GameAction
     $this->ajaxResponse();
   }
 
+  public function discardInfo()
+  {
+    $this->setAjaxMode();
+
+    $card_id = $this->getArg("card_id", AT_enum, true, null, range(1, 72));
+    $this->game->discardInfo($card_id);
+
+    $this->ajaxResponse();
+  }
+
   public function breakFirstTie()
   {
     $this->setAjaxMode();
