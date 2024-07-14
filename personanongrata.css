@@ -55,7 +55,17 @@
 
 .prs_gameArea *:not(.prs_card) {
   box-sizing: border-box;
+}
+
+.prs_gameArea .whiteblock {
   margin: 0;
+}
+
+.prs_rowContainer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .prs_selected {
@@ -93,6 +103,14 @@
   width: 100%;
 }
 
+.prs_area:not(.prs_myArea) {
+  order: 2;
+}
+
+.prs_publicArea {
+  outline-color: #fff;
+}
+
 .prs_areaTitle {
   display: inline-block;
   align-self: flex-start;
@@ -100,14 +118,6 @@
   border-radius: 8px;
   color: #fff;
   padding: 4px;
-}
-
-.prs_area:not(.prs_myArea) {
-  order: 2;
-}
-
-.prs_publicArea {
-  outline-color: #fff;
 }
 
 .prs_publicArea .prs_areaTitle {

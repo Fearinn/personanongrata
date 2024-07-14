@@ -218,8 +218,16 @@ define([
       this.selectedInfo = gamedatas.cardsPlayedByMe["info"];
 
       $(`prs_playerArea$${this.player_id}`).style.order = 0;
+
       $(`prs_playerArea$${this.prevPlayer}`).style.order = -1;
+      $(`prs_directionTag$${this.prevPlayer}`).textContent = _(
+        "Your left (next counterclockwise)"
+      );
+
       $(`prs_playerArea$${this.nextPlayer}`).style.order = 1;
+      $(`prs_directionTag$${this.nextPlayer}`).textContent = _(
+        "Your right (next clockwise)"
+      );
 
       for (const player_id in this.players) {
         const player = this.players[player_id];
@@ -594,7 +602,7 @@ define([
       this[actionsInHandControl] = new HandStock(
         this.actionManager,
         $(`prs_handOfActions$${this.player_id}`),
-        { cardOverlap: "90px", sort: sortFunction("type_arg") }
+        { cardOverlap: "120px", sort: sortFunction("type_arg") }
       );
 
       this[actionsInHandControl].onSelectionChange = (
@@ -639,7 +647,7 @@ define([
       this[infoInHandControl] = new HandStock(
         this.informationManager,
         $(`prs_handOfInfo$${this.player_id}`),
-        { cardOverlap: "90px", sort: this.infoSortFunction }
+        { cardOverlap: "120px", sort: this.infoSortFunction }
       );
 
       this[infoInHandControl].onSelectionChange = (selection, lastChange) => {

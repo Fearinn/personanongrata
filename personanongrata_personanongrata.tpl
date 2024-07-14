@@ -62,9 +62,17 @@
       class="prs_area"
       style="border-color: #{PLAYER_COLOR}"
     >
-      <h3 class="prs_areaTitle" style="color: #{PLAYER_COLOR}">
-        {PLAYER_NAME}
-      </h3>
+      <div class="prs_rowContainer">
+        <h3 class="prs_areaTitle" style="color: #{PLAYER_COLOR}">
+          {PLAYER_NAME}
+        </h3>
+        <span
+          id="prs_directionTag${PLAYER_ID}"
+          class="prs_directionTag prs_areaTitle"
+          style="color: #{PLAYER_COLOR}"
+          >Direction</span
+        >
+      </div>
       <div class="prs_playerZones">
         <div
           id="prs_archive${PLAYER_ID}"
