@@ -997,8 +997,8 @@ define([
     },
 
     onDiscardInfo() {
-      if (!this.selectedAction || !this.selectedInfo) {
-        this.showMessage(_("Please select both cards first"), "error");
+      if (!this.selectedInfo) {
+        this.showMessage(_("Please select a card first"), "error");
         return;
       }
 
@@ -1057,7 +1057,10 @@ define([
         "notif_computeArchivedPoints"
       );
       dojo.subscribe("computeKeyPoint", this, "notif_computeKeyPoint");
+      dojo.subscribe("discardInfo", this, "notif_discardInfo");
+      dojo.subscribe("discardInfoPrivate", this, "notif_discardInfoPrivate");
 
+      this.notifqueue.setSynchronous("discardInfo", 1000);
       this.notifqueue.setSynchronous("revealPlayed", 1000);
       this.notifqueue.setSynchronous("store", 1000);
       this.notifqueue.setSynchronous("storePrivate", 1000);
@@ -1072,6 +1075,10 @@ define([
       this.notifqueue.setSynchronous("passHands", 1000);
       this.notifqueue.setSynchronous("computeArchivedPoints", 1000);
       this.notifqueue.setSynchronous("computeKeyPoint", 1000);
+
+      this.notifqueue.setIgnoreNotificationCheck("discardInfo", (notif) => {
+        return notif.args.player_id == this.player_id;
+      });
     },
 
     notif_playCards: function (notif) {
@@ -1097,8 +1104,22 @@ define([
 
       const infoInHandControl = `infoInHandStock$${player_id}`;
 
-      const infoCard = this[infoInHandControl].getCards()[0];
+      const hand = this[infoInHandControl].getCards();
+      const randomIndex = Math.floor(Math.random() * hand.length);
+      const randomCard = hand[randomIndex];
+
+      this[infoInHandControl].removeCard(randomCard);
+      this.updateHandWidth(this[infoInHandControl]);
+    },
+
+    notif_discardInfoPrivate: function (notif) {
+      const player_id = notif.args.player_id;
+      const infoCard = notif.args.infoCard;
+
+      const infoInHandControl = `infoInHandStock$${player_id}`;
+
       this[infoInHandControl].removeCard(infoCard);
+      this.updateHandWidth(this[infoInHandControl]);
     },
 
     notif_revealPlayed: function (notif) {

@@ -1171,7 +1171,7 @@ class PersonaNonGrata extends Table
 
         $player_id = $this->getCurrentPlayerId();
 
-        $this->information_cards->moveCard($card_id, "discard");
+        $this->information_cards->moveCard($card_id, "pre_discard", $player_id);
         $info_card = $this->information_cards->getCard($card_id);
 
         $info_id = $info_card["type_arg"];
@@ -1179,10 +1179,11 @@ class PersonaNonGrata extends Table
 
         $this->notifyPlayer(
             $player_id,
-            "discardInfoPrivately",
+            "discardInfoPrivate",
             clienttranslate('You discard a ${info_label} of ${corporation_label}'),
             array(
                 "i18n" => array("info_label"),
+                "player_id" => $player_id,
                 "info_label" => $this->informations[$info_id]["name"],
                 "corporation_label" => $this->corporations[$corporation_id],
                 "corporationId" => $corporation_id,
@@ -1231,6 +1232,10 @@ class PersonaNonGrata extends Table
 
         $this->gamestate->initializePrivateState($player_id);
     }
+
+    // function changeMindDiscarded()
+    // {
+    // }
 
     function stealCard($card_id)
     {
@@ -1428,6 +1433,8 @@ class PersonaNonGrata extends Table
 
         $this->incGameStateValue("day", 1);
 
+        $this->information_cards->moveAllCardsInLocation("pre_discard", "discard");
+
         foreach ($players as $player_id => $player) {
             $this->revealPlayed($player_id);
 
@@ -1437,7 +1444,7 @@ class PersonaNonGrata extends Table
         $hand_actions_count = $this->action_cards->countCardsInLocation("hand");
 
         //tests
-        if ($hand_actions_count >= 12) {
+        if ($hand_actions_count == 0) {
             $this->gamestate->nextState("infoArchiving");
             return;
         }
@@ -1563,7 +1570,7 @@ class PersonaNonGrata extends Table
 
     function st_betweenWeeks()
     {
-        if ($this->getGameStateValue("week") >= 1) {
+        if ($this->getGameStateValue("week") == 3) {
             $this->gamestate->nextState("finalPoints");
             return;
         }
