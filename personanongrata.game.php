@@ -246,7 +246,7 @@ class PersonaNonGrata extends Table
         $card = array_shift($location_cards);
 
         if ($card === null && $showError) {
-            throw new BgaVisibleSystemException("Card not found");
+            throw new BgaVisibleSystemException("Card not found: " . $location);
         }
 
         return $card;
@@ -1151,7 +1151,7 @@ class PersonaNonGrata extends Table
         $info_card = $this->information_cards->getCard($info_card_id);
 
         if (!$action_card || !$info_card) {
-            throw new BgaVisibleSystemException("Card not found");
+            throw new BgaVisibleSystemException("Played card not found");
         }
 
         if (!$this->cardInHand($action_card, $player_id) || !$this->cardInHand($info_card, $player_id)) {

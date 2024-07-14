@@ -1299,9 +1299,23 @@ define([
     notif_obtainCorporation: function (notif) {
       const player_id = notif.args.player_id;
       const corporationCard = notif.args.corporationCard;
+      const isCurrentPlayer = player_id == this.player_id;
+
+      const hackerElement = isCurrentPlayer
+        ? undefined
+        : $(`prs_hacker$${player_id}`);
 
       const archivedCorporationsControl = `archivedCorporationStock$${player_id}`;
-      this[archivedCorporationsControl].addCard(corporationCard);
+
+      this[archivedCorporationsControl].addCard(
+        corporationCard,
+        {},
+        { forceToElement: hackerElement }
+      );
+      this[archivedCorporationsControl].setCardVisible(
+        corporationCard,
+        isCurrentPlayer
+      );
     },
 
     notif_obtainKey: function (notif) {
@@ -1310,17 +1324,6 @@ define([
 
       const archivedKeyControl = `archivedKeysStock$${player_id}`;
       this[archivedKeyControl].addCard(keyCard);
-    },
-
-    notif_tie: function (notif) {},
-
-    notif_flipHackers: function (notif) {
-      for (const player_id in this.players) {
-        const hackerControl = `hackerStock$${player_id}`;
-
-        const hackerCard = this[hackerControl].getCards()[0];
-        this[hackerControl].flipCard(hackerCard);
-      }
     },
 
     notif_archiveInfo: function (notif) {
@@ -1342,6 +1345,17 @@ define([
           { forceToElement: hackerElement }
         );
         this[archivedInfoControl].setCardVisible(card, isCurrentPlayer);
+      }
+    },
+
+    notif_tie: function (notif) {},
+
+    notif_flipHackers: function (notif) {
+      for (const player_id in this.players) {
+        const hackerControl = `hackerStock$${player_id}`;
+
+        const hackerCard = this[hackerControl].getCards()[0];
+        this[hackerControl].flipCard(hackerCard);
       }
     },
 
