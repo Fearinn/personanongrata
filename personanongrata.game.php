@@ -705,7 +705,7 @@ class PersonaNonGrata extends Table
 
         $this->notifyAllPlayers(
             "store",
-            clienttranslate('${player_name2} sends a ${info_label} of ${corporation_label} to ${player_name}'),
+            clienttranslate('${player_name2} sends the ${info_label} of ${corporation_label} to ${player_name}'),
             array(
                 "preserve" => array("corporationId"),
                 "player_id" => $recipient_id,
@@ -732,7 +732,7 @@ class PersonaNonGrata extends Table
 
         $this->notifyAllPlayers(
             "store",
-            clienttranslate('${player_name2} sends a ${info_label} of ${corporation_label} to ${player_name}'),
+            clienttranslate('${player_name2} sends the ${info_label} of ${corporation_label} to ${player_name}'),
             array(
                 "preserve" => array("corporationId"),
                 "player_id" => $recipient_id,
@@ -763,8 +763,8 @@ class PersonaNonGrata extends Table
             $info_card = $this->hideCard($info_card, true, -1);
         }
 
-        $message =  $encrypt ? clienttranslate('${player_name} combines a ${action_label} to an information')
-            : clienttranslate('${player_name} combines a ${action_label} to a ${info_label} of ${corporation_label}');
+        $message =  $encrypt ? clienttranslate('${player_name} combines the ${action_label} to an information')
+            : clienttranslate('${player_name} combines the ${action_label} to the ${info_label} of ${corporation_label}');
 
         $this->notifyAllPlayers(
             "revealPlayed",
@@ -886,7 +886,7 @@ class PersonaNonGrata extends Table
 
         $this->notifyAllPlayers(
             "revealEncrypted",
-            clienttranslate('${player_name} reveals his encrypted card... It&apos;s a ${info_label} of ${corporation_label}!'),
+            clienttranslate('${player_name} reveals his encrypted card... It&apos;s the ${info_label} of ${corporation_label}!'),
             array(
                 "preserve" => array("corporationId"),
                 "i18n" => array("info_label"),
@@ -1168,7 +1168,7 @@ class PersonaNonGrata extends Table
         $this->notifyPlayer(
             $player_id,
             "playCards",
-            clienttranslate('You combine a ${action_label} to a ${info_label} of ${corporation_label}'),
+            clienttranslate('You combine the ${action_label} to the ${info_label} of ${corporation_label}'),
             array(
                 "preserve" => array("corporationId"),
                 "i18n" => array("action_label", "info_label"),
@@ -1205,7 +1205,7 @@ class PersonaNonGrata extends Table
         $this->notifyPlayer(
             $player_id,
             "discardInfoPrivate",
-            clienttranslate('You discard a ${info_label} of ${corporation_label}'),
+            clienttranslate('You discard the ${info_label} of ${corporation_label}'),
             array(
                 "preserve" => array("corporationId"),
                 "i18n" => array("info_label"),
@@ -1303,7 +1303,7 @@ class PersonaNonGrata extends Table
 
         $this->notifyAllPlayers(
             "archiveInfo",
-            clienttranslate('${player_name} takes a ${info_label} of ${corporation_label} from ${player_name2} and archives it'),
+            clienttranslate('${player_name} takes the ${info_label} of ${corporation_label} from ${player_name2} and archives it'),
             array(
                 "preserve" => array("corporationId"),
                 "i18n" => array("info_label"),
