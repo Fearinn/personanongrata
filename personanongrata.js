@@ -737,7 +737,12 @@ define([
       if (stateName === "day") {
         if (!this.isCurrentPlayerActive()) {
           this.addActionButton("prs_changeMind_btn", _("Change mind"), () => {
-            this.onChangeMindDiscarded();
+            if (Object.keys(this.players).length == 2) {
+              this.onChangeMindDiscarded();
+              return;
+            }
+
+            this.onChangeMindPlayed();
           });
 
           this[`actionsInHandStock$${this.player_id}`].setSelectionMode("none");
@@ -1321,11 +1326,11 @@ define([
     notif_archiveInfo: function (notif) {
       const player_id = notif.args.player_id;
       const infoCards = notif.args.infoCards;
-      const isStolen = notif.args.stolen;
       const isCurrentPlayer = player_id == this.player_id;
 
-      const hackerElement =
-        !isCurrentPlayer && isStolen ? undefined : $(`prs_hacker$${player_id}`);
+      const hackerElement = isCurrentPlayer
+        ? undefined
+        : $(`prs_hacker$${player_id}`);
 
       const archivedInfoControl = `archivedInfoStock$${player_id}`;
 
