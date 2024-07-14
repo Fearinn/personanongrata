@@ -33,7 +33,7 @@ $machinestates = array(
         "descriptionmyturn" => "",
         "type" => "multipleactiveplayer",
         "action" => "st_day",
-        "possibleactions" => array("changeMind"),
+        "possibleactions" => array("changeMindPlayed", "changeMindDiscarded"),
         "transitions" => array("betweenDays" => 3),
         "initialprivate" => 20,
         "updateGameProgression" => true
@@ -47,7 +47,8 @@ $machinestates = array(
         "possibleactions" => array("playCards"),
         "transitions" => array(
             "discardInfo" => 21,
-            "betweenDays" => 3
+            "changeMindDiscarded" => 21,
+            "betweenDays" => 3,
         ),
     ),
 
@@ -58,9 +59,9 @@ $machinestates = array(
         "type" => "private",
         "possibleactions" => array(
             "discardInfo",
-            "changeMind"
+            "changeMindPlayed"
         ),
-        "transitions" => array("changeMind" => 20),
+        "transitions" => array("changeMindPlayed" => 20),
     ),
 
     3 => array(

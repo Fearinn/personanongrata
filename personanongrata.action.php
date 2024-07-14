@@ -48,20 +48,17 @@ class action_personanongrata extends APP_GameAction
     $this->ajaxResponse();
   }
 
-  public function changeMind()
+  public function changeMindPlayed()
   {
     $this->setAjaxMode();
-    $this->game->changeMind();
+    $this->game->changeMindPlayed();
     $this->ajaxResponse();
   }
 
-  public function stealCard()
+  public function changeMindDiscarded()
   {
     $this->setAjaxMode();
-
-    $card_id = $this->getArg("card_id", AT_enum, true, null, range(1, 72));
-    $this->game->stealCard($card_id);
-
+    $this->game->changeMindDiscarded();
     $this->ajaxResponse();
   }
 
@@ -71,6 +68,16 @@ class action_personanongrata extends APP_GameAction
 
     $card_id = $this->getArg("card_id", AT_enum, true, null, range(1, 72));
     $this->game->discardInfo($card_id);
+
+    $this->ajaxResponse();
+  }
+
+  public function stealCard()
+  {
+    $this->setAjaxMode();
+
+    $card_id = $this->getArg("card_id", AT_enum, true, null, range(1, 72));
+    $this->game->stealCard($card_id);
 
     $this->ajaxResponse();
   }

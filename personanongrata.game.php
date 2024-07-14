@@ -1182,6 +1182,7 @@ class PersonaNonGrata extends Table
             "discardInfoPrivate",
             clienttranslate('You discard a ${info_label} of ${corporation_label}'),
             array(
+                "preserve" => array("corporationId"),
                 "i18n" => array("info_label"),
                 "player_id" => $player_id,
                 "info_label" => $this->informations[$info_id]["name"],
@@ -1203,9 +1204,9 @@ class PersonaNonGrata extends Table
         $this->gamestate->setPlayerNonMultiactive($player_id, "betweenDays");
     }
 
-    function changeMind()
+    function changeMindPlayed()
     {
-        $this->gamestate->checkPossibleAction("changeMind");
+        $this->gamestate->checkPossibleAction("changeMindPlayed");
 
         $player_id = $this->getCurrentPlayerId();
 
@@ -1219,8 +1220,8 @@ class PersonaNonGrata extends Table
 
         $this->notifyPlayer(
             $player_id,
-            "changeMind",
-            clienttranslate("You change your mind and become active again"),
+            "changeMindPlayed",
+            clienttranslate("You change your mind and may play cards again"),
             array(
                 "player_id" => $player_id,
                 "actionCard" => $action_card,
@@ -1233,9 +1234,30 @@ class PersonaNonGrata extends Table
         $this->gamestate->initializePrivateState($player_id);
     }
 
-    // function changeMindDiscarded()
-    // {
-    // }
+    function changeMindDiscarded()
+    {
+        $this->gamestate->checkPossibleAction("changeMindDiscarded");
+
+        $player_id = $this->getCurrentPlayerId();
+
+        $info_card = $this->getSingleCardInLocation($this->information_cards, "pre_discard", $player_id);
+        $this->information_cards->moveCard($info_card["id"], "hand", $player_id);
+
+        $this->notifyPlayer(
+            $player_id,
+            "changeMindDiscarded",
+            clienttranslate("You change your mind and may discard an Information again"),
+            array(
+                "player_id" => $player_id,
+                "infoCard" => $info_card,
+            )
+        );
+
+        $this->gamestate->setPlayersMultiactive(array($player_id), "error");
+
+        $this->gamestate->initializePrivateState($player_id);
+        $this->gamestate->nextPrivateState($player_id, "changeMindDiscarded");
+    }
 
     function stealCard($card_id)
     {

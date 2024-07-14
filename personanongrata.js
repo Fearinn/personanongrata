@@ -261,7 +261,6 @@ define([
             if (selection.length === 0) {
               this.selectedTieWinner = null;
             } else {
-              console.log(lastChange);
               this.selectedTieWinner = lastChange.location_arg;
             }
 
@@ -644,8 +643,6 @@ define([
       );
 
       this[infoInHandControl].onSelectionChange = (selection, lastChange) => {
-        console.log(this.getStateName());
-
         if (this.isCurrentPlayerActive()) {
           if (this.getStateName() === "playCards") {
             if (selection.length === 0) {
@@ -693,7 +690,7 @@ define([
       if (stateName === "playCards") {
         if (!this.isCurrentPlayerActive()) {
           this.addActionButton("prs_changeMind_btn", _("Change mind"), () => {
-            this.onChangeMind();
+            this.onChangeMindPlayed();
           });
 
           this[`actionsInHandStock$${this.player_id}`].setSelectionMode("none");
@@ -729,6 +726,20 @@ define([
     onUpdateActionButtons: function (stateName, args) {
       console.log("Update action buttons: " + stateName);
 
+      if (stateName === "day") {
+        if (!this.isCurrentPlayerActive()) {
+          this.addActionButton("prs_changeMind_btn", _("Change mind"), () => {
+            this.onChangeMindDiscarded();
+          });
+
+          this[`actionsInHandStock$${this.player_id}`].setSelectionMode("none");
+
+          this.selectedAction = null;
+          this.selectedInfo = null;
+        }
+        return;
+      }
+
       if (stateName === "playCards") {
         if (this.isCurrentPlayerActive()) {
           this[`actionsInHandStock$${this.player_id}`].setSelectionMode(
@@ -741,6 +752,10 @@ define([
 
       if (stateName === "discardInfo") {
         if (this.isCurrentPlayerActive()) {
+          this.addActionButton("prs_changeMind_btn", _("Change mind"), () => {
+            this.onChangeMindPlayed();
+          });
+
           this[`actionsInHandStock$${this.player_id}`].setSelectionMode("none");
           this[`infoInHandStock$${this.player_id}`].setSelectionMode("single");
         }
@@ -888,7 +903,6 @@ define([
 
     handleConfirmationButton: function (content = _("Confirm selection")) {
       this.removeActionButtons();
-      console.log(this.getStateName());
 
       if (this.getStateName() === "playCards") {
         if (this.selectedAction && this.selectedInfo) {
@@ -900,7 +914,6 @@ define([
       }
 
       if (this.getStateName() === "discardInfo") {
-        console.log(this.selectedInfo);
         if (this.selectedInfo) {
           this.addActionButton("prs_confirmationBtn", content, () => {
             this.onDiscardInfo();
@@ -1005,8 +1018,12 @@ define([
       this.sendAjaxCall("discardInfo", { card_id: this.selectedInfo.id });
     },
 
-    onChangeMind() {
-      this.sendAjaxCall("changeMind", {}, true);
+    onChangeMindPlayed() {
+      this.sendAjaxCall("changeMindPlayed", {}, true);
+    },
+
+    onChangeMindDiscarded() {
+      this.sendAjaxCall("changeMindDiscarded", {}, true);
     },
 
     onStealCard() {
@@ -1034,8 +1051,11 @@ define([
     setupNotifications: function () {
       console.log("notifications subscriptions setup");
       dojo.subscribe("playCards", this, "notif_playCards");
+      dojo.subscribe("discardInfo", this, "notif_discardInfo");
+      dojo.subscribe("discardInfoPrivate", this, "notif_discardInfoPrivate");
       dojo.subscribe("revealPlayed", this, "notif_revealPlayed");
-      dojo.subscribe("changeMind", this, "notif_changeMind");
+      dojo.subscribe("changeMindPlayed", this, "notif_changeMindPlayed");
+      dojo.subscribe("changeMindDiscarded", this, "notif_changeMindDiscarded");
       dojo.subscribe("store", this, "notif_store");
       dojo.subscribe("storePrivate", this, "notif_storePrivate");
       dojo.subscribe("activateActionCard", this, "notif_activateActionCard");
@@ -1057,8 +1077,6 @@ define([
         "notif_computeArchivedPoints"
       );
       dojo.subscribe("computeKeyPoint", this, "notif_computeKeyPoint");
-      dojo.subscribe("discardInfo", this, "notif_discardInfo");
-      dojo.subscribe("discardInfoPrivate", this, "notif_discardInfoPrivate");
 
       this.notifqueue.setSynchronous("discardInfo", 1000);
       this.notifqueue.setSynchronous("revealPlayed", 1000);
@@ -1154,7 +1172,7 @@ define([
       this.updateHandWidth(this[infoInHandControl]);
     },
 
-    notif_changeMind: function (notif) {
+    notif_changeMindPlayed: function (notif) {
       const player_id = notif.args.player_id;
       const actionCard = notif.args.actionCard;
       const infoCard = notif.args.infoCard;
@@ -1168,6 +1186,17 @@ define([
       this.updateHandWidth(this[infoInHandControl]);
 
       this.selectedAction = null;
+      this.selectedInfo = null;
+    },
+
+    notif_changeMindDiscarded: function (notif) {
+      const player_id = notif.args.player_id;
+      const infoCard = notif.args.infoCard;
+
+      const infoInHandControl = `infoInHandStock$${player_id}`;
+      this[infoInHandControl].addCard(infoCard);
+      this.updateHandWidth(this[infoInHandControl]);
+
       this.selectedInfo = null;
     },
 
@@ -1487,7 +1516,9 @@ define([
             }
 
             if (args.info_label) {
-              args.info_label = `<span style="color: #${corporationColor}; font-weight: bold">${args.info_label}</span>`;
+              args.info_label = `<span style="color: #${corporationColor}; font-weight: bold">${_(
+                args.info_label
+              )}</span>`;
             }
           }
         }
