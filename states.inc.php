@@ -83,7 +83,7 @@ $machinestates = array(
         "action" => "st_infoArchiving",
         "transitions" => array(
             "infoArchiving" => 4,
-            "stealCard" => 41,
+            "stealInfo" => 41,
             "breakFirstTie" => 42,
             "breakSecondTie" => 43,
             "betweenWeeks" => 5
@@ -92,12 +92,12 @@ $machinestates = array(
     ),
 
     41 => array(
-        "name" => "stealCard",
+        "name" => "stealInfo",
         "description" => clienttranslate('${actplayer} must take a card of ${corporation_label} from other player'),
         "descriptionmyturn" => clienttranslate('${you} must take a card of ${corporation_label} from other player'),
         "type" => "activeplayer",
-        "possibleactions" => array("stealCard"),
-        "args" => "arg_stealCard",
+        "possibleactions" => array("stealInfo"),
+        "args" => "arg_stealInfo",
         "transitions" => array(
             "infoArchiving" => 4,
         )

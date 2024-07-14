@@ -31,6 +31,8 @@ class PersonaNonGrata extends Table
             "week" => 10,
             "currentCorporation" => 11,
             "day" => 12,
+            "corporationFirst" => 13,
+            "corporationSecond" => 14,
         ));
 
         $this->information_cards = $this->getNew("module.common.deck");
@@ -585,7 +587,7 @@ class PersonaNonGrata extends Table
     }
 
     //corporation tie break
-    function setTiedPlayer($player_id, $tied = 1): void
+    function setTiedPlayer(int $player_id, int $tied = 1): void
     {
         $this->DbQuery("UPDATE player SET player_tied=$tied WHERE player_id='$player_id'");
     }
@@ -595,6 +597,20 @@ class PersonaNonGrata extends Table
         $tied_players = $this->getCollectionFromDB("SELECT player_id id from player WHERE player_tied=1");
 
         return $tied_players;
+    }
+
+    //player stole info
+
+    function setPlayerStole(int $player_id, int $stole = 1): void
+    {
+        $this->DbQuery("UPDATE player SET player_stole=$stole WHERE player_id='$player_id'");
+    }
+
+    function getPlayerStole($player_id): int
+    {
+        $stole = $this->getUniqueValueFromDB("SELECT player_stole from player WHERE player_id='$player_id'");
+
+        return $stole;
     }
 
     //checkers
@@ -614,6 +630,15 @@ class PersonaNonGrata extends Table
     {
         $canSteal = false;
         $players = $this->loadPlayersBasicInfos();
+
+        $stole = $this->getPlayerStole($current_player_id);
+
+        $this->dump("stole", $stole);
+        $this->dump("player", $current_player_id);
+
+        if ($stole) {
+            return false;
+        }
 
         foreach ($players as $player_id => $player) {
             if ($current_player_id != $player_id) {
@@ -1259,12 +1284,12 @@ class PersonaNonGrata extends Table
         $this->gamestate->nextPrivateState($player_id, "changeMindDiscarded");
     }
 
-    function stealCard($card_id)
+    function stealInfo($card_id)
     {
-        $this->checkAction("stealCard");
+        $this->checkAction("stealInfo");
 
         $player_id = $this->getActivePlayerId();
-        $corporation_id = $this->getGameStateValue("currentCorporation") - 1;
+        $corporation_id = $this->getGameStateValue("currentCorporation");
 
         $card = $this->information_cards->getCard($card_id);
         $opponent_id = $card["location_arg"];
@@ -1294,6 +1319,8 @@ class PersonaNonGrata extends Table
             )
         );
 
+        $this->setPlayerStole($player_id);
+
         $this->gamestate->nextState("infoArchiving");
     }
 
@@ -1302,7 +1329,7 @@ class PersonaNonGrata extends Table
         $this->checkAction("breakFirstTie");
 
         $player_id = $this->getActivePlayerId();
-        $corporation_id = $this->getGameStateValue("currentCorporation") - 1;
+        $corporation_id = $this->getGameStateValue("currentCorporation");
 
         $tied_players = $this->getTiedPlayers($corporation_id);
 
@@ -1353,33 +1380,36 @@ class PersonaNonGrata extends Table
             $this->setTiedPlayer($player_id, 0);
         }
 
+        $this->setGameStateValue("corporationFirst", $tie_winner);
+        $this->setGameStateValue("corporationSecond", $tie_runner);
+
         $this->gamestate->nextState("infoArchiving");
     }
 
-    function breakSecondTie($tie_winner)
+    function breakSecondTie($tie_runner)
     {
         $this->checkAction("breakSecondTie");
 
         $player_id = $this->getActivePlayerId();
-        $corporation_id = $this->getGameStateValue("currentCorporation") - 1;
+        $corporation_id = $this->getGameStateValue("currentCorporation");
 
         $tied_players = $this->getTiedPlayers($corporation_id);
 
-        if (!key_exists($tie_winner, $tied_players)) {
+        if (!key_exists($tie_runner, $tied_players)) {
             throw new BgaVisibleSystemException("You can't pick this player to obtain the Key");
         }
 
         $key_card = $this->getKeyByCorporation($corporation_id);
 
-        $this->key_cards->moveCard($key_card["id"], "archived", $tie_winner);
+        $this->key_cards->moveCard($key_card["id"], "archived", $tie_runner);
 
         $this->notifyAllPlayers(
             "obtainKey",
             clienttranslate('${player_name2} picks ${player_name} to obtain the Key of ${corporation_label}'),
             array(
                 "preserve" => array("corporationId"),
-                "player_id" => $tie_winner,
-                "player_name" => $this->getPlayerNameById($tie_winner),
+                "player_id" => $tie_runner,
+                "player_name" => $this->getPlayerNameById($tie_runner),
                 "player_id2" => $player_id,
                 "player_name2" => $this->getPlayerNameById($player_id),
                 "corporation_label" => $this->corporations()[$corporation_id],
@@ -1392,6 +1422,8 @@ class PersonaNonGrata extends Table
             $this->setTiedPlayer($player_id, 0);
         }
 
+        $this->setGameStateValue("corporationSecond", $tie_runner);
+
         $this->gamestate->nextState("infoArchiving");
     }
 
@@ -1399,9 +1431,9 @@ class PersonaNonGrata extends Table
     //////////// Game state arguments
     ////////////
 
-    function arg_stealCard()
+    function arg_stealInfo()
     {
-        $corporation_id = $this->getGameStateValue("currentCorporation") - 1;
+        $corporation_id = $this->getGameStateValue("currentCorporation");
         $corporation_label = $this->corporations()[$corporation_id];
 
         return array(
@@ -1412,7 +1444,7 @@ class PersonaNonGrata extends Table
 
     function arg_breakFirstTie()
     {
-        $corporation_id = $this->getGameStateValue("currentCorporation") - 1;
+        $corporation_id = $this->getGameStateValue("currentCorporation");
         $corporation_label = $this->corporations()[$corporation_id];
 
         $tied_players = $this->getTiedPlayers();
@@ -1426,7 +1458,7 @@ class PersonaNonGrata extends Table
 
     function arg_breakSecondTie()
     {
-        $corporation_id = $this->getGameStateValue("currentCorporation") - 1;
+        $corporation_id = $this->getGameStateValue("currentCorporation");
         $corporation_label = $this->corporations()[$corporation_id];
 
         $tied_players = $this->getTiedPlayers();
@@ -1466,7 +1498,7 @@ class PersonaNonGrata extends Table
         $hand_actions_count = $this->action_cards->countCardsInLocation("hand");
 
         //tests
-        if ($hand_actions_count == 0) {
+        if ($hand_actions_count == 16) {
             $this->gamestate->nextState("infoArchiving");
             return;
         }
@@ -1481,111 +1513,146 @@ class PersonaNonGrata extends Table
         $players = $this->loadPlayersBasicInfos();
 
         $corporation_id = $this->getGameStateValue("currentCorporation");
-        $this->incGameStateValue("currentCorporation", 1);
 
-        if ($corporation_id > count($this->corporations())) {
+        if ($corporation_id == count($this->corporations())) {
             $this->gamestate->nextState("betweenWeeks");
             return;
         }
 
         $corporation_label = $this->corporations()[$corporation_id];
 
-        if ($corporation_id == 1) {
-            foreach ($players as $player_id => $player) {
-                $this->revealEncrypted($player_id);
-            }
-        }
+        $first = $this->getGameStateValue("corporationFirst");
+        $second = $this->getGameStateValue("corporationSecond");
 
-        $corporation_points = $this->storePoints($corporation_id);
-        $most_points = max($corporation_points);
-
-        if (!$most_points) {
-            $this->notifyAllPlayers(
-                "tie",
-                clienttranslate('No player scores points for ${corporation_label} this week'),
-                array(
-                    "preserve" => array("corporationId"),
-                    "corporation_label" => $corporation_label,
-                    "corporationId" => $corporation_id,
-                )
-            );
-            $this->gamestate->nextState("infoArchiving");
-            return;
-        }
-
-        $winners = array_keys($corporation_points, $most_points);
-
-        foreach ($winners as $player_id) {
-            unset($corporation_points[$player_id]);
-        }
-
-        if (count($winners) >= 2) {
-            $this->notifyAllPlayers(
-                "tie",
-                clienttranslate('Two or more players are tied in the first-place for ${corporation_label}'),
-                array(
-                    "preserve" => array("corporationId"),
-                    "corporation_label" => $corporation_label,
-                    "corporationId" => $corporation_id
-                )
-            );
-
-            $key_card = $this->getKeyByCorporation($corporation_id);
-
-            if ($key_card["location"] === "archived") {
-                foreach ($winners as $player_id) {
-                    $this->setTiedPlayer($player_id);
+        if (!$first) {
+            if ($corporation_id == 1) {
+                foreach ($players as $player_id => $player) {
+                    $this->revealEncrypted($player_id);
                 }
+            }
 
-                $this->gamestate->changeActivePlayer($key_card["location_arg"]);
-                $this->gamestate->nextState("breakFirstTie");
+            $corporation_points = $this->storePoints($corporation_id);
+            $most_points = max($corporation_points);
+
+            if (!$most_points) {
+                $this->notifyAllPlayers(
+                    "tie",
+                    clienttranslate('No player scores points for ${corporation_label} this week'),
+                    array(
+                        "preserve" => array("corporationId"),
+                        "corporation_label" => $corporation_label,
+                        "corporationId" => $corporation_id,
+                    )
+                );
+
+                $this->incGameStateValue("currentCorporation", 1);
+
+                $this->setGameStateValue("corporationFirst", 0);
+                $this->setGameStateValue("corporationSecond", 0);
+
+                $this->gamestate->nextState("infoArchiving");
                 return;
             }
 
-            $this->gamestate->nextState("infoArchiving");
-            return;
-        }
+            $winners = array_keys($corporation_points, $most_points);
 
-        $first = array_shift($winners);
-
-        $this->obtainCorporation($corporation_id, $first);
-
-        $second_most_points = max($corporation_points);
-        $runner_ups = array_keys($corporation_points, $second_most_points);
-
-        if (count($runner_ups) >= 2 && $second_most_points) {
-            foreach ($runner_ups as $player_id) {
-                $this->setTiedPlayer($player_id);
+            foreach ($winners as $player_id) {
+                unset($corporation_points[$player_id]);
             }
 
-            $this->notifyAllPlayers(
-                "tie",
-                clienttranslate('Two or more players are tied in the second-place for ${corporation_label}'),
-                array(
-                    "preserve" => array("corporationId"),
-                    "corporation_label" => $corporation_label,
-                    "corporationId" => $corporation_id
-                )
-            );
+            if (count($winners) >= 2) {
+                $this->notifyAllPlayers(
+                    "tie",
+                    clienttranslate('Two or more players are tied in the first-place for ${corporation_label}'),
+                    array(
+                        "preserve" => array("corporationId"),
+                        "corporation_label" => $corporation_label,
+                        "corporationId" => $corporation_id
+                    )
+                );
 
-            $this->gamestate->changeActivePlayer($first);
-            $this->gamestate->nextState("breakSecondTie");
-            return;
+                $key_card = $this->getKeyByCorporation($corporation_id);
+
+                if ($key_card["location"] === "archived") {
+                    foreach ($winners as $player_id) {
+                        $this->setTiedPlayer($player_id);
+                    }
+
+                    $this->gamestate->changeActivePlayer($key_card["location_arg"]);
+                    $this->gamestate->nextState("breakFirstTie");
+                    return;
+                }
+
+                $this->incGameStateValue("currentCorporation", 1);
+
+                $this->setGameStateValue("corporationFirst", 0);
+                $this->setGameStateValue("corporationSecond", 0);
+
+                $this->gamestate->nextState("infoArchiving");
+                return;
+            }
+
+            $first = array_shift($winners);
+
+            $this->obtainCorporation($corporation_id, $first);
+
+            $this->setGameStateValue("corporationFirst", $first);
         }
 
-        $second = array_shift($runner_ups);
+        if (!$second) {
+            $second_most_points = max($corporation_points);
+            $runner_ups = array_keys($corporation_points, $second_most_points);
 
-        if (!$second_most_points) {
-            $second = $first;
+            if (count($runner_ups) >= 2 && $second_most_points) {
+                foreach ($runner_ups as $player_id) {
+                    $this->setTiedPlayer($player_id);
+                }
+
+                $this->notifyAllPlayers(
+                    "tie",
+                    clienttranslate('Two or more players are tied in the second-place for ${corporation_label}'),
+                    array(
+                        "preserve" => array("corporationId"),
+                        "corporation_label" => $corporation_label,
+                        "corporationId" => $corporation_id
+                    )
+                );
+
+                $this->gamestate->changeActivePlayer($first);
+                $this->gamestate->nextState("breakSecondTie");
+                return;
+            }
+
+            $second = array_shift($runner_ups);
+
+            if (!$second_most_points) {
+                $second = $first;
+            }
+
+            $this->obtainKey($corporation_id, $second);
+            $this->setGameStateValue("corporationSecond", $second);
         }
-
-        $this->obtainKey($corporation_id, $second);
 
         if ($this->canSteal($corporation_id, $first)) {
             $this->gamestate->changeActivePlayer($first);
-            $this->gamestate->nextState("stealCard");
+            $this->gamestate->nextState("stealInfo");
             return;
         }
+
+
+        $this->dump("second", $second);
+
+        if ($this->canSteal($corporation_id, $second)) {
+            $this->gamestate->changeActivePlayer($second);
+            $this->gamestate->nextState("stealInfo");
+            return;
+        }
+
+
+        $this->incGameStateValue("currentCorporation", 1);
+
+        $this->setGameStateValue("corporationFirst", 0);
+        $this->setGameStateValue("corporationSecond", 0);
 
         $this->gamestate->nextState("infoArchiving");
     }
@@ -1603,7 +1670,7 @@ class PersonaNonGrata extends Table
         $players = $this->loadPlayersBasicInfos();
 
         foreach ($players as $player_id => $player) {
-            $info_card = $this->getSingleCardInLocation($this->informations, "hand", $player_id);
+            $info_card = $this->getSingleCardInLocation($this->information_cards, "hand", $player_id);
 
             $corporation_id = $info_card["type"];
             $info_id = $info_card["type_arg"];
@@ -1615,7 +1682,7 @@ class PersonaNonGrata extends Table
                     "i18n" => array("info_label"),
                     "player_id" => $player_id,
                     "player_name" => $this->getPlayerNameById($player_id),
-                    "info_label" => $this->informations[$info_id],
+                    "info_label" => $this->informations[$info_id]["name"],
                     "corporation_label" => $this->corporations[$corporation_id],
                     "corporationId" => $corporation_id,
                     "infoCard" => $info_card

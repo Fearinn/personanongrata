@@ -72,12 +72,12 @@ class action_personanongrata extends APP_GameAction
     $this->ajaxResponse();
   }
 
-  public function stealCard()
+  public function stealInfo()
   {
     $this->setAjaxMode();
 
     $card_id = $this->getArg("card_id", AT_enum, true, null, range(1, 72));
-    $this->game->stealCard($card_id);
+    $this->game->stealInfo($card_id);
 
     $this->ajaxResponse();
   }

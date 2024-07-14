@@ -347,7 +347,7 @@ define([
 
           this[storedControl].onSelectionChange = (selection, lastChange) => {
             if (
-              this.getStateName() === "stealCard" &&
+              this.getStateName() === "stealInfo" &&
               this.isCurrentPlayerActive()
             ) {
               if (selection.length === 0) {
@@ -701,7 +701,7 @@ define([
         return;
       }
 
-      if (stateName === "stealCard") {
+      if (stateName === "stealInfo") {
         for (const player_id in this.players) {
           const storedControl = `storedStock$${player_id}`;
           this[storedControl].setSelectionMode("none");
@@ -762,22 +762,25 @@ define([
         return;
       }
 
-      if (stateName === "stealCard") {
+      if (stateName === "stealInfo") {
         const corporationId = args.corporationId;
+
         if (this.isCurrentPlayerActive()) {
           for (const player_id in this.players) {
-            if (player_id != this.player_id) {
-              const storedControl = `storedStock$${player_id}`;
-              this[storedControl].setSelectionMode("single");
-
-              const selectableCards = this[storedControl]
-                .getCards()
-                .filter((card) => {
-                  return card.type == corporationId;
-                });
-
-              this[storedControl].setSelectableCards(selectableCards);
+            if (player_id == this.player_id) {
+              continue;
             }
+
+            const storedControl = `storedStock$${player_id}`;
+            this[storedControl].setSelectionMode("single");
+
+            const selectableCards = this[storedControl]
+              .getCards()
+              .filter((card) => {
+                return card.type == corporationId;
+              });
+
+            this[storedControl].setSelectableCards(selectableCards);
           }
         }
         return;
@@ -922,10 +925,10 @@ define([
         return;
       }
 
-      if (this.getStateName() === "stealCard") {
+      if (this.getStateName() === "stealInfo") {
         if (this.selectedInfo) {
           this.addActionButton("prs_confirmationBtn", content, () => {
-            this.onStealCard();
+            this.onStealInfo();
           });
         }
       }
@@ -1026,8 +1029,8 @@ define([
       this.sendAjaxCall("changeMindDiscarded", {}, true);
     },
 
-    onStealCard() {
-      this.sendAjaxCall("stealCard", {
+    onStealInfo() {
+      this.sendAjaxCall("stealInfo", {
         card_id: this.selectedInfo.id,
       });
     },
