@@ -13,7 +13,7 @@
 $gameinfos = array(
 
     // Name of the game in English (will serve as the basis for translation) 
-    'game_name' => "Persona Non Grata",
+    'game_name' => "Persona non Grata",
 
     // Game publisher (use empty string if there is no publisher)
     'publisher' => 'Dijon Jogos',
