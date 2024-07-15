@@ -23,6 +23,7 @@
         id="prs_archive${PLAYER_ID}"
         class="prs_myZone prs_playerZone prs_zone whiteblock"
       >
+        <div id="prs_actionDiscard${PLAYER_ID}" class="prs_actionDiscard"></div>
         <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
         <div id="prs_archivedInfo${PLAYER_ID}"></div>
         <div id="prs_archivedCorporation${PLAYER_ID}"></div>
@@ -35,7 +36,7 @@
         <div id="prs_playedInfo${PLAYER_ID}" class="prs_playedInfo"></div>
         <div id="prs_playedAction${PLAYER_ID}" class="prs_playedAction"></div>
         <div id="prs_stored${PLAYER_ID}" class="prs_stored"></div>
-        <div id="prs_actionDiscard${PLAYER_ID}" class="prs_actionDiscard"></div>
+
         <div id="prs_encryptAction${PLAYER_ID}" class="prs_encryptAction"></div>
       </div>
 
@@ -78,6 +79,10 @@
           id="prs_archive${PLAYER_ID}"
           class="prs_playerZone prs_zone whiteblock"
         >
+          <div
+            id="prs_actionDiscard${PLAYER_ID}"
+            class="prs_actionDiscard"
+          ></div>
           <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
           <div id="prs_archivedInfo${PLAYER_ID}"></div>
           <div id="prs_archivedCorporation${PLAYER_ID}"></div>
@@ -90,10 +95,6 @@
           <div id="prs_playedInfo${PLAYER_ID}" class="prs_playedInfo"></div>
           <div id="prs_playedAction${PLAYER_ID}" class="prs_playedAction"></div>
           <div id="prs_stored${PLAYER_ID}" class="prs_stored"></div>
-          <div
-            id="prs_actionDiscard${PLAYER_ID}"
-            class="prs_actionDiscard"
-          ></div>
           <div
             id="prs_encryptAction${PLAYER_ID}"
             class="prs_encryptAction"
