@@ -633,9 +633,6 @@ class PersonaNonGrata extends Table
 
         $stole = $this->getPlayerStole($current_player_id);
 
-        $this->dump("stole", $stole);
-        $this->dump("player", $current_player_id);
-
         if ($stole) {
             return false;
         }
@@ -656,7 +653,6 @@ class PersonaNonGrata extends Table
     function download(array $info_card, int $player_id): void
     {
         $this->information_cards->moveCard($info_card["id"], "stored", $player_id);
-        $info_card = $this->getSingleCardInLocation($this->information_cards, "stored", $player_id);
 
         $this->notifyAllPlayers(
             "store",
@@ -698,7 +694,6 @@ class PersonaNonGrata extends Table
         $recipient_id = $this->getPlayerAfter($player_id);
 
         $this->information_cards->moveCard($info_card["id"], "stored", $recipient_id);
-        $info_card = $this->getSingleCardInLocation($this->information_cards, "stored", $recipient_id);
 
         $info_id = $info_card["type_arg"];
         $corporation_id = intval($info_card["type"]);
@@ -725,7 +720,6 @@ class PersonaNonGrata extends Table
         $recipient_id = $this->getPlayerBefore($player_id);
 
         $this->information_cards->moveCard($info_card["id"], "stored", $recipient_id);
-        $info_card = $this->getSingleCardInLocation($this->information_cards, "stored", $recipient_id);
 
         $info_id = $info_card["type_arg"];
         $corporation_id = intval($info_card["type"]);
