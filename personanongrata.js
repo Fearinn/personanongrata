@@ -177,8 +177,8 @@ define([
           div.classList.add("prs_cardFace");
         },
         setupBackDiv: (card, div) => {
-          div.style.backgroundImage = `url(${g_gamethemeurl}img/corporations.jpg)`;
-          div.style.backgroundPosition = this.calcBackgroundPosition(24);
+          div.style.backgroundImage = `url(${g_gamethemeurl}img/informations.jpg)`;
+          div.style.backgroundPosition = this.calcBackgroundPosition(30);
           div.classList.add("prs_cardFace");
         },
       });
