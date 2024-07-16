@@ -1138,11 +1138,11 @@ define([
 
       const infoInHandControl = `infoInHandStock$${player_id}`;
 
-      const hand = this[infoInHandControl].getCards();
-      const randomIndex = Math.floor(Math.random() * hand.length);
-      const randomCard = hand[randomIndex];
+      const hand = this[infoInHandControl];
 
-      this[infoInHandControl].removeCard(randomCard);
+      this[infoInHandControl].removeCard({
+        id: `-${hand.length}:${player_id}`,
+      });
       this.updateHandWidth(this[infoInHandControl]);
     },
 
@@ -1172,10 +1172,10 @@ define([
       const infoInHandControl = `infoInHandStock$${player_id}`;
 
       const hand = this[infoInHandControl].getCards();
-      const randomIndex = Math.floor(Math.random() * hand.length);
-      const randomCard = hand[randomIndex];
 
-      this[infoInHandControl].removeCard(randomCard);
+      this[infoInHandControl].removeCard({
+        id: `-${hand.length}:${player_id}`,
+      });
 
       const playedInfoControl = `playedInfoStock$${player_id}`;
       this[playedInfoControl].removeAll();
@@ -1400,8 +1400,13 @@ define([
         const infoCards = newInfo[player_id];
         const cardsRemoved = removedFromDeck[player_id];
 
+        console.log(this[infoInHandControl].getCards(), "cards before");
+
         for (const card_id in infoCards) {
           const card = infoCards[card_id];
+
+          console.log(card);
+
           this[infoInHandControl].addCard(card, {
             fromElement: $("prs_infoDeck"),
           });
@@ -1411,6 +1416,8 @@ define([
           const card = cardsRemoved[card_id];
           this["deckOfInformationsStock"].removeCard(card);
         }
+
+        console.log(this[infoInHandControl].getCards(), "cards");
 
         this.updateHandWidth(this[infoInHandControl]);
       }
@@ -1424,7 +1431,9 @@ define([
 
       for (const card_id in infoCards) {
         const card = infoCards[card_id];
-        this[infoInHandControl].addCard(card);
+        this[infoInHandControl].addCard(card, {
+          fromElement: $("prs_infoDeck"),
+        });
       }
 
       this.updateHandWidth(this[infoInHandControl]);

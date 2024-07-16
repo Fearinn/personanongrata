@@ -1131,6 +1131,48 @@ class PersonaNonGrata extends Table
         }
     }
 
+    function drawSingleNewInfo()
+    {
+        $players = $this->loadPlayersBasicInfos();
+
+        foreach ($players as $player_id => $player) {
+            $info_card = $this->information_cards->pickCard("deck", $player_id);
+
+            $info_id = $info_card["type_arg"];
+            $corporation_id = intval($info_card["type"]);
+
+            $hand_info_count = $this->information_cards->countCardsInLocation("hand", $player_id);
+
+            $new_info[$player_id] = array($this->hideCard($info_card, true, $hand_info_count - 12));
+
+            $removed_from_deck[$player_id] = $this->hideCards(array($info_card), true);
+
+            $this->notifyPlayer(
+                $player_id,
+                "drawNewInfoPrivate",
+                clienttranslate('You draw the ${info_label} of ${corporation_label}'),
+                array(
+                    "preserve" => array("corporationId"),
+                    "i18n" => array("info_label"),
+                    "player_id" => $player_id,
+                    "info_label" => $this->informations[$info_id]["name"],
+                    "corporation_label" => $this->corporations[$corporation_id],
+                    "corporationId" => $corporation_id,
+                    "infoCards" => array($info_card),
+                )
+            );
+        }
+
+        $this->notifyAllPlayers(
+            "drawNewInfo",
+            clienttranslate('All other players draw a new Information card from the deck'),
+            array(
+                "newInfo" => $new_info,
+                "removedFromDeck" => $removed_from_deck
+            )
+        );
+    }
+
     //////////////////////////////////////////////////////////////////////////////
     //////////// Player actions
     //////////// 
@@ -1213,7 +1255,7 @@ class PersonaNonGrata extends Table
 
         $this->notifyAllPlayers(
             "discardInfo",
-            clienttranslate('${player_name} discards an information'),
+            "",
             array(
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id)
@@ -1491,12 +1533,16 @@ class PersonaNonGrata extends Table
 
         $hand_actions_count = $this->action_cards->countCardsInLocation("hand");
 
-        if ($hand_actions_count <= 0) {
+        if ($hand_actions_count == 0) {
             $this->gamestate->nextState("infoArchiving");
             return;
         }
 
         $this->passHands();
+
+        if ($this->getPlayersNumber() == 2) {
+            $this->drawSingleNewInfo();
+        }
 
         $this->gamestate->nextState("nextDay");
     }
