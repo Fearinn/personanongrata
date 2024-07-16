@@ -1253,7 +1253,7 @@ define([
 
     notif_store: function (notif) {
       const player_id = notif.args.player_id;
-      const card = notif.args.infoCard;
+      const infoCard = notif.args.infoCard;
       const encrypt = notif.args.encrypt;
 
       if (encrypt && player_id == this.player_id) {
@@ -1267,22 +1267,22 @@ define([
 
       const storedControl = `storedStock$${player_id}`;
 
-      this[storedControl].addCard(card, {
+      this[storedControl].addCard(infoCard, {
         fromElement: encrypt ? $(`prs_playedInfo$${player_id}`) : undefined,
       });
-      this.setSlotOffset(this[storedControl].getCardElement(card));
+
+      this.setSlotOffset(this[storedControl].getCardElement(infoCard));
     },
 
     notif_storePrivate: function (notif) {
       const player_id = notif.args.player_id;
-      const card = notif.args.infoCard;
+      const infoCard = notif.args.infoCard;
 
       const storedControl = `storedStock$${player_id}`;
 
-      this[storedControl].addCard(card);
-      this[storedControl].setCardVisible(card, false);
+      this[storedControl].addCard(infoCard);
 
-      this.setSlotOffset(this[storedControl].getCardElement(card));
+      this.setSlotOffset(this[storedControl].getCardElement(infoCard));
     },
 
     notif_activateActionCard: function (notif) {
@@ -1299,9 +1299,10 @@ define([
           { forceToElement: $(`information-${encryptedInfo.id}`).parentElement }
         );
 
-        const actionElement =
-          this[encryptActionControl].getCardElement(actionCard);
-        this.setSlotOffset(actionElement, 8);
+        this.setSlotOffset(
+          this[encryptActionControl].getCardElement(actionCard),
+          player_id == this.player_id ? -32 : 8
+        );
 
         return;
       }
