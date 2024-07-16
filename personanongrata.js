@@ -165,6 +165,8 @@ define([
           div.style.width = "180px";
           div.style.height = "280px";
           div.style.position = "relative";
+
+          div.classList.add("prs_informationCard");
         },
         setupFrontDiv: (card, div) => {
           div.style.background = this.imageFiles["informations"];
@@ -581,9 +583,10 @@ define([
             forceToElement: $(`information-${encryptedInfo.id}`).parentElement,
           }
         );
+
         this.setSlotOffset(
           this[encryptActionControl].getCardElement(encryptActionUsed),
-          8
+          -32
         );
       }
 
@@ -939,7 +942,7 @@ define([
       const slotElement = cardElement.parentNode;
       const index = slotElement.childNodes.length - 1;
 
-      slotElement.style.height = 280 + offset * index + "px";
+      slotElement.style.height = 280 + Math.abs(offset) * index + "px";
 
       if (!index) {
         cardElement.style.marginTop = 0;
@@ -1267,7 +1270,6 @@ define([
       this[storedControl].addCard(card, {
         fromElement: encrypt ? $(`prs_playedInfo$${player_id}`) : undefined,
       });
-
       this.setSlotOffset(this[storedControl].getCardElement(card));
     },
 

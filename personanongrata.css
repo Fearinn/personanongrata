@@ -398,3 +398,13 @@ body > .card {
 .prs_hacker > div:not(:first-child) {
   margin-top: -276px !important;
 }
+
+.prs_myStored .prs_informationCard {
+  z-index: 1;
+}
+
+.prs_myStored [data-slot-id="-1"] {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}

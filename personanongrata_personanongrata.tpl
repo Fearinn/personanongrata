@@ -35,7 +35,7 @@
       >
         <div id="prs_playedInfo${PLAYER_ID}" class="prs_playedInfo"></div>
         <div id="prs_playedAction${PLAYER_ID}" class="prs_playedAction"></div>
-        <div id="prs_stored${PLAYER_ID}" class="prs_stored"></div>
+        <div id="prs_stored${PLAYER_ID}" class="prs_myStored prs_stored"></div>
 
         <div id="prs_encryptAction${PLAYER_ID}" class="prs_encryptAction"></div>
       </div>
