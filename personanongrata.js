@@ -77,7 +77,7 @@ define([
           div.style.position = "relative";
         },
         setupFrontDiv: (card, div) => {
-          div.style.background = `url(${g_gamethemeurl}img/corporations.jpg)`;
+          div.style.background = this.imageFiles["corporations"];
 
           const type = Number(card.type);
           const type_arg = Number(card.type_arg);
@@ -88,7 +88,7 @@ define([
           div.classList.add("prs_cardFace");
         },
         setupBackDiv: (card, div) => {
-          div.style.backgroundImage = `url(${g_gamethemeurl}img/corporations.jpg)`;
+          div.style.backgroundImage = this.imageFiles["corporations"];
           div.style.backgroundPosition = this.calcBackgroundPosition(24);
           div.classList.add("prs_cardFace");
         },
@@ -105,7 +105,7 @@ define([
           div.style.position = "relative";
         },
         setupFrontDiv: (card, div) => {
-          div.style.background = `url(${g_gamethemeurl}img/corporations.jpg)`;
+          div.style.background = this.imageFiles["corporations"];
 
           const type = Number(card.type);
           const position = type + 17;
@@ -114,7 +114,7 @@ define([
           div.classList.add("prs_cardFace");
         },
         setupBackDiv: (card, div) => {
-          div.style.backgroundImage = `url(${g_gamethemeurl}img/corporations.jpg)`;
+          div.style.backgroundImage = this.imageFiles["corporations"];
           div.style.backgroundPosition = this.calcBackgroundPosition(24);
           div.classList.add("prs_cardFace");
         },
@@ -132,7 +132,7 @@ define([
           div.style.position = "relative";
         },
         setupFrontDiv: (card, div) => {
-          div.style.background = `url(${g_gamethemeurl}img/actions.jpg)`;
+          div.style.background = this.imageFiles["actions"];
 
           const type = Number(card.type);
           const type_arg = Number(card.type_arg);
@@ -143,7 +143,7 @@ define([
           div.classList.add("prs_cardFace");
         },
         setupBackDiv: (card, div) => {
-          div.style.backgroundImage = `url(${g_gamethemeurl}img/actions.jpg)`;
+          div.style.backgroundImage = this.imageFiles["actions"];
 
           const type = Number(card.type);
 
@@ -167,7 +167,7 @@ define([
           div.style.position = "relative";
         },
         setupFrontDiv: (card, div) => {
-          div.style.background = `url(${g_gamethemeurl}img/informations.jpg)`;
+          div.style.background = this.imageFiles["informations"];
 
           const type = Number(card.type);
           const type_arg = Number(card.type_arg);
@@ -177,7 +177,7 @@ define([
           div.classList.add("prs_cardFace");
         },
         setupBackDiv: (card, div) => {
-          div.style.backgroundImage = `url(${g_gamethemeurl}img/informations.jpg)`;
+          div.style.backgroundImage = this.imageFiles["informations"];
           div.style.backgroundPosition = this.calcBackgroundPosition(30);
           div.classList.add("prs_cardFace");
         },
@@ -186,6 +186,38 @@ define([
 
     setup: function (gamedatas) {
       console.log("Starting game setup");
+
+      this.dontPreloadImage("actions_pt.jpg");
+      this.dontPreloadImage("corporations_pt.jpg");
+      this.dontPreloadImage("informations_pt.jpg");
+      this.dontPreloadImage("actions.jpg");
+      this.dontPreloadImage("corporations.jpg");
+      this.dontPreloadImage("informations.jpg");
+
+      const lang = _("$locale");
+      this.imageFiles = [];
+
+      if (lang === "pt") {
+        this.imageFiles = [
+          "actions_pt.jpg",
+          "corporations_pt.jpg",
+          "informations_pt.jpg",
+        ];
+      } else {
+        this.imageFiles = [
+          "actions.jpg",
+          "corporations.jpg",
+          "informations.jpg",
+        ];
+      }
+
+      this.ensureSpecificGameImageLoading(this.imageFiles);
+
+      this.imageFiles = {
+        actions: `url(${g_gamethemeurl}img/${this.imageFiles[0]}`,
+        corporations: `url(${g_gamethemeurl}img/${this.imageFiles[1]}`,
+        informations: `url(${g_gamethemeurl}img/${this.imageFiles[2]}`,
+      };
 
       this.infoSortFunction =
         this.getGameUserPreference("101") == 1
