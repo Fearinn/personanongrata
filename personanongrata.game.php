@@ -1218,7 +1218,7 @@ class PersonaNonGrata extends Table
             )
         );
 
-        if ($this->getPlayersNumber() === 2) {
+        if ($this->getPlayersNumber() == 2 && $this->information_cards->countCardsInLocation("hand", $player_id) > 1) {
             $this->gamestate->nextPrivateState($player_id, "discardInfo");
             return;
         }
