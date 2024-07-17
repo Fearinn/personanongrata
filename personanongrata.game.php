@@ -1553,7 +1553,7 @@ class PersonaNonGrata extends Table
 
         $corporation_id = $this->getGameStateValue("currentCorporation");
 
-        if ($corporation_id == count($this->corporations())) {
+        if ($corporation_id > count($this->corporations())) {
             $this->gamestate->nextState("betweenWeeks");
             return;
         }
