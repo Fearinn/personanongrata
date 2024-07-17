@@ -181,6 +181,7 @@ class PersonaNonGrata extends Table
         $result["prevPlayer"] = $this->getPlayerBefore($current_player_id);
         $result["nextPlayer"] = $this->getPlayerAfter($current_player_id);
         $result["corporations"] = $this->corporations();
+        $result["informations"] = $this->informations;
         $result["hackers"] = $this->getHackers();
         $result["keysOnTable"] = $this->getKeysOnTable();
         $result["corporationDecks"] = $this->getCorporationDecks();
@@ -703,7 +704,7 @@ class PersonaNonGrata extends Table
             "store",
             clienttranslate('${player_name2} sends the ${info_label} of ${corporation_label} to ${player_name}'),
             array(
-                "preserve" => array("corporationId"),
+                "preserve" => array("corporationId", "informationId"),
                 "player_id" => $recipient_id,
                 "player_name" => $this->getPlayerNameById($recipient_id),
                 "player_id2" => $player_id,
@@ -711,6 +712,7 @@ class PersonaNonGrata extends Table
                 "info_label" => $this->informations[$info_id]["name"],
                 "corporation_label" => $this->corporations()[$corporation_id],
                 "corporationId" => $corporation_id,
+                "informationId" => $info_id,
                 "infoCard" => $info_card,
             )
         );
@@ -729,7 +731,7 @@ class PersonaNonGrata extends Table
             "store",
             clienttranslate('${player_name2} sends the ${info_label} of ${corporation_label} to ${player_name}'),
             array(
-                "preserve" => array("corporationId"),
+                "preserve" => array("corporationId", "informationId"),
                 "player_id" => $recipient_id,
                 "player_name" => $this->getPlayerNameById($recipient_id),
                 "player_id2" => $player_id,
@@ -737,6 +739,7 @@ class PersonaNonGrata extends Table
                 "info_label" => $this->informations[$info_id]["name"],
                 "corporation_label" => $this->corporations()[$corporation_id],
                 "corporationId" => $corporation_id,
+                "informationId" => $info_id,
                 "infoCard" => $info_card,
             )
         );
@@ -765,7 +768,7 @@ class PersonaNonGrata extends Table
             "revealPlayed",
             $message,
             array(
-                "preserve" => array("corporationId"),
+                "preserve" => array("corporationId", "informationId"),
                 "i18n" => array("action_label", "info_label"),
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
@@ -773,6 +776,7 @@ class PersonaNonGrata extends Table
                 "info_label" => $encrypt ? null : $this->informations[$info_id]["name"],
                 "corporation_label" => $encrypt ? null : $this->corporations()[$corporation_id],
                 "corporationId" => $corporation_id,
+                "informationId" => $info_id,
                 "actionCard" => $action_card,
                 "infoCard" => $info_card,
                 "encrypt" => $encrypt
@@ -883,13 +887,14 @@ class PersonaNonGrata extends Table
             "revealEncrypted",
             clienttranslate('${player_name} reveals his encrypted card... It&apos;s the ${info_label} of ${corporation_label}!'),
             array(
-                "preserve" => array("corporationId"),
+                "preserve" => array("corporationId", "informationId"),
                 "i18n" => array("info_label"),
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
                 "info_label" => $this->informations[$info_id]["name"],
                 "corporation_label" => $this->corporations()[$corporation_id],
                 "corporationId" => $corporation_id,
+                "informationId" => $info_id,
                 "infoCard" => $info_card
             )
         );
@@ -1017,7 +1022,6 @@ class PersonaNonGrata extends Table
                     clienttranslate('${player_name} discards the Corporation card of value ${value} to activate ${corporation_label}'),
                     array(
                         "preserve" => array("corporationId"),
-
                         "player_name" => $this->getPlayerNameById($player_id),
                         "value" => $card["type_arg"],
                         "corporation_label" => $this->corporations()[$corporation_id],
@@ -1157,12 +1161,13 @@ class PersonaNonGrata extends Table
                 "drawNewInfoPrivate",
                 clienttranslate('You draw the ${info_label} of ${corporation_label}'),
                 array(
-                    "preserve" => array("corporationId"),
+                    "preserve" => array("corporationId", "informationId"),
                     "i18n" => array("info_label"),
                     "player_id" => $player_id,
                     "info_label" => $this->informations[$info_id]["name"],
                     "corporation_label" => $this->corporations[$corporation_id],
                     "corporationId" => $corporation_id,
+                    "informationId" => $info_id,
                     "infoCards" => array($info_card),
                 )
             );
@@ -1211,13 +1216,14 @@ class PersonaNonGrata extends Table
             "playCards",
             clienttranslate('You combine the ${action_label} to the ${info_label} of ${corporation_label}'),
             array(
-                "preserve" => array("corporationId"),
+                "preserve" => array("corporationId", "informationId"),
                 "i18n" => array("action_label", "info_label"),
                 "player_id" => $player_id,
                 "action_label" => $this->actions[$action_id],
                 "info_label" => $this->informations[$info_id]["name"],
                 "corporation_label" => $this->corporations()[$corporation_id],
                 "corporationId" => $corporation_id,
+                "informationId" => $info_id,
                 "actionCard" => $action_card,
                 "infoCard" => $info_card
             )
@@ -1248,12 +1254,13 @@ class PersonaNonGrata extends Table
             "discardInfoPrivate",
             clienttranslate('You discard the ${info_label} of ${corporation_label}'),
             array(
-                "preserve" => array("corporationId"),
+                "preserve" => array("corporationId", "informationId"),
                 "i18n" => array("info_label"),
                 "player_id" => $player_id,
                 "info_label" => $this->informations[$info_id]["name"],
                 "corporation_label" => $this->corporations[$corporation_id],
                 "corporationId" => $corporation_id,
+                "informationId" => $info_id,
                 "infoCard" => $info_card,
             )
         );
@@ -1346,7 +1353,7 @@ class PersonaNonGrata extends Table
             "archiveInfo",
             clienttranslate('${player_name} takes the ${info_label} of ${corporation_label} from ${player_name2} and archives it'),
             array(
-                "preserve" => array("corporationId"),
+                "preserve" => array("corporationId", "informationId"),
                 "i18n" => array("info_label"),
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
@@ -1355,6 +1362,7 @@ class PersonaNonGrata extends Table
                 "info_label" => $this->informations[$info_id]["name"],
                 "corporation_label" => $this->corporations()[$corporation_id],
                 "corporationId" => $corporation_id,
+                "informationId" => $info_id,
                 "infoCards" => array($card_id => $card),
                 "isStolen" => true
             )

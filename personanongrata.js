@@ -26,6 +26,9 @@ define([
     constructor: function () {
       console.log("personanongrata constructor");
 
+      this._registeredCustomTooltips = {};
+      this._attachedTooltips = {};
+
       this.corporationColors = {
         1: "35a7dd",
         2: "652b80",
@@ -216,9 +219,9 @@ define([
       this.ensureSpecificGameImageLoading(this.imageFiles);
 
       this.imageFiles = {
-        actions: `url(${g_gamethemeurl}img/${this.imageFiles[0]}`,
-        corporations: `url(${g_gamethemeurl}img/${this.imageFiles[1]}`,
-        informations: `url(${g_gamethemeurl}img/${this.imageFiles[2]}`,
+        actions: `url(${g_gamethemeurl}img/${this.imageFiles[0]})`,
+        corporations: `url(${g_gamethemeurl}img/${this.imageFiles[1]})`,
+        informations: `url(${g_gamethemeurl}img/${this.imageFiles[2]})`,
       };
 
       this.infoSortFunction =
@@ -232,6 +235,7 @@ define([
       this.prevPlayer = gamedatas.prevPlayer;
 
       this.corporations = gamedatas.corporations;
+      this.informations = gamedatas.informations;
       this.hackers = gamedatas.hackers;
       this.keysOnTable = gamedatas.keysOnTable;
       this.corporationDecks = gamedatas.corporationDecks;
@@ -1577,7 +1581,63 @@ define([
       this.scoreCtrl[player_id].toValue(totalPoints);
     },
 
-    //Style logs
+    ///////////////////////////////////////////////
+    //////////////////////////////////////////////
+    ///////////// Style logs ////////////////////
+
+    getTooltipForInformation: function (informationId, corporationId) {
+      const information = this.informations[informationId];
+
+      if (!information) {
+        return;
+      }
+
+      const type = Number(corporationId);
+      const type_arg = Number(informationId);
+      const position = type_arg - 2 + (type - 1) * 5;
+
+      const backgroundPosition = this.calcBackgroundPosition(position);
+
+      const html = `<div class="prs_cardFace" style="background: ${this.imageFiles["informations"]}; background-position: ${backgroundPosition}; 
+      box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.5); height: 280px; width: 180px"></div>`;
+
+      return html;
+    },
+
+    addCustomTooltip: function (container, html) {
+      this.addTooltipHtml(container, html, 1000);
+    },
+
+    setLoader: function (image_progress, logs_progress) {
+      this.inherited(arguments); // required, this is "super()" call, do not remove
+      if (!this.isLoadingLogsComplete && logs_progress >= 100) {
+        this.isLoadingLogsComplete = true; // this is to prevent from calling this more then once
+        this.onLoadingLogsComplete();
+      }
+    },
+
+    onLoadingLogsComplete: function () {
+      console.log("Loading logs complete");
+
+      this.attachRegisteredTooltips();
+    },
+
+    registerCustomTooltip(html, id) {
+      this._registeredCustomTooltips[id] = html;
+      return id;
+    },
+
+    attachRegisteredTooltips() {
+      console.log("Attaching toolips");
+
+      for (const id in this._registeredCustomTooltips) {
+        this.addCustomTooltip(id, this._registeredCustomTooltips[id]);
+        this._attachedTooltips[id] = this._registeredCustomTooltips[id];
+      }
+
+      this._registeredCustomTooltips = {};
+    },
+
     // @Override
     format_string_recursive: function (log, args) {
       try {
@@ -1592,10 +1652,20 @@ define([
               args.corporation_label = `<span style="color: #${corporationColor}; font-weight: bold">${args.corporation_label}</span>`;
             }
 
-            if (args.info_label) {
-              args.info_label = `<span style="color: #${corporationColor}; font-weight: bold">${_(
+            if (args.info_label && args.informationId) {
+              const html = this.getTooltipForInformation(
+                args.informationId,
+                corporationId
+              );
+              const uid = Date.now() + args.informationId;
+
+              const elementId = `prs_infoLog:${uid}`;
+
+              args.info_label = `<span id=${elementId} style="color: #${corporationColor}; font-weight: bold">${_(
                 args.info_label
               )}</span>`;
+
+              this.registerCustomTooltip(html, elementId);
             }
           }
         }
