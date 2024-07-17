@@ -1678,20 +1678,20 @@ class PersonaNonGrata extends Table
             return;
         }
 
-
-        $this->dump("second", $second);
-
         if ($this->canSteal($corporation_id, $second)) {
             $this->gamestate->changeActivePlayer($second);
             $this->gamestate->nextState("stealInfo");
             return;
         }
 
-
         $this->incGameStateValue("currentCorporation", 1);
 
         $this->setGameStateValue("corporationFirst", 0);
         $this->setGameStateValue("corporationSecond", 0);
+
+        foreach ($players as $player_id => $player) {
+            $this->setPlayerStole($player_id, 0);
+        }
 
         $this->gamestate->nextState("infoArchiving");
     }
