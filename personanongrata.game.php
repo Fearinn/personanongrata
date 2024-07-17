@@ -235,6 +235,7 @@ class PersonaNonGrata extends Table
             $count += $inc;
             $this->dbSetScore($player_id, $count);
         }
+
         return $count;
     }
 
@@ -1088,6 +1089,8 @@ class PersonaNonGrata extends Table
             $points += $card["type_arg"];
         }
 
+        $total_points = $this->dbIncScore($player_id, $points);
+
         $this->notifyAllPlayers(
             "computeArchivedPoints",
             clienttranslate('${player_name} scores ${points} points with ${corporation_label} from archived cards'),
@@ -1098,9 +1101,10 @@ class PersonaNonGrata extends Table
                 "player_color" => $this->getPlayerColorById($player_id),
                 "corporation_label" => $this->corporations()[$corporation_id],
                 "corporationId" => $corporation_id,
-                "points" => $points,
                 "corporationCards" => $archived_corporations,
                 "infoCards" => $archived_info,
+                "points" => $points,
+                "totalPoints" => $total_points
             )
         );
 
@@ -1113,7 +1117,7 @@ class PersonaNonGrata extends Table
         $archived_keys = $this->key_cards->getCardsOfTypeInLocation($corporation_id, null, "archived", $player_id);
 
         foreach ($archived_keys as $card) {
-            $this->dbIncScore($player_id, 1);
+            $total_points = $this->dbIncScore($player_id, 1);
 
             $this->notifyAllPlayers(
                 "computeKeyPoint",
@@ -1126,6 +1130,7 @@ class PersonaNonGrata extends Table
                     "corporation_label" => $this->corporations()[$corporation_id],
                     "corporationId" => $corporation_id,
                     "keyCard" => $card,
+                    "totalPoints" => $total_points
                 )
             );
         }
@@ -1699,7 +1704,7 @@ class PersonaNonGrata extends Table
     function st_betweenWeeks()
     {
         if ($this->getGameStateValue("week") == 3) {
-            $this->gamestate->nextState("finalPoints");
+            $this->gamestate->nextState("finalScoring");
             return;
         }
 
@@ -1778,7 +1783,7 @@ class PersonaNonGrata extends Table
         $this->gamestate->nextState("nextWeek");
     }
 
-    function st_finalPoints()
+    function st_finalScoring()
     {
         $players = $this->loadPlayersBasicInfos();
 

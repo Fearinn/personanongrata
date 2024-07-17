@@ -1530,10 +1530,10 @@ define([
     notif_computeArchivedPoints: function (notif) {
       const player_id = notif.args.player_id;
       const player_color = notif.args.player_color;
-      const points = notif.args.points;
       const corporationCards = notif.args.corporationCards;
       const infoCards = notif.args.infoCards;
-      const keyCards = notif.args.keyCards;
+      const points = notif.args.points;
+      const totalPoints = notif.args.totalPoints;
 
       const archivedCorporationsControl = `archivedCorporationStock$${player_id}`;
       this[archivedCorporationsControl].removeAll();
@@ -1560,18 +1560,21 @@ define([
         this.displayScoring(cardElement, player_color, card.type_arg);
       }
 
-      this.scoreCtrl[player_id].toValue(points);
+      this.scoreCtrl[player_id].toValue(totalPoints);
     },
 
     notif_computeKeyPoint: function (notif) {
       const player_id = notif.args.player_id;
       const player_color = notif.args.player_color;
       const keyCard = notif.args.keyCard;
+      const totalPoints = notif.args.totalPoints;
 
       const archivedKeysControl = `archivedKeysStock$${player_id}`;
 
       const cardElement = this[archivedKeysControl].getCardElement(keyCard);
       this.displayScoring(cardElement, player_color, keyCard.type_arg);
+
+      this.scoreCtrl[player_id].toValue(totalPoints);
     },
 
     //Style logs
