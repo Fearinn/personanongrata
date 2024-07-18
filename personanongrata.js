@@ -139,7 +139,6 @@ define([
 
           const type = Number(card.type);
           const type_arg = Number(card.type_arg);
-
           const position = (type - 1) * 5 + type_arg;
 
           div.style.backgroundPosition = this.calcBackgroundPosition(position);
@@ -234,6 +233,7 @@ define([
       this.nextPlayer = gamedatas.nextPlayer;
       this.prevPlayer = gamedatas.prevPlayer;
 
+      this.actions = gamedatas.actions;
       this.corporations = gamedatas.corporations;
       this.informations = gamedatas.informations;
       this.hackers = gamedatas.hackers;
@@ -772,6 +772,8 @@ define([
 
     onUpdateActionButtons: function (stateName, args) {
       console.log("Update action buttons: " + stateName);
+
+      this.attachRegisteredTooltips();
 
       if (stateName === "day") {
         if (!this.isCurrentPlayerActive()) {
@@ -1584,6 +1586,23 @@ define([
     ///////////////////////////////////////////////
     //////////////////////////////////////////////
     ///////////// Style logs ////////////////////
+    getTooltipForAction: function (actionId, hackerId) {
+      const action = this.actions[actionId];
+
+      if (!action) {
+        return;
+      }
+
+      const type = Number(hackerId);
+      const type_arg = Number(actionId);
+      const position = (type - 1) * 5 + type_arg;
+      const backgroundPosition = this.calcBackgroundPosition(position);
+
+      const html = `<div class="prs_cardFace" style="background: ${this.imageFiles["actions"]}; background-position: ${backgroundPosition}; 
+      box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.5); height: 280px; width: 180px"></div>`;
+
+      return html;
+    },
 
     getTooltipForInformation: function (informationId, corporationId) {
       const information = this.informations[informationId];
@@ -1595,7 +1614,6 @@ define([
       const type = Number(corporationId);
       const type_arg = Number(informationId);
       const position = type_arg - 2 + (type - 1) * 5;
-
       const backgroundPosition = this.calcBackgroundPosition(position);
 
       const html = `<div class="prs_cardFace" style="background: ${this.imageFiles["informations"]}; background-position: ${backgroundPosition}; 
@@ -1657,8 +1675,8 @@ define([
                 args.informationId,
                 corporationId
               );
-              const uid = Date.now() + args.informationId;
 
+              const uid = Date.now() + args.informationId;
               const elementId = `prs_infoLog:${uid}`;
 
               args.info_label = `<span id=${elementId} style="color: #${corporationColor}; font-weight: bold">${_(
@@ -1667,6 +1685,21 @@ define([
 
               this.registerCustomTooltip(html, elementId);
             }
+          }
+
+          if (args.action_label && args.actionId && args.hackerId) {
+            const html = this.getTooltipForAction(args.actionId, args.hackerId);
+
+            const uid = Date.now() + args.actionId;
+            const elementId = `prs_actionLog:${uid}`;
+
+            args.action_label = `<span id=${elementId} style="font-weight: bold">${_(
+              args.action_label
+            )}</span>`;
+
+            console.log(args.action_label);
+
+            this.registerCustomTooltip(html, elementId);
           }
         }
       } catch (e) {

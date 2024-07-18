@@ -180,6 +180,7 @@ class PersonaNonGrata extends Table
         $result["clockwise"] = $this->isClockwise();
         $result["prevPlayer"] = $this->getPlayerBefore($current_player_id);
         $result["nextPlayer"] = $this->getPlayerAfter($current_player_id);
+        $result["actions"] = $this->actions;
         $result["corporations"] = $this->corporations();
         $result["informations"] = $this->informations;
         $result["hackers"] = $this->getHackers();
@@ -768,7 +769,7 @@ class PersonaNonGrata extends Table
             "revealPlayed",
             $message,
             array(
-                "preserve" => array("corporationId", "informationId"),
+                "preserve" => array("corporationId", "informationId", "actionId", "hackerId"),
                 "i18n" => array("action_label", "info_label"),
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
@@ -777,6 +778,8 @@ class PersonaNonGrata extends Table
                 "corporation_label" => $encrypt ? null : $this->corporations()[$corporation_id],
                 "corporationId" => $corporation_id,
                 "informationId" => $info_id,
+                "actionId" => $action_id,
+                "hackerId" => $action_card["type"],
                 "actionCard" => $action_card,
                 "infoCard" => $info_card,
                 "encrypt" => $encrypt
@@ -1216,7 +1219,7 @@ class PersonaNonGrata extends Table
             "playCards",
             clienttranslate('You combine the ${action_label} to the ${info_label} of ${corporation_label}'),
             array(
-                "preserve" => array("corporationId", "informationId"),
+                "preserve" => array("corporationId", "informationId", "actionId", "hackerId"),
                 "i18n" => array("action_label", "info_label"),
                 "player_id" => $player_id,
                 "action_label" => $this->actions[$action_id],
@@ -1224,6 +1227,8 @@ class PersonaNonGrata extends Table
                 "corporation_label" => $this->corporations()[$corporation_id],
                 "corporationId" => $corporation_id,
                 "informationId" => $info_id,
+                "actionId" => $action_id,
+                "hackerId" => $action_card["type"],
                 "actionCard" => $action_card,
                 "infoCard" => $info_card
             )
