@@ -761,7 +761,7 @@ class PersonaNonGrata extends Table
             $info_card = $this->hideCard($info_card, true, -1);
         }
 
-        $message =  $encrypt ? clienttranslate('${player_name} combines the ${action_label} to an information')
+        $message =  $encrypt ? clienttranslate('${player_name} combines the ${action_label} to an Information card')
             : clienttranslate('${player_name} combines the ${action_label} to the ${info_label} of ${corporation_label}');
 
         $this->notifyAllPlayers(

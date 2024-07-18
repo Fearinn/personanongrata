@@ -23,7 +23,10 @@
         id="prs_archive${PLAYER_ID}"
         class="prs_myZone prs_playerZone prs_zone whiteblock"
       >
-        <div id="prs_actionDiscard${PLAYER_ID}" class="prs_actionDiscard"></div>
+        <div
+          id="prs_actionDiscard${PLAYER_ID}"
+          class="prs_actionDiscard prs_noExpand"
+        ></div>
         <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
         <div id="prs_archivedInfo${PLAYER_ID}"></div>
         <div id="prs_archivedCorporation${PLAYER_ID}"></div>
@@ -81,7 +84,7 @@
         >
           <div
             id="prs_actionDiscard${PLAYER_ID}"
-            class="prs_actionDiscard"
+            class="prs_actionDiscard prs_noExpand"
           ></div>
           <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
           <div id="prs_archivedInfo${PLAYER_ID}"></div>

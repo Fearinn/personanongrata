@@ -308,6 +308,10 @@ body > .card {
   z-index: 99 !important;
 }
 
+.prs_noExpand {
+  pointer-events: none;
+}
+
 .prs_card,
 .prs_cardFace {
   border-radius: 12px;
