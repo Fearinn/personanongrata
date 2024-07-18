@@ -247,7 +247,7 @@ body > .card {
   display: none;
 }
 
-/* bga-cards module */
+/* END bga-cards module */
 
 .hand-stock {
   min-height: 330px;
@@ -259,15 +259,7 @@ body > .card {
 
 .all-visible-deck {
   position: relative !important;
-}
-
-.all-visible-deck:active,
-.all-visible-deck:hover,
-.all-visible-deck.opened {
-  width: calc(
-    var(--width) + (var(--tile-count) - 1) * var(--horizontal-shift)
-  ) !important;
-  z-index: 2 !important;
+  pointer-events: none;
 }
 
 .all-visible-deck > .card {
@@ -315,10 +307,6 @@ body > .card {
   border: 3px solid red;
   transform: none !important;
   z-index: 99 !important;
-}
-
-.prs_noExpand {
-  pointer-events: none;
 }
 
 .prs_card,
