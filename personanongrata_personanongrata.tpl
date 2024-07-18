@@ -127,12 +127,12 @@
       <div id="prs_infoDeck" class="prs_infoDeck"></div>
       <div id="prs_keys" class="prs_keys"></div>
       <div id="prs_corporationDecks" class="prs_corporationDecks">
-        <div id="prs_corporationDeck:1"></div>
-        <div id="prs_corporationDeck:2"></div>
-        <div id="prs_corporationDeck:3"></div>
-        <div id="prs_corporationDeck:4"></div>
-        <div id="prs_corporationDeck:5"></div>
-        <div id="prs_corporationDeck:6"></div>
+        <div id="prs_corporationDeck:1" class="prs_noExpand"></div>
+        <div id="prs_corporationDeck:2" class="prs_noExpand"></div>
+        <div id="prs_corporationDeck:3" class="prs_noExpand"></div>
+        <div id="prs_corporationDeck:4" class="prs_noExpand"></div>
+        <div id="prs_corporationDeck:5" class="prs_noExpand"></div>
+        <div id="prs_corporationDeck:6" class="prs_noExpand"></div>
       </div>
     </div>
   </div>
