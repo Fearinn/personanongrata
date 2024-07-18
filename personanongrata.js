@@ -449,7 +449,11 @@ define([
         this[discardedActionsControl] = new AllVisibleDeck(
           this.actionManager,
           $(`prs_actionDiscard$${player_id}`),
-          { horizontalShift: "32px", verticalShift: "0px" }
+          {
+            direction: "horizontal",
+            horizontalShift: "32px",
+            verticalShift: "0px",
+          }
         );
 
         const discardedCards = this.discardedActions[player_id];
@@ -465,6 +469,7 @@ define([
           this.corporationManager,
           $(`prs_archivedCorporation$${player_id}`),
           {
+            direction: "horizontal",
             horizontalShift: "32px",
             verticalShift: "0px",
             sort: sortFunction("type, type_arg"),
@@ -483,7 +488,12 @@ define([
         this[archivedKeyControl] = new AllVisibleDeck(
           this.keyManager,
           $(`prs_archivedKey$${player_id}`),
-          { horizontalShift: "32px", verticalShift: "0px" }
+          {
+            direction: "horizontal",
+            horizontalShift: "32px",
+            verticalShift: "0px",
+            sort: sortFunction("type"),
+          }
         );
 
         const archivedKeys = this.archivedKeys[player_id];
@@ -498,6 +508,7 @@ define([
           this.informationManager,
           $(`prs_archivedInfo$${player_id}`),
           {
+            direction: "horizontal",
             horizontalShift: "32px",
             verticalShift: "0px",
             sort: sortFunction("type", "type_arg"),
@@ -624,7 +635,7 @@ define([
         this[corporationDeckControl] = new AllVisibleDeck(
           this.corporationManager,
           $(`prs_corporationDeck:${corporation_id}`),
-          { horizontalShift: "0px" }
+          { direction: "horizontal", horizontalShift: "0px" }
         );
 
         cards.sort((a, b) => {

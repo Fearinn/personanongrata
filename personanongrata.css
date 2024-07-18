@@ -253,12 +253,21 @@ body > .card {
   min-height: 330px;
 }
 
+.all-visible-deck:empty {
+  display: none;
+}
+
 .all-visible-deck {
   position: relative !important;
 }
 
-.all-visible-deck:empty {
-  display: none;
+.all-visible-deck:active,
+.all-visible-deck:hover,
+.all-visible-deck.opened {
+  width: calc(
+    var(--width) + (var(--tile-count) - 1) * var(--horizontal-shift)
+  ) !important;
+  z-index: 2 !important;
 }
 
 .all-visible-deck > .card {
@@ -372,8 +381,9 @@ body > .card {
 }
 
 .prs_zone {
+  position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   flex-wrap: wrap;
   gap: 16px;
