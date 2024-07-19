@@ -653,141 +653,191 @@ class PersonaNonGrata extends Table
     }
 
     // action cards
-    function download(array $info_card, int $player_id): void
+    function download(array $info_card, array $action_card, int $player_id): void
     {
         $this->information_cards->moveCard($info_card["id"], "stored", $player_id);
 
-        $this->notifyAllPlayers(
-            "store",
-            "",
-            array(
-                "player_id" => $player_id,
-                "infoCard" => $info_card,
-            )
-        );
-    }
-
-    function encrypt(array $info_card, int $player_id): void
-    {
-        $this->information_cards->moveCard($info_card["id"], "encrypted", $player_id);
-        $info_card = $this->getSingleCardInLocation($this->information_cards, "encrypted", $player_id);
-
-        $this->notifyPlayer(
-            $player_id,
-            "storePrivate",
-            "",
-            array(
-                "player_id" => $player_id,
-                "infoCard" => $info_card
-            )
-        );
-
-        $this->notifyAllPlayers(
-            "store",
-            "",
-            array(
-                "player_id" => $player_id,
-                "infoCard" => $this->hideCard($info_card, true, -1),
-                "encrypt" => true
-            )
-        );
-    }
-    function sendToRight(array $info_card, int $player_id): void
-    {
-        $recipient_id = $this->getPlayerAfter($player_id);
-
-        $this->information_cards->moveCard($info_card["id"], "stored", $recipient_id);
-
-        $info_id = $info_card["type_arg"];
+        $action_id = 1;
         $corporation_id = intval($info_card["type"]);
-
-        $this->notifyAllPlayers(
-            "store",
-            clienttranslate('${player_name2} sends the ${info_label} of ${corporation_label} to ${player_name}'),
-            array(
-                "preserve" => array("corporationId", "informationId"),
-                "player_id" => $recipient_id,
-                "player_name" => $this->getPlayerNameById($recipient_id),
-                "player_id2" => $player_id,
-                "player_name2" => $this->getPlayerNameById($player_id),
-                "info_label" => $this->informations[$info_id]["name"],
-                "corporation_label" => $this->corporations()[$corporation_id],
-                "corporationId" => $corporation_id,
-                "informationId" => $info_id,
-                "infoCard" => $info_card,
-            )
-        );
-    }
-
-    function sendToLeft(array $info_card, int $player_id): void
-    {
-        $recipient_id = $this->getPlayerBefore($player_id);
-
-        $this->information_cards->moveCard($info_card["id"], "stored", $recipient_id);
-
         $info_id = $info_card["type_arg"];
-        $corporation_id = intval($info_card["type"]);
 
         $this->notifyAllPlayers(
-            "store",
-            clienttranslate('${player_name2} sends the ${info_label} of ${corporation_label} to ${player_name}'),
-            array(
-                "preserve" => array("corporationId", "informationId"),
-                "player_id" => $recipient_id,
-                "player_name" => $this->getPlayerNameById($recipient_id),
-                "player_id2" => $player_id,
-                "player_name2" => $this->getPlayerNameById($player_id),
-                "info_label" => $this->informations[$info_id]["name"],
-                "corporation_label" => $this->corporations()[$corporation_id],
-                "corporationId" => $corporation_id,
-                "informationId" => $info_id,
-                "infoCard" => $info_card,
-            )
-        );
-    }
-
-    // operations
-    function revealPlayed(int $player_id): array
-    {
-        $action_card = $this->getSingleCardInLocation($this->action_cards, "played", $player_id);
-        $info_card = $this->getSingleCardInLocation($this->information_cards, "played", $player_id);
-
-        $action_id = $action_card["type_arg"];
-        $info_id = $info_card["type_arg"];
-        $corporation_id = intval($info_card["type"]);
-
-        $encrypt = $action_id == 2;
-
-        if ($encrypt) {
-            $info_card = $this->hideCard($info_card, true, -1);
-        }
-
-        $message =  $encrypt ? clienttranslate('${player_name} combines the ${action_label} to an Information card')
-            : clienttranslate('${player_name} combines the ${action_label} to the ${info_label} of ${corporation_label}');
-
-        $this->notifyAllPlayers(
-            "revealPlayed",
-            $message,
+            "storeInfo",
+            clienttranslate('${player_name} combines the ${action_label} to the ${info_label} of ${corporation_label}'),
             array(
                 "preserve" => array("corporationId", "informationId", "actionId", "hackerId"),
                 "i18n" => array("action_label", "info_label"),
                 "player_id" => $player_id,
                 "player_name" => $this->getPlayerNameById($player_id),
                 "action_label" => $this->actions[$action_id],
-                "info_label" => $encrypt ? null : $this->informations[$info_id]["name"],
-                "corporation_label" => $encrypt ? null : $this->corporations()[$corporation_id],
+                "info_label" => $this->informations[$info_id]["name"],
+                "corporation_label" => $this->corporations()[$corporation_id],
+                "corporationId" => $corporation_id,
+                "informationId" => $info_id,
+                "actionId" => $action_id,
+                "hackerId" => $action_card["type"],
+                "actionCard" => $action_card,
+                "infoCard" => $info_card
+            )
+        );
+    }
+
+    function encrypt(array $info_card, array $action_card, int $player_id): void
+    {
+        $this->information_cards->moveCard($info_card["id"], "encrypted", $player_id);
+        $info_card = $this->getSingleCardInLocation($this->information_cards, "encrypted", $player_id);
+
+        $action_id = 2;
+        $corporation_id = intval($info_card["type"]);
+        $info_id = $info_card["type_arg"];
+
+        $this->notifyPlayer(
+            $player_id,
+            "storeInfoPrivate",
+            clienttranslate('You combine the ${action_label} to the ${info_label} of ${corporation_label}'),
+            array(
+                "preserve" => array("corporationId", "informationId", "actionId", "hackerId"),
+                "i18n" => array("action_label", "info_label"),
+                "player_id" => $player_id,
+                "player_name" => $this->getPlayerNameById($player_id),
+                "action_label" => $this->actions[$action_id],
+                "info_label" => $this->informations[$info_id]["name"],
+                "corporation_label" => $this->corporations()[$corporation_id],
                 "corporationId" => $corporation_id,
                 "informationId" => $info_id,
                 "actionId" => $action_id,
                 "hackerId" => $action_card["type"],
                 "actionCard" => $action_card,
                 "infoCard" => $info_card,
-                "encrypt" => $encrypt
+                "encrypt" => true
             )
         );
 
-        return array("action" => $action_card, "info" => $info_card);
+        $this->notifyAllPlayers(
+            "storeInfo",
+            clienttranslate('${player_name} combines the ${action_label} to an Information card'),
+            array(
+                "preserve" => array("actionId", "hackerId"),
+                "i18n" => array("action_label"),
+                "player_id" => $player_id,
+                "player_name" => $this->getPlayerNameById($player_id),
+                "action_label" => $this->actions[$action_id],
+                "actionId" => $action_id,
+                "hackerId" => $action_card["type"],
+                "actionCard" => $action_card,
+                "infoCard" => $this->hideCard($info_card, true, -1),
+                "encrypt" => true
+            )
+        );
     }
+    function sendToRight(array $info_card, array $action_card, int $player_id): void
+    {
+        $recipient_id = $this->getPlayerAfter($player_id);
+
+        $this->information_cards->moveCard($info_card["id"], "stored", $recipient_id);
+
+        $action_id = 3;
+        $info_id = $info_card["type_arg"];
+        $corporation_id = intval($info_card["type"]);
+
+        $this->notifyAllPlayers(
+            "storeInfo",
+            clienttranslate('${player_name2} uses the ${action_label} to send the ${info_label} of ${corporation_label} to ${player_name}'),
+            array(
+                "preserve" => array("corporationId", "informationId", "actionId", "hackerId"),
+                "i18n" => array("action_label", "info_label"),
+                "player_id" => $recipient_id,
+                "player_name" => $this->getPlayerNameById($recipient_id),
+                "player_id2" => $player_id,
+                "player_name2" => $this->getPlayerNameById($player_id),
+                "action_label" => $this->actions[$action_id],
+                "info_label" => $this->informations[$info_id]["name"],
+                "corporation_label" => $this->corporations()[$corporation_id],
+                "corporationId" => $corporation_id,
+                "informationId" => $info_id,
+                "actionId" => $action_id,
+                "hackerId" => $action_card["type"],
+                "actionCard" => $action_card,
+                "infoCard" => $info_card
+            )
+        );
+    }
+
+    function sendToLeft(array $info_card, array $action_card, int $player_id): void
+    {
+        $recipient_id = $this->getPlayerBefore($player_id);
+
+        $this->information_cards->moveCard($info_card["id"], "stored", $recipient_id);
+
+        $action_id = 4;
+        $info_id = $info_card["type_arg"];
+        $corporation_id = intval($info_card["type"]);
+
+        $this->notifyAllPlayers(
+            "storeInfo",
+            clienttranslate('${player_name2} uses the ${action_label} to send the ${info_label} of ${corporation_label} to ${player_name}'),
+            array(
+                "preserve" => array("corporationId", "informationId", "actionId", "hackerId"),
+                "i18n" => array("action_label", "info_label"),
+                "player_id" => $recipient_id,
+                "player_name" => $this->getPlayerNameById($recipient_id),
+                "player_id2" => $player_id,
+                "player_name2" => $this->getPlayerNameById($player_id),
+                "action_label" => $this->actions[$action_id],
+                "info_label" => $this->informations[$info_id]["name"],
+                "corporation_label" => $this->corporations()[$corporation_id],
+                "corporationId" => $corporation_id,
+                "informationId" => $info_id,
+                "actionId" => $action_id,
+                "hackerId" => $action_card["type"],
+                "actionCard" => $action_card,
+                "infoCard" => $info_card
+            )
+        );
+    }
+
+    // operations
+    // function revealPlayed(int $player_id): array
+    // {
+    //     $action_card = $this->getSingleCardInLocation($this->action_cards, "played", $player_id);
+    //     $info_card = $this->getSingleCardInLocation($this->information_cards, "played", $player_id);
+
+    //     $action_id = $action_card["type_arg"];
+    //     $info_id = $info_card["type_arg"];
+    //     $corporation_id = intval($info_card["type"]);
+
+    //     $encrypt = $action_id == 2;
+
+    //     if ($encrypt) {
+    //         $info_card = $this->hideCard($info_card, true, -1);
+    //     }
+
+    //     $message =  $encrypt ? clienttranslate('${player_name} combines the ${action_label} to an Information card')
+    //         : clienttranslate('${player_name} combines the ${action_label} to the ${info_label} of ${corporation_label}');
+
+    //     $this->notifyAllPlayers(
+    //         "revealPlayed",
+    //         $message,
+    //         array(
+    //             "preserve" => array("corporationId", "informationId", "actionId", "hackerId"),
+    //             "i18n" => array("action_label", "info_label"),
+    //             "player_id" => $player_id,
+    //             "player_name" => $this->getPlayerNameById($player_id),
+    //             "action_label" => $this->actions[$action_id],
+    //             "info_label" => $encrypt ? null : $this->informations[$info_id]["name"],
+    //             "corporation_label" => $encrypt ? null : $this->corporations()[$corporation_id],
+    //             "corporationId" => $corporation_id,
+    //             "informationId" => $info_id,
+    //             "actionId" => $action_id,
+    //             "hackerId" => $action_card["type"],
+    //             "actionCard" => $action_card,
+    //             "infoCard" => $info_card,
+    //             "encrypt" => $encrypt
+    //         )
+    //     );
+
+    //     return array("action" => $action_card, "info" => $info_card);
+    // }
 
     function activateActionCard(int $player_id)
     {
@@ -797,19 +847,19 @@ class PersonaNonGrata extends Table
         $action_id = $action_card["type_arg"];
 
         if ($action_id == 1) {
-            $this->download($info_card, $player_id);
+            $this->download($info_card, $action_card, $player_id);
         }
 
         if ($action_id == 2) {
-            $this->encrypt($info_card, $player_id);
+            $this->encrypt($info_card, $action_card, $player_id);
         }
 
         if ($action_id == 3) {
-            $this->sendToRight($info_card, $player_id);
+            $this->sendToRight($info_card, $action_card, $player_id);
         }
 
         if ($action_id == 4) {
-            $this->sendToLeft($info_card, $player_id);
+            $this->sendToLeft($info_card, $action_card, $player_id);
         }
 
         if ($action_id == 2) {
@@ -1544,7 +1594,7 @@ class PersonaNonGrata extends Table
         $this->information_cards->moveAllCardsInLocation("pre_discard", "discard");
 
         foreach ($players as $player_id => $player) {
-            $this->revealPlayed($player_id);
+            // $this->revealPlayed($player_id);
 
             $this->activateActionCard($player_id);
         }
