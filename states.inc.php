@@ -100,6 +100,7 @@ $machinestates = array(
         "args" => "arg_stealInfo",
         "transitions" => array(
             "infoArchiving" => 4,
+            "zombiePass" => 4
         )
     ),
 

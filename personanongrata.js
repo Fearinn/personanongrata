@@ -1150,6 +1150,7 @@ define([
         "notif_computeArchivedPoints"
       );
       dojo.subscribe("computeKeyPoint", this, "notif_computeKeyPoint");
+      dojo.subscribe("zombieTurn", this, "notif_zombieTurn");
 
       this.notifqueue.setSynchronous("discardInfo", 1000);
       this.notifqueue.setSynchronous("storeInfo", 1000);
@@ -1560,6 +1561,26 @@ define([
       this.displayScoring(cardElement, player_color, keyCard.type_arg);
 
       this.scoreCtrl[player_id].toValue(totalPoints);
+    },
+
+    notif_zombieTurn: function (notif) {
+      const player_id = notif.args.player_id;
+      const infoCards = notif.args.infoCards;
+
+      const deckOfInformations = `deckOfInformationsStock`;
+      this[deckOfInformations].addCards(infoCards, {
+        fromElement: $(`prs_handOfInfo$${player_id}`),
+      });
+      this[deckOfInformations].shuffle();
+
+      this[`infoInHandStock$${player_id}`].removeAll();
+
+      const keyCards = this[`archivedKeysStock$${player_id}`].getCards();
+      this["keysStock"].addCards(keyCards);
+
+      this[`actionsInHandStock$${player_id}`].removeAll();
+
+      dojo.destroy(`prs_hand$${player_id}`);
     },
 
     ///////////////////////////////////////////////

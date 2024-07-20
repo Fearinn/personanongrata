@@ -272,6 +272,16 @@ class PersonaNonGrata extends Table
         return $this->corporations;
     }
 
+    private function getRandomKey(array $array)
+    {
+        $size = count($array);
+        $rand = random_int(0, $size - 1);
+        $slice = array_slice($array, $rand, 1, true);
+        foreach ($slice as $key => $value) {
+            return $key;
+        }
+    }
+
     function getCustomPlayerAfter(int $player_id): int
     {
         return $this->isClockwise() ? $this->getPlayerAfter($player_id) : $this->getPlayerBefore($player_id);
@@ -1212,7 +1222,7 @@ class PersonaNonGrata extends Table
             $this->notifyPlayer(
                 $player_id,
                 "drawNewInfoPrivate",
-                clienttranslate('You draw the ${info_label} of ${corporation_label}'),
+                clienttranslate('You draw the ${info_label} of ${corporation_label} from the deck'),
                 array(
                     "preserve" => array("corporationId", "informationId"),
                     "i18n" => array("info_label"),
@@ -1428,11 +1438,23 @@ class PersonaNonGrata extends Table
         $this->gamestate->nextState("infoArchiving");
     }
 
-    function breakFirstTie($tie_winner, $tie_runner)
+    function breakFirstTie($tie_winner, $tie_runner, bool $auto = false)
     {
-        $this->checkAction("breakFirstTie");
-
         $player_id = $this->getActivePlayerId();
+
+        if (!$auto) {
+            $this->checkAction("breakFirstTie");
+        } else {
+            $this->notifyAllPlayers(
+                "zombieBreakTie",
+                clienttranslate('${player_name} is offline. The second-place of this Corporation is randomly decided'),
+                array(
+                    "player_id" => $player_id,
+                    "player_name" => $this->getPlayerNameById($player_id)
+                )
+            );
+        }
+
         $corporation_id = $this->getGameStateValue("currentCorporation");
 
         $tied_players = $this->getTiedPlayers($corporation_id);
@@ -1490,11 +1512,23 @@ class PersonaNonGrata extends Table
         $this->gamestate->nextState("infoArchiving");
     }
 
-    function breakSecondTie($tie_runner)
+    function breakSecondTie($tie_runner, bool $auto = false)
     {
-        $this->checkAction("breakSecondTie");
-
         $player_id = $this->getActivePlayerId();
+
+        if (!$auto) {
+            $this->checkAction("breakSecondTie");
+        } else {
+            $this->notifyAllPlayers(
+                "zombieBreakTie",
+                clienttranslate('${player_name} is offline. The first and second-place of this Corporation are randomly decided'),
+                array(
+                    "player_id" => $player_id,
+                    "player_name" => $this->getPlayerNameById($player_id)
+                )
+            );
+        }
+
         $corporation_id = $this->getGameStateValue("currentCorporation");
 
         $tied_players = $this->getTiedPlayers($corporation_id);
@@ -1601,7 +1635,8 @@ class PersonaNonGrata extends Table
 
         $hand_actions_count = $this->action_cards->countCardsInLocation("hand");
 
-        if ($hand_actions_count == 0) {
+        //tests
+        if ($hand_actions_count <= 4 * $this->getPlayersNumber()) {
             $this->gamestate->nextState("infoArchiving");
             return;
         }
@@ -1888,18 +1923,64 @@ class PersonaNonGrata extends Table
     {
         $statename = $state['name'];
 
+        $isZombie = $this->action_cards->countCardsInLocation("zombie") > 0;
+
+        if (!$isZombie) {
+            $info_cards = $this->information_cards->getCardsInLocation("hand", $active_player);
+
+            $this->notifyAllPlayers(
+                "zombieTurn",
+                clienttranslate('All Information cards in the hand of ${player_name} are shuffled back to the deck. His Key cards go back to the table'),
+                array(
+                    "player_id" => $active_player,
+                    "player_name" => $this->getPlayerNameById($active_player),
+                    "infoCards" => $this->hideCards($info_cards, true)
+                )
+            );
+
+            $this->information_cards->moveAllCardsInLocation("hand", "deck", $active_player, $active_player);
+            $this->action_cards->moveAllCardsInLocation("hand", "zombie", $active_player, $active_player);
+            $this->key_cards->moveAllCardsInLocation("archived", "table", $active_player);
+
+            $this->information_cards->shuffle("deck");
+        }
+
         if ($state['type'] === "activeplayer") {
-            switch ($statename) {
-                default:
-                    $this->gamestate->nextState("zombiePass");
-                    break;
+            if ($statename === "breakFirstTie") {
+                $tied_players = $this->getTiedPlayers();
+
+                $tie_winner = $this->getRandomKey($tied_players);
+
+                unset($tied_players[$tie_winner]);
+
+                $tie_runner = $this->getRandomKey($tied_players);
+
+                foreach ($tied_players as $player_id => $player) {
+                    $this->setTiedPlayer($player_id, 0);
+                }
+
+                $this->breakFirstTie($tie_winner, $tie_runner, true);
+                return;
             }
 
+            if ($statename === "breakSecondTie") {
+                $tied_players = $this->getTiedPlayers();
+
+                $tie_runner = $this->getRandomKey($tied_players);
+
+                foreach ($tied_players as $player_id => $player) {
+                    $this->setTiedPlayer($player_id, 0);
+                }
+
+                $this->breakSecondTie($tie_runner, true);
+                return;
+            }
+
+            $this->gamestate->nextState("zombiePass");
             return;
         }
 
         if ($state['type'] === "multipleactiveplayer") {
-            // Make sure player is in a non blocking status for role turn
             $this->gamestate->setPlayerNonMultiactive($active_player, '');
 
             return;
