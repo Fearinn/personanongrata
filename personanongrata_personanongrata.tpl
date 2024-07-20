@@ -74,8 +74,7 @@
           id="prs_directionTag${PLAYER_ID}"
           class="prs_directionTag prs_areaTitle"
           style="color: #{PLAYER_COLOR}"
-          >Direction</span
-        >
+        ></span>
       </div>
       <div class="prs_playerZones">
         <div

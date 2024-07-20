@@ -230,8 +230,8 @@ define([
 
       this.players = gamedatas.players;
       this.clockwise = gamedatas.clockwise;
-      this.nextPlayer = gamedatas.nextPlayer;
-      this.prevPlayer = gamedatas.prevPlayer;
+      this.playerLeft = gamedatas.playerLeft;
+      this.playerRight = gamedatas.playerRight;
 
       this.actions = gamedatas.actions;
       this.corporations = gamedatas.corporations;
@@ -255,17 +255,19 @@ define([
       this.selectedAction = gamedatas.cardsPlayedByMe["action"];
       this.selectedInfo = gamedatas.cardsPlayedByMe["info"];
 
-      $(`prs_playerArea$${this.player_id}`).style.order = 0;
+      if (Object.keys(this.players) > 2) {
+        $(`prs_playerArea$${this.player_id}`).style.order = 0;
 
-      $(`prs_playerArea$${this.prevPlayer}`).style.order = 1;
-      $(`prs_directionTag$${this.prevPlayer}`).textContent = _(
-        "Your left (next counterclockwise)"
-      );
+        $(`prs_playerArea$${this.playerLeft}`).style.order = 1;
+        $(`prs_directionTag$${this.playerLeft}`).textContent = _(
+          "Your left (next counterclockwise)"
+        );
 
-      $(`prs_playerArea$${this.nextPlayer}`).style.order = -1;
-      $(`prs_directionTag$${this.nextPlayer}`).textContent = _(
-        "Your right (next clockwise)"
-      );
+        $(`prs_playerArea$${this.playerRight}`).style.order = -1;
+        $(`prs_directionTag$${this.playerRight}`).textContent = _(
+          "Your right (next clockwise)"
+        );
+      }
 
       for (const player_id in this.players) {
         const player = this.players[player_id];
@@ -1166,6 +1168,7 @@ define([
       this.notifqueue.setSynchronous("passHands", 1000);
       this.notifqueue.setSynchronous("computeArchivedPoints", 1000);
       this.notifqueue.setSynchronous("computeKeyPoint", 1000);
+      this.notifqueue.setSynchronous("zombieTurn", 1000);
 
       this.notifqueue.setIgnoreNotificationCheck("discardInfo", (notif) => {
         return notif.args.player_id == this.player_id;
@@ -1564,23 +1567,31 @@ define([
     },
 
     notif_zombieTurn: function (notif) {
-      const player_id = notif.args.player_id;
-      const infoCards = notif.args.infoCards;
+      // const player_id = notif.args.player_id;
+      // const infoCards = notif.args.infoCards;
 
-      const deckOfInformations = `deckOfInformationsStock`;
-      this[deckOfInformations].addCards(infoCards, {
-        fromElement: $(`prs_handOfInfo$${player_id}`),
-      });
-      this[deckOfInformations].shuffle();
+      // const deckOfInformations = `deckOfInformationsStock`;
+      // this[deckOfInformations].addCards(infoCards, {
+      //   fromElement: $(`prs_handOfInfo$${player_id}`),
+      // });
+      // this[deckOfInformations].shuffle();
 
-      this[`infoInHandStock$${player_id}`].removeAll();
+      // this[`infoInHandStock$${player_id}`].removeAll();
 
-      const keyCards = this[`archivedKeysStock$${player_id}`].getCards();
-      this["keysStock"].addCards(keyCards);
+      // const keyCards = this[`archivedKeysStock$${player_id}`].getCards();
+      // this["keysStock"].addCards(keyCards);
 
-      this[`actionsInHandStock$${player_id}`].removeAll();
+      // const actionsCards = this[`discardedActionsStock$${player_id}`].getCards();
+      // this[`discardedActionsStock$${player_id}`].addCards(actionCards);
 
-      dojo.destroy(`prs_hand$${player_id}`);
+      // dojo.destroy(`prs_hand$${player_id}`);
+
+      this.showMessage(
+        _("A player quits the game. Reload in progress"),
+        "info"
+      );
+
+      location.reload();
     },
 
     ///////////////////////////////////////////////

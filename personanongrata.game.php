@@ -176,10 +176,10 @@ class PersonaNonGrata extends Table
 
         $current_player_id = $this->getCurrentPlayerId();    // !! We must only return informations visible by this player !!
 
-        $result["players"] = $this->getCollectionFromDb("SELECT player_id id, player_score score FROM player ");
+        $result["players"] = $this->getCollectionFromDb("SELECT player_id id, player_score score, player_zombie zombie FROM player ");
         $result["clockwise"] = $this->isClockwise();
-        $result["prevPlayer"] = $this->getPlayerBefore($current_player_id);
-        $result["nextPlayer"] = $this->getPlayerAfter($current_player_id);
+        $result["playerLeft"] = $this->getPlayerBeforeNoZombie($current_player_id);
+        $result["playerRight"] = $this->getPlayerAfterNoZombie($current_player_id);
         $result["actions"] = $this->actions;
         $result["corporations"] = $this->corporations();
         $result["informations"] = $this->informations;
@@ -196,7 +196,7 @@ class PersonaNonGrata extends Table
         $result["infoStoredByOthers"] = $this->getInfoStoredByOthers($current_player_id);
         $result["discardedActions"] = $this->getActionsDiscarded();
         $result["encryptActionUsed"] = $this->getEncryptActionUsed();
-        $result["archivedKeys"] = $this->getArchivedKeysKeys();
+        $result["archivedKeys"] = $this->getArchivedKeys();
         $result["archivedCorporations"] = $this->getArchivedCorporations();
         $result["archivedInfo"] = $this->getArchivedInfo();
         return $result;
@@ -257,6 +257,19 @@ class PersonaNonGrata extends Table
 
     ////////////////////////////////////////////////////
 
+    function loadPlayersNoZombies(): array
+    {
+        $players = $this->loadPlayersBasicInfos();
+
+        foreach ($players as $player_id => $player) {
+            if ($player["player_zombie"] == 1) {
+                unset($players[$player_id]);
+            }
+        }
+
+        return $players;
+    }
+
     function corporations(array $players = null): array
     {
         if (!key_exists(6, $this->corporations)) {
@@ -272,7 +285,7 @@ class PersonaNonGrata extends Table
         return $this->corporations;
     }
 
-    private function getRandomKey(array $array)
+    private function getRandomKey(array $array): int | string
     {
         $size = count($array);
         $rand = random_int(0, $size - 1);
@@ -282,9 +295,33 @@ class PersonaNonGrata extends Table
         }
     }
 
-    function getCustomPlayerAfter(int $player_id): int
+    function getPlayerAfterNoZombie($player_id): int
     {
-        return $this->isClockwise() ? $this->getPlayerAfter($player_id) : $this->getPlayerBefore($player_id);
+        $player_after = $this->getPlayerAfter($player_id);
+
+        if (!key_exists($player_after, $this->loadPlayersNoZombies())) {
+            //recursive
+            $player_after = $this->getPlayerAfter($player_after);
+        }
+
+        return $player_after;
+    }
+
+    function getPlayerBeforeNoZombie($player_id): int
+    {
+        $player_before = $this->getPlayerBefore($player_id);
+
+        if (!key_exists($player_before, $this->loadPlayersNoZombies())) {
+            //recursive
+            $player_before = $this->getPlayerBefore($player_before);
+        }
+
+        return $player_before;
+    }
+
+    function getNextPlayer(int $player_id): int
+    {
+        return $this->isClockwise() ? $this->getPlayerAfterNoZombie($player_id) : $this->getPlayerBeforeNoZombie($player_id);
     }
 
     function hideCard(array $card, bool $hideType = false, string | int $fake_id = null, string $fake_location = null): array
@@ -548,7 +585,7 @@ class PersonaNonGrata extends Table
         return $encrypt_cards;
     }
 
-    function getArchivedKeysKeys(int $player_id = null): array
+    function getArchivedKeys(int $player_id = null): array
     {
         if ($player_id) {
             return $this->key_cards->getCardsInLocation("archived", $player_id);
@@ -607,13 +644,12 @@ class PersonaNonGrata extends Table
 
     function getTiedPlayers(): array
     {
-        $tied_players = $this->getCollectionFromDB("SELECT player_id id from player WHERE player_tied=1");
+        $tied_players = $this->getCollectionFromDB("SELECT player_id id from player WHERE player_tied=1 AND player_zombie=0");
 
         return $tied_players;
     }
 
     //player stole info
-
     function setPlayerStole(int $player_id, int $stole = 1): void
     {
         $this->DbQuery("UPDATE player SET player_stole=$stole WHERE player_id='$player_id'");
@@ -742,7 +778,7 @@ class PersonaNonGrata extends Table
     }
     function sendToRight(array $info_card, array $action_card, int $player_id): void
     {
-        $recipient_id = $this->getPlayerAfter($player_id);
+        $recipient_id = $this->getPlayerAfterNoZombie($player_id);
 
         $this->information_cards->moveCard($info_card["id"], "stored", $recipient_id);
 
@@ -775,7 +811,7 @@ class PersonaNonGrata extends Table
 
     function sendToLeft(array $info_card, array $action_card, int $player_id): void
     {
-        $recipient_id = $this->getPlayerBefore($player_id);
+        $recipient_id = $this->getPlayerBeforeNoZombie($player_id);
 
         $this->information_cards->moveCard($info_card["id"], "stored", $recipient_id);
 
@@ -891,12 +927,12 @@ class PersonaNonGrata extends Table
 
     function passHands()
     {
-        $players = $this->loadPlayersBasicInfos();
+        $players = $this->loadPlayersNoZombies();
 
         $senders = array();
 
         foreach ($players as $player_id => $player) {
-            $recipient_id = $this->getCustomPlayerAfter($player_id);
+            $recipient_id = $this->getNextPlayer($player_id);
             $this->information_cards->moveAllCardsInLocation("hand", "preHand", $player_id, $recipient_id);
 
             $senders[$recipient_id] = $player_id;
@@ -965,7 +1001,7 @@ class PersonaNonGrata extends Table
 
     function storePoints(int $corporation_id): array
     {
-        $players = $this->loadPlayersBasicInfos();
+        $players = $this->loadPlayersNoZombies();
 
         $stored_points = array();
 
@@ -1205,7 +1241,7 @@ class PersonaNonGrata extends Table
 
     function drawSingleNewInfo()
     {
-        $players = $this->loadPlayersBasicInfos();
+        $players = $this->loadPlayersNoZombies();
 
         foreach ($players as $player_id => $player) {
             $info_card = $this->information_cards->pickCard("deck", $player_id);
@@ -1621,7 +1657,7 @@ class PersonaNonGrata extends Table
 
     function st_betweenDays()
     {
-        $players = $this->loadPlayersBasicInfos();
+        $players = $this->loadPlayersNoZombies();
 
         $this->incGameStateValue("day", 1);
 
@@ -1635,8 +1671,7 @@ class PersonaNonGrata extends Table
 
         $hand_actions_count = $this->action_cards->countCardsInLocation("hand");
 
-        //tests
-        if ($hand_actions_count <= 4 * $this->getPlayersNumber()) {
+        if ($hand_actions_count == 0) {
             $this->gamestate->nextState("infoArchiving");
             return;
         }
@@ -1652,7 +1687,7 @@ class PersonaNonGrata extends Table
 
     function st_infoArchiving()
     {
-        $players = $this->loadPlayersBasicInfos();
+        $players = $this->loadPlayersNoZombies();
 
         $corporation_id = $this->getGameStateValue("currentCorporation");
 
@@ -1809,7 +1844,7 @@ class PersonaNonGrata extends Table
         $this->setGameStateValue("currentCorporation", 1);
         $this->incGameStateValue("week", 1);
 
-        $players = $this->loadPlayersBasicInfos();
+        $players = $this->loadPlayersNoZombies();
 
         foreach ($players as $player_id => $player) {
             $info_card = $this->getSingleCardInLocation($this->information_cards, "hand", $player_id);
@@ -1883,7 +1918,7 @@ class PersonaNonGrata extends Table
 
     function st_finalScoring()
     {
-        $players = $this->loadPlayersBasicInfos();
+        $players = $this->loadPlayersNoZombies();
 
         $points = array();
 
@@ -1923,7 +1958,9 @@ class PersonaNonGrata extends Table
     {
         $statename = $state['name'];
 
-        $isZombie = $this->action_cards->countCardsInLocation("zombie") > 0;
+        $isZombie = $this->information_cards->countCardsInLocation("hand", $active_player) == 0;
+
+        $this->setTiedPlayer($active_player, 0);
 
         if (!$isZombie) {
             $info_cards = $this->information_cards->getCardsInLocation("hand", $active_player);
@@ -1939,7 +1976,7 @@ class PersonaNonGrata extends Table
             );
 
             $this->information_cards->moveAllCardsInLocation("hand", "deck", $active_player, $active_player);
-            $this->action_cards->moveAllCardsInLocation("hand", "zombie", $active_player, $active_player);
+            $this->action_cards->moveAllCardsInLocation("hand", "discard", $active_player, $active_player);
             $this->key_cards->moveAllCardsInLocation("archived", "table", $active_player);
 
             $this->information_cards->shuffle("deck");
