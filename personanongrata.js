@@ -732,9 +732,16 @@ define([
 
       if (stateName === "playCards") {
         if (!this.isCurrentPlayerActive()) {
-          this.addActionButton("prs_changeMind_btn", _("Change mind"), () => {
-            this.onChangeMindPlayed();
-          });
+          this.addActionButton(
+            "prs_changeMind_btn",
+            _("Change mind"),
+            () => {
+              this.onChangeMindPlayed();
+            },
+            null,
+            null,
+            "gray"
+          );
 
           this[`actionsInHandStock$${this.player_id}`].setSelectionMode("none");
 
@@ -773,14 +780,21 @@ define([
 
       if (stateName === "day") {
         if (!this.isCurrentPlayerActive()) {
-          this.addActionButton("prs_changeMind_btn", _("Change mind"), () => {
-            if (Object.keys(this.players).length == 2) {
-              this.onChangeMindDiscarded();
-              return;
-            }
+          this.addActionButton(
+            "prs_changeMind_btn",
+            _("Change mind"),
+            () => {
+              if (Object.keys(this.players).length == 2) {
+                this.onChangeMindDiscarded();
+                return;
+              }
 
-            this.onChangeMindPlayed();
-          });
+              this.onChangeMindPlayed();
+            },
+            null,
+            null,
+            "gray"
+          );
 
           this[`actionsInHandStock$${this.player_id}`].setSelectionMode("none");
 
@@ -802,9 +816,16 @@ define([
 
       if (stateName === "discardInfo") {
         if (this.isCurrentPlayerActive()) {
-          this.addActionButton("prs_changeMind_btn", _("Change mind"), () => {
-            this.onChangeMindPlayed();
-          });
+          this.addActionButton(
+            "prs_changeMind_btn",
+            _("Change mind"),
+            () => {
+              this.onChangeMindPlayed();
+            },
+            null,
+            null,
+            "gray"
+          );
 
           this[`actionsInHandStock$${this.player_id}`].setSelectionMode("none");
           this[`infoInHandStock$${this.player_id}`].setSelectionMode("single");
@@ -955,7 +976,7 @@ define([
     },
 
     handleConfirmationButton: function (content = _("Confirm selection")) {
-      this.removeActionButtons();
+      dojo.destroy("prs_confirmationBtn");
 
       if (this.getStateName() === "playCards") {
         if (this.selectedAction && this.selectedInfo) {
