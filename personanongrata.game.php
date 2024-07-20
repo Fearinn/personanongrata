@@ -176,6 +176,8 @@ class PersonaNonGrata extends Table
 
         $current_player_id = $this->getCurrentPlayerId();    // !! We must only return informations visible by this player !!
 
+        $result["gameVersion"] = intval($this->gamestate->table_globals[300]);
+
         $result["players"] = $this->getCollectionFromDb("SELECT player_id id, player_score score, player_zombie zombie FROM player ");
         $result["clockwise"] = $this->isClockwise();
         $result["playerLeft"] = $this->getPlayerBeforeNoZombie($current_player_id);
@@ -213,6 +215,13 @@ class PersonaNonGrata extends Table
     //////////////////////////////////////////////////////////////////////////////
     //////////// Utility functions
     ////////////
+
+    public function checkVersion(int $clientVersion): void
+    {
+        if ($clientVersion != intval($this->gamestate->table_globals[300])) {
+            throw new BgaVisibleSystemException($this->_("A new version of this game is now available. Please reload the page (F5)."));
+        }
+    }
 
     //scoring helpers
     function dbGetScore($player_id)

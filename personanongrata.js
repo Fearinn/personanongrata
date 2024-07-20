@@ -228,6 +228,8 @@ define([
           ? sortFunction("type", "type_arg")
           : sortFunction("type_arg", "type");
 
+      this.gameVersion = gamedatas.gameVersion;
+
       this.players = gamedatas.players;
       this.clockwise = gamedatas.clockwise;
       this.playerLeft = gamedatas.playerLeft;
@@ -905,6 +907,7 @@ define([
 
     sendAjaxCall: function (action, args = {}, allowInactive = false) {
       args.lock = true;
+      args.gameVersion = this.gameVersion;
 
       const runCall = () => {
         this.ajaxcall(

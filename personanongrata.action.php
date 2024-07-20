@@ -37,9 +37,16 @@ class action_personanongrata extends APP_GameAction
     }
   }
 
+  private function checkVersion()
+  {
+    $clientVersion = (int) $this->getArg('gameVersion', AT_int, false);
+    $this->game->checkVersion($clientVersion);
+  }
+
   public function playCards()
   {
     $this->setAjaxMode();
+    $this->checkVersion();
 
     $action_card_id = $this->getArg("action_card_id", AT_enum, true, null, range(1, 20));
     $info_card_id = $this->getArg("info_card_id", AT_enum, true, null, range(1, 72));
@@ -51,6 +58,8 @@ class action_personanongrata extends APP_GameAction
   public function changeMindPlayed()
   {
     $this->setAjaxMode();
+    $this->checkVersion();
+
     $this->game->changeMindPlayed();
     $this->ajaxResponse();
   }
@@ -58,6 +67,8 @@ class action_personanongrata extends APP_GameAction
   public function changeMindDiscarded()
   {
     $this->setAjaxMode();
+    $this->checkVersion();
+
     $this->game->changeMindDiscarded();
     $this->ajaxResponse();
   }
@@ -65,6 +76,7 @@ class action_personanongrata extends APP_GameAction
   public function discardInfo()
   {
     $this->setAjaxMode();
+    $this->checkVersion();
 
     $card_id = $this->getArg("card_id", AT_enum, true, null, range(1, 72));
     $this->game->discardInfo($card_id);
@@ -75,6 +87,7 @@ class action_personanongrata extends APP_GameAction
   public function stealInfo()
   {
     $this->setAjaxMode();
+    $this->checkVersion();
 
     $card_id = $this->getArg("card_id", AT_enum, true, null, range(1, 72));
     $this->game->stealInfo($card_id);
@@ -85,6 +98,8 @@ class action_personanongrata extends APP_GameAction
   public function breakFirstTie()
   {
     $this->setAjaxMode();
+    $this->checkVersion();
+
 
     $tie_winner = $this->getArg("tie_winner", AT_int, true);
     $tie_runner = $this->getArg("tie_runner", AT_int, true);
@@ -96,6 +111,8 @@ class action_personanongrata extends APP_GameAction
   public function breakSecondTie()
   {
     $this->setAjaxMode();
+    $this->checkVersion();
+
 
     $tie_winner = $this->getArg("tie_winner", AT_int, true);
     $this->game->breakSecondTie($tie_winner);
