@@ -905,30 +905,10 @@ define([
       return state.name;
     },
 
-    sendAjaxCall: function (action, args = {}, allowInactive = false) {
-      args.lock = true;
+    performAction: function (action, args = {}, checkAction = true) {
       args.gameVersion = this.gameVersion;
 
-      const runCall = () => {
-        this.ajaxcall(
-          "/" + this.game_name + "/" + this.game_name + "/" + action + ".html",
-          args,
-          this,
-          (result) => {},
-          (isError) => {}
-        );
-      };
-
-      if (allowInactive) {
-        if (this.checkPossibleActions(action, true) && this.checkLock()) {
-          runCall();
-        }
-        return;
-      }
-
-      if (this.checkAction(action, true)) {
-        runCall();
-      }
+      this.bgaPerformAction(action, args, { checkAction });
     },
 
     calcBackgroundPosition: function (spritePosition) {
@@ -1082,7 +1062,7 @@ define([
         return;
       }
 
-      this.sendAjaxCall("playCards", {
+      this.performAction("playCards", {
         action_card_id: this.selectedAction.id,
         info_card_id: this.selectedInfo.id,
       });
@@ -1094,32 +1074,32 @@ define([
         return;
       }
 
-      this.sendAjaxCall("discardInfo", { card_id: this.selectedInfo.id });
+      this.performAction("discardInfo", { card_id: this.selectedInfo.id });
     },
 
     onChangeMindPlayed() {
-      this.sendAjaxCall("changeMindPlayed", {}, true);
+      this.performAction("changeMindPlayed", {}, false);
     },
 
     onChangeMindDiscarded() {
-      this.sendAjaxCall("changeMindDiscarded", {}, true);
+      this.performAction("changeMindDiscarded", {}, false);
     },
 
     onStealInfo() {
-      this.sendAjaxCall("stealInfo", {
+      this.performAction("stealInfo", {
         card_id: this.selectedInfo.id,
       });
     },
 
     onBreakFirstTie() {
-      this.sendAjaxCall("breakFirstTie", {
+      this.performAction("breakFirstTie", {
         tie_winner: this.selectedTieWinner,
         tie_runner: this.selectedTieRunner,
       });
     },
 
     onBreakSecondTie() {
-      this.sendAjaxCall("breakSecondTie", {
+      this.performAction("breakSecondTie", {
         tie_winner: this.selectedTieWinner,
       });
     },
