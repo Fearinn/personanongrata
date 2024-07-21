@@ -204,6 +204,7 @@ class PersonaNonGrata extends Table
         $result["archivedKeys"] = $this->getArchivedKeys();
         $result["archivedCorporations"] = $this->getArchivedCorporations();
         $result["archivedInfo"] = $this->getArchivedInfo();
+        $result["storedCounters"] = $this->getStoredCounters();
         return $result;
     }
 
@@ -648,6 +649,20 @@ class PersonaNonGrata extends Table
         return $archived_informations;
     }
 
+    function getStoredCounters(): array
+    {
+        $stored_counters = array();
+
+        foreach ($this->corporations() as $corporation_id => $corporation) {
+            foreach ($this->storePoints($corporation_id, false) as $player_id => $points) {
+                $stored_counters[$player_id][$corporation_id] = $points;
+            };
+        }
+
+        return $stored_counters;
+    }
+
+
     //corporation tie break
     function setTiedPlayer(int $player_id, int $tied = 1): void
     {
@@ -1011,7 +1026,7 @@ class PersonaNonGrata extends Table
         );
     }
 
-    function storePoints(int $corporation_id): array
+    function storePoints(int $corporation_id, $notify = true): array
     {
         $players = $this->loadPlayersNoZombies();
 
@@ -1030,7 +1045,7 @@ class PersonaNonGrata extends Table
 
             $stored_points[$player_id] = $points;
 
-            if ($points > 0) {
+            if ($notify && $points > 0) {
                 $this->notifyAllPlayers(
                     "storePoints",
                     clienttranslate('${player_name} scores ${points} points for ${corporation_label}'),

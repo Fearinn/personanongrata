@@ -254,6 +254,8 @@ define([
       this.archivedCorporations = gamedatas.archivedCorporations;
       this.archivedInfo = gamedatas.archivedInfo;
 
+      this.storedCounters = {};
+
       this.selectedAction = gamedatas.cardsPlayedByMe["action"];
       this.selectedInfo = gamedatas.cardsPlayedByMe["info"];
 
@@ -273,6 +275,40 @@ define([
 
       for (const player_id in this.players) {
         const player = this.players[player_id];
+
+        this.storedCounters[player_id] = {};
+
+        $(
+          `player_board_${player_id}`
+        ).innerHTML += `<div id="prs_corporationCounters$${player_id}" class="prs_corporationCounters">
+        </div>`;
+
+        for (const corporation_id in this.corporations) {
+          const backgroundPosition = this.calcBackgroundPosition(
+            corporation_id - 1
+          );
+
+          $(`prs_corporationCounters$${player_id}`).innerHTML += `
+          <div class="prs_corporationCounter">
+            <div class="prs_corporationIcon" style="background-position: ${backgroundPosition}"></div>
+            <span id="prs_corporationCounter$${player_id}:${corporation_id}"></span>
+          </div>`;
+
+          const corporationCounter = new ebg.counter();
+          corporationCounter.create(
+            $(`prs_corporationCounter$${player_id}:${corporation_id}`)
+          );
+
+          this.storedCounters[player_id] = {
+            ...this.storedCounters[player_id],
+            [corporation_id]: corporationCounter,
+          };
+        }
+
+        this.updateStoredCounters(
+          gamedatas.storedCounters[player_id],
+          player_id
+        );
 
         const hackerControl = `hackerStock$${player_id}`;
         this[hackerControl] = new LineStock(
@@ -1053,10 +1089,18 @@ define([
       }
     },
 
+    updateStoredCounters: function (newCounters, player_id) {
+      for (const corporation_id in newCounters) {
+        const newValue = newCounters[corporation_id];
+
+        this.storedCounters[player_id][corporation_id].toValue(newValue);
+      }
+    },
+
     ///////////////////////////////////////////////////
     //// Player's action
 
-    onPlayCards() {
+    onPlayCards: function () {
       if (!this.selectedAction || !this.selectedInfo) {
         this.showMessage(_("Please select both cards first"), "error");
         return;
@@ -1068,7 +1112,7 @@ define([
       });
     },
 
-    onDiscardInfo() {
+    onDiscardInfo: function () {
       if (!this.selectedInfo) {
         this.showMessage(_("Please select a card first"), "error");
         return;
@@ -1077,28 +1121,28 @@ define([
       this.performAction("discardInfo", { card_id: this.selectedInfo.id });
     },
 
-    onChangeMindPlayed() {
+    onChangeMindPlayed: function () {
       this.performAction("changeMindPlayed", {}, false);
     },
 
-    onChangeMindDiscarded() {
+    onChangeMindDiscarded: function () {
       this.performAction("changeMindDiscarded", {}, false);
     },
 
-    onStealInfo() {
+    onStealInfo: function () {
       this.performAction("stealInfo", {
         card_id: this.selectedInfo.id,
       });
     },
 
-    onBreakFirstTie() {
+    onBreakFirstTie: function () {
       this.performAction("breakFirstTie", {
         tie_winner: this.selectedTieWinner,
         tie_runner: this.selectedTieRunner,
       });
     },
 
-    onBreakSecondTie() {
+    onBreakSecondTie: function () {
       this.performAction("breakSecondTie", {
         tie_winner: this.selectedTieWinner,
       });

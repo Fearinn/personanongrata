@@ -66,7 +66,7 @@
       class="prs_area"
       style="border-color: #{PLAYER_COLOR}"
     >
-      <div class="prs_rowContainer">
+      <div class="prs_areaHeader">
         <h3 class="prs_areaTitle" style="color: #{PLAYER_COLOR}">
           {PLAYER_NAME}
         </h3>

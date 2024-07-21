@@ -296,13 +296,6 @@ body > .card {
   margin: 0;
 }
 
-.prs_rowContainer {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  width: 100%;
-}
-
 .prs_selected {
   border: 3px solid red;
   transform: none !important;
@@ -312,6 +305,28 @@ body > .card {
 .prs_card,
 .prs_cardFace {
   border-radius: 12px;
+}
+
+.prs_corporationCounters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  max-width: 240px;
+}
+
+.prs_corporationCounter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.prs_corporationIcon {
+  background-image: url("img/corporationIcons.png");
+  aspect-ratio: 1;
+  width: 30px;
 }
 
 .prs_playerAreas {
@@ -344,6 +359,13 @@ body > .card {
 
 .prs_publicArea {
   outline-color: #fff;
+}
+
+.prs_areaHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .prs_areaTitle {
