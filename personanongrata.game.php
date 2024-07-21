@@ -46,6 +46,9 @@ class PersonaNonGrata extends Table
 
         $this->key_cards = $this->getNew("module.common.deck");
         $this->key_cards->init("corporationKey");
+
+        // EXPERIMENTAL to avoid deadlocks
+        $this->bSelectGlobalsForUpdate = true;
     }
 
     protected function getGameName()
