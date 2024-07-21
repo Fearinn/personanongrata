@@ -259,7 +259,7 @@ define([
       this.selectedAction = gamedatas.cardsPlayedByMe["action"];
       this.selectedInfo = gamedatas.cardsPlayedByMe["info"];
 
-      if (Object.keys(this.players) > 2) {
+      if (Object.keys(this.players).length > 2) {
         $(`prs_playerArea$${this.player_id}`).style.order = 0;
 
         $(`prs_playerArea$${this.playerLeft}`).style.order = 1;
