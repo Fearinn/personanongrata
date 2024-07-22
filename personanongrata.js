@@ -293,16 +293,15 @@ define([
             <div class="prs_corporationIcon" style="background-position: ${backgroundPosition}"></div>
             <span id="prs_corporationCounter$${player_id}:${corporation_id}"></span>
           </div>`;
+        }
 
+        for (const corporation_id in this.corporations) {
           const corporationCounter = new ebg.counter();
           corporationCounter.create(
             $(`prs_corporationCounter$${player_id}:${corporation_id}`)
           );
 
-          this.storedCounters[player_id] = {
-            ...this.storedCounters[player_id],
-            [corporation_id]: corporationCounter,
-          };
+          this.storedCounters[player_id][corporation_id] = corporationCounter;
         }
 
         this.updateStoredCounters(
@@ -1090,7 +1089,7 @@ define([
     },
 
     updateStoredCounters: function (newCounters, player_id) {
-      for (const corporation_id in newCounters) {
+      for (const corporation_id in this.corporations) {
         const newValue = newCounters[corporation_id];
 
         this.storedCounters[player_id][corporation_id].toValue(newValue);
@@ -1277,6 +1276,9 @@ define([
       const encrypt = notif.args.encrypt;
       const isCurrentPlayer = player_id == this.player_id;
 
+      const storedCounters = notif.args.storedCounters;
+      this.updateStoredCounters(storedCounters, player_id);
+
       if (encrypt && isCurrentPlayer) {
         return;
       }
@@ -1389,6 +1391,9 @@ define([
       const player_id = notif.args.player_id;
       const infoCards = notif.args.infoCards;
       const isCurrentPlayer = player_id == this.player_id;
+
+      const storedCounters = notif.args.storedCounters;
+      this.updateStoredCounters(storedCounters, player_id);
 
       const hackerElement = isCurrentPlayer
         ? undefined

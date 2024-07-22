@@ -649,7 +649,7 @@ class PersonaNonGrata extends Table
         return $archived_informations;
     }
 
-    function getStoredCounters(): array
+    function getStoredCounters(?int $current_player_id = null): array
     {
         $stored_counters = array();
 
@@ -659,9 +659,12 @@ class PersonaNonGrata extends Table
             };
         }
 
+        if ($current_player_id) {
+            return $stored_counters[$current_player_id];
+        }
+
         return $stored_counters;
     }
-
 
     //corporation tie break
     function setTiedPlayer(int $player_id, int $tied = 1): void
@@ -750,7 +753,8 @@ class PersonaNonGrata extends Table
                 "actionId" => $action_id,
                 "hackerId" => $action_card["type"],
                 "actionCard" => $action_card,
-                "infoCard" => $info_card
+                "infoCard" => $info_card,
+                "storedCounters" => $this->getStoredCounters($player_id),
             )
         );
     }
@@ -782,7 +786,7 @@ class PersonaNonGrata extends Table
                 "hackerId" => $action_card["type"],
                 "actionCard" => $action_card,
                 "infoCard" => $info_card,
-                "encrypt" => true
+                "encrypt" => true,
             )
         );
 
@@ -799,7 +803,8 @@ class PersonaNonGrata extends Table
                 "hackerId" => $action_card["type"],
                 "actionCard" => $action_card,
                 "infoCard" => $this->hideCard($info_card, true, -1),
-                "encrypt" => true
+                "encrypt" => true,
+                "storedCounters" => $this->getStoredCounters($player_id),
             )
         );
     }
@@ -831,7 +836,8 @@ class PersonaNonGrata extends Table
                 "actionId" => $action_id,
                 "hackerId" => $action_card["type"],
                 "actionCard" => $action_card,
-                "infoCard" => $info_card
+                "infoCard" => $info_card,
+                "storedCounters" => $this->getStoredCounters($recipient_id),
             )
         );
     }
@@ -864,7 +870,8 @@ class PersonaNonGrata extends Table
                 "actionId" => $action_id,
                 "hackerId" => $action_card["type"],
                 "actionCard" => $action_card,
-                "infoCard" => $info_card
+                "infoCard" => $info_card,
+                "storedCounters" => $this->getStoredCounters($recipient_id),
             )
         );
     }
@@ -1492,6 +1499,7 @@ class PersonaNonGrata extends Table
                 "corporationId" => $corporation_id,
                 "informationId" => $info_id,
                 "infoCards" => array($card_id => $card),
+                "storedCounters" => $this->getStoredCounters($player_id),
                 "isStolen" => true
             )
         );
@@ -1961,7 +1969,8 @@ class PersonaNonGrata extends Table
                     "i18n" => array("info_label"),
                     "player_id" => $player_id,
                     "player_name" => $this->getPlayerNameById($player_id),
-                    "infoCards" => $information_cards
+                    "infoCards" => $information_cards,
+                    "storedCounters" => $this->getStoredCounters($player_id),
                 )
             );
 
