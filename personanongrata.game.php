@@ -967,6 +967,11 @@ class PersonaNonGrata extends Table
 
         foreach ($players as $player_id => $player) {
             $recipient_id = $this->getNextPlayer($player_id);
+
+            if ($recipient_id == $player_id) {
+                return;
+            }
+
             $this->information_cards->moveAllCardsInLocation("hand", "preHand", $player_id, $recipient_id);
 
             $senders[$recipient_id] = $player_id;

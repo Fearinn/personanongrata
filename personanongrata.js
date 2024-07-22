@@ -283,31 +283,33 @@ define([
         ).innerHTML += `<div id="prs_corporationCounters$${player_id}" class="prs_corporationCounters">
         </div>`;
 
-        for (const corporation_id in this.corporations) {
-          const backgroundPosition = this.calcBackgroundPosition(
-            corporation_id - 1
-          );
+        if (!player["zombie"]) {
+          for (const corporation_id in this.corporations) {
+            const backgroundPosition = this.calcBackgroundPosition(
+              corporation_id - 1
+            );
 
-          $(`prs_corporationCounters$${player_id}`).innerHTML += `
+            $(`prs_corporationCounters$${player_id}`).innerHTML += `
           <div class="prs_corporationCounter">
             <div class="prs_corporationIcon" style="background-position: ${backgroundPosition}"></div>
             <span id="prs_corporationCounter$${player_id}:${corporation_id}"></span>
           </div>`;
-        }
+          }
 
-        for (const corporation_id in this.corporations) {
-          const corporationCounter = new ebg.counter();
-          corporationCounter.create(
-            $(`prs_corporationCounter$${player_id}:${corporation_id}`)
+          for (const corporation_id in this.corporations) {
+            const corporationCounter = new ebg.counter();
+            corporationCounter.create(
+              $(`prs_corporationCounter$${player_id}:${corporation_id}`)
+            );
+
+            this.storedCounters[player_id][corporation_id] = corporationCounter;
+          }
+
+          this.updateStoredCounters(
+            gamedatas.storedCounters[player_id],
+            player_id
           );
-
-          this.storedCounters[player_id][corporation_id] = corporationCounter;
         }
-
-        this.updateStoredCounters(
-          gamedatas.storedCounters[player_id],
-          player_id
-        );
 
         const hackerControl = `hackerStock$${player_id}`;
         this[hackerControl] = new LineStock(
