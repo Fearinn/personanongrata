@@ -1342,15 +1342,16 @@ define([
       const player_id = notif.args.player_id;
       const infoCard = notif.args.infoCard;
 
+      const storedCounters = notif.args.storedCounters;
+      this.updateStoredCounters(storedCounters, player_id);
+
       const storedControl = `storedStock$${player_id}`;
 
       this[storedControl].removeCard({ id: `-1:${player_id}` });
-
       this[storedControl].addCard(infoCard);
       this.setSlotOffset(this[storedControl].getCardElement(infoCard));
 
       const actionCard = this[`encryptActionStock$${player_id}`].getCards()[0];
-
       const discardedActionsControl = `discardedActionsStock$${player_id}`;
       this[discardedActionsControl].addCard(actionCard);
 
@@ -1392,10 +1393,15 @@ define([
     notif_archiveInfo: function (notif) {
       const player_id = notif.args.player_id;
       const infoCards = notif.args.infoCards;
+      const player_id2 = notif.args.player_id2;
+      const isStolen = notif.args.isStolen;
       const isCurrentPlayer = player_id == this.player_id;
 
       const storedCounters = notif.args.storedCounters;
-      this.updateStoredCounters(storedCounters, player_id);
+      this.updateStoredCounters(
+        storedCounters,
+        isStolen ? player_id2 : player_id
+      );
 
       const hackerElement = isCurrentPlayer
         ? undefined

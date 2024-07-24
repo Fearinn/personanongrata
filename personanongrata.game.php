@@ -1033,7 +1033,8 @@ class PersonaNonGrata extends Table
                 "corporation_label" => $this->corporations()[$corporation_id],
                 "corporationId" => $corporation_id,
                 "informationId" => $info_id,
-                "infoCard" => $info_card
+                "infoCard" => $info_card,
+                "storedCounters" => $this->getStoredCounters($player_id)
             )
         );
     }
@@ -1504,7 +1505,7 @@ class PersonaNonGrata extends Table
                 "corporationId" => $corporation_id,
                 "informationId" => $info_id,
                 "infoCards" => array($card_id => $card),
-                "storedCounters" => $this->getStoredCounters($player_id),
+                "storedCounters" => $this->getStoredCounters($opponent_id),
                 "isStolen" => true
             )
         );
