@@ -538,7 +538,6 @@ define([
           for (const card_id in visibleStored) {
             const card = visibleStored[card_id];
             this[storedControl].addCard(card);
-            this.setSlotOffset(this[storedControl].getCardElement(card));
           }
 
           const encryptedCard = storedCards["encrypted"];
@@ -560,10 +559,6 @@ define([
               encryptActionUsed,
               {},
               { forceToElement: $(`information--1:${player_id}`).parentElement }
-            );
-            this.setSlotOffset(
-              this[encryptActionControl].getCardElement(encryptActionUsed),
-              8
             );
           }
 
@@ -616,7 +611,6 @@ define([
         const card = this.infoStoredByMe[card_id];
 
         this[storedControl].addCard(card);
-        this.setSlotOffset(this[storedControl].getCardElement(card));
       }
 
       const encryptActionControl = `encryptActionStock$${this.player_id}`;
@@ -636,11 +630,6 @@ define([
           {
             forceToElement: $(`information-${encryptedInfo.id}`).parentElement,
           }
-        );
-
-        this.setSlotOffset(
-          this[encryptActionControl].getCardElement(encryptActionUsed),
-          -32
         );
       }
 
@@ -996,20 +985,6 @@ define([
       }
     },
 
-    setSlotOffset: function (cardElement, offset = 48) {
-      const slotElement = cardElement.parentNode;
-      const index = slotElement.childNodes.length - 1;
-
-      slotElement.style.height = 280 + Math.abs(offset) * index + "px";
-
-      if (!index) {
-        cardElement.style.marginTop = 0;
-        return;
-      }
-
-      cardElement.style.marginTop = -280 + offset + "px";
-    },
-
     handleConfirmationButton: function (content = _("Confirm selection")) {
       dojo.destroy("prs_confirmationBtn");
 
@@ -1312,8 +1287,6 @@ define([
           ? $(`prs_handOfInfo$${player_id}`)
           : undefined,
       });
-
-      this.setSlotOffset(this[storedControl].getCardElement(infoCard));
     },
 
     notif_storeInfoPrivate: function (notif) {
@@ -1322,8 +1295,6 @@ define([
 
       const storedControl = `storedStock$${player_id}`;
       this[storedControl].addCard(infoCard);
-
-      this.setSlotOffset(this[storedControl].getCardElement(infoCard));
     },
 
     notif_activateActionCard: function (notif) {
@@ -1338,11 +1309,6 @@ define([
           actionCard,
           {},
           { forceToElement: $(`information-${encryptedInfo.id}`).parentElement }
-        );
-
-        this.setSlotOffset(
-          this[encryptActionControl].getCardElement(actionCard),
-          player_id == this.player_id ? -32 : 8
         );
 
         return;
@@ -1362,15 +1328,10 @@ define([
 
       this[storedControl].removeCard({ id: `-1:${player_id}` });
       this[storedControl].addCard(infoCard);
-      this.setSlotOffset(this[storedControl].getCardElement(infoCard));
 
       const actionCard = this[`encryptActionStock$${player_id}`].getCards()[0];
       const discardedActionsControl = `discardedActionsStock$${player_id}`;
       this[discardedActionsControl].addCard(actionCard);
-
-      this[discardedActionsControl].getCardElement(
-        actionCard
-      ).style.marginTop = 0;
     },
 
     notif_obtainCorporation: function (notif) {

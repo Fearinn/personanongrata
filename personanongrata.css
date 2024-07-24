@@ -249,10 +249,6 @@ body > .card {
 
 /* END bga-cards module */
 
-.hand-stock {
-  min-height: 330px;
-}
-
 .all-visible-deck:empty {
   display: none;
 }
@@ -266,12 +262,20 @@ body > .card {
   position: absolute !important;
 }
 
-.slot:empty {
-  display: none;
-}
-
 .card-stock:empty {
   min-height: unset;
+}
+
+.hand-stock {
+  min-height: 330px;
+}
+
+.slot > div.card:not(:first-child) {
+  margin-top: -230px !important;
+}
+
+.slot:empty {
+  display: none;
 }
 
 .prs_darkTheme #overall-content {
