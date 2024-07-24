@@ -363,6 +363,106 @@ define([
           this[hackerControl].flipCard(hackerCard);
         }
 
+        //discard
+        const discardedActionsControl = `discardedActionsStock$${player_id}`;
+        this[discardedActionsControl] = new AllVisibleDeck(
+          this.actionManager,
+          $(`prs_actionDiscard$${player_id}`),
+          {
+            direction: "horizontal",
+            horizontalShift: "32px",
+            verticalShift: "0px",
+          }
+        );
+
+        const discardedCards = this.discardedActions[player_id];
+
+        for (const card_id in discardedCards) {
+          const card = discardedCards[card_id];
+          this[discardedActionsControl].addCard(card);
+        }
+
+        //archived
+        const archivedCorporationsControl = `archivedCorporationsStock$${player_id}`;
+        this[archivedCorporationsControl] = new AllVisibleDeck(
+          this.corporationManager,
+          $(`prs_archivedCorporation$${player_id}`),
+          {
+            direction: "horizontal",
+            horizontalShift: "32px",
+            verticalShift: "0px",
+            sort: sortFunction("type, type_arg"),
+          }
+        );
+
+        const archivedCorporations = this.archivedCorporations[player_id];
+
+        for (const card_id in archivedCorporations) {
+          const card = archivedCorporations[card_id];
+
+          this[archivedCorporationsControl].addCard(
+            card,
+            {},
+            {
+              forceToElement:
+                player_id == this.player_id
+                  ? undefined
+                  : $(`prs_hacker$${player_id}`),
+            }
+          );
+          this[archivedCorporationsControl].setCardVisible(
+            card,
+            player_id == this.player_id
+          );
+        }
+
+        const archivedKeyControl = `archivedKeysStock$${player_id}`;
+        this[archivedKeyControl] = new AllVisibleDeck(
+          this.keyManager,
+          $(`prs_archivedKey$${player_id}`),
+          {
+            direction: "horizontal",
+            horizontalShift: "32px",
+            verticalShift: "0px",
+            sort: sortFunction("type"),
+          }
+        );
+
+        const archivedKeys = this.archivedKeys[player_id];
+        for (const card_id in archivedKeys) {
+          const card = archivedKeys[card_id];
+
+          this[archivedKeyControl].addCard(card);
+        }
+
+        const archivedInfoControl = `archivedInfoStock$${player_id}`;
+        this[archivedInfoControl] = new AllVisibleDeck(
+          this.informationManager,
+          $(`prs_archivedInfo$${player_id}`),
+          {
+            direction: "horizontal",
+            horizontalShift: "32px",
+            verticalShift: "0px",
+            sort: sortFunction("type", "type_arg"),
+          }
+        );
+
+        const archivedInfo = this.archivedInfo[player_id];
+        const isCurrentPlayer = player_id == this.player_id;
+        const hackerElement = isCurrentPlayer
+          ? undefined
+          : $(`prs_hacker$${player_id}`);
+
+        for (const card_id in archivedInfo) {
+          const card = archivedInfo[card_id];
+          this[archivedInfoControl].addCard(
+            card,
+            {},
+            { forceToElement: hackerElement }
+          );
+          this[archivedInfoControl].setCardVisible(card, isCurrentPlayer);
+        }
+
         if (this.player_id != player_id) {
           //actions
           const actionsInHandControl = `actionsInHandStock$${player_id}`;
@@ -468,93 +568,6 @@ define([
           }
 
           //end of current player excluding
-        }
-
-        //discard
-        const discardedActionsControl = `discardedActionsStock$${player_id}`;
-        this[discardedActionsControl] = new AllVisibleDeck(
-          this.actionManager,
-          $(`prs_actionDiscard$${player_id}`),
-          {
-            direction: "horizontal",
-            horizontalShift: "32px",
-            verticalShift: "0px",
-          }
-        );
-
-        const discardedCards = this.discardedActions[player_id];
-
-        for (const card_id in discardedCards) {
-          const card = discardedCards[card_id];
-          this[discardedActionsControl].addCard(card);
-        }
-
-        //archived
-        const archivedCorporationsControl = `archivedCorporationStock$${player_id}`;
-        this[archivedCorporationsControl] = new AllVisibleDeck(
-          this.corporationManager,
-          $(`prs_archivedCorporation$${player_id}`),
-          {
-            direction: "horizontal",
-            horizontalShift: "32px",
-            verticalShift: "0px",
-            sort: sortFunction("type, type_arg"),
-          }
-        );
-
-        const archivedCorporations = this.archivedCorporations[player_id];
-
-        for (const card_id in archivedCorporations) {
-          const card = archivedCorporations[card_id];
-
-          this[archivedCorporationsControl].addCard(card);
-        }
-
-        const archivedKeyControl = `archivedKeysStock$${player_id}`;
-        this[archivedKeyControl] = new AllVisibleDeck(
-          this.keyManager,
-          $(`prs_archivedKey$${player_id}`),
-          {
-            direction: "horizontal",
-            horizontalShift: "32px",
-            verticalShift: "0px",
-            sort: sortFunction("type"),
-          }
-        );
-
-        const archivedKeys = this.archivedKeys[player_id];
-        for (const card_id in archivedKeys) {
-          const card = archivedKeys[card_id];
-
-          this[archivedKeyControl].addCard(card);
-        }
-
-        const archivedInfoControl = `archivedInfoStock$${player_id}`;
-        this[archivedInfoControl] = new AllVisibleDeck(
-          this.informationManager,
-          $(`prs_archivedInfo$${player_id}`),
-          {
-            direction: "horizontal",
-            horizontalShift: "32px",
-            verticalShift: "0px",
-            sort: sortFunction("type", "type_arg"),
-          }
-        );
-
-        const archivedInfo = this.archivedInfo[player_id];
-        const isCurrentPlayer = player_id == this.player_id;
-        const hackerElement = isCurrentPlayer
-          ? undefined
-          : $(`prs_hacker$${player_id}`);
-
-        for (const card_id in archivedInfo) {
-          const card = archivedInfo[card_id];
-          this[archivedInfoControl].addCard(
-            card,
-            {},
-            { forceToElement: hackerElement }
-          );
-          this[archivedInfoControl].setCardVisible(card, isCurrentPlayer);
         }
 
         //end of players loop
@@ -1369,7 +1382,7 @@ define([
         ? undefined
         : $(`prs_hacker$${player_id}`);
 
-      const archivedCorporationsControl = `archivedCorporationStock$${player_id}`;
+      const archivedCorporationsControl = `archivedCorporationsStock$${player_id}`;
 
       this[archivedCorporationsControl].addCard(
         corporationCard,
@@ -1561,10 +1574,9 @@ define([
       const player_color = notif.args.player_color;
       const corporationCards = notif.args.corporationCards;
       const infoCards = notif.args.infoCards;
-      const points = notif.args.points;
       const totalPoints = notif.args.totalPoints;
 
-      const archivedCorporationsControl = `archivedCorporationStock$${player_id}`;
+      const archivedCorporationsControl = `archivedCorporationsStock$${player_id}`;
       this[archivedCorporationsControl].removeAll();
 
       for (const card_id in corporationCards) {
