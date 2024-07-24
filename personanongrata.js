@@ -262,12 +262,12 @@ define([
       if (Object.keys(this.players).length > 2) {
         $(`prs_playerArea$${this.player_id}`).style.order = 0;
 
-        $(`prs_playerArea$${this.playerLeft}`).style.order = 1;
+        $(`prs_playerArea$${this.playerLeft}`).style.order = -1;
         $(`prs_directionTag$${this.playerLeft}`).textContent = _(
           "Your left (next counterclockwise)"
         );
 
-        $(`prs_playerArea$${this.playerRight}`).style.order = -1;
+        $(`prs_playerArea$${this.playerRight}`).style.order = 1;
         $(`prs_directionTag$${this.playerRight}`).textContent = _(
           "Your right (next clockwise)"
         );
@@ -365,7 +365,7 @@ define([
 
         //discard
         const discardedActionsControl = `discardedActionsStock$${player_id}`;
-        this[discardedActionsControl] = new AllVisibleDeck(
+        this[discardedActionsControl] = new LineStock(
           this.actionManager,
           $(`prs_actionDiscard$${player_id}`),
           {
@@ -384,9 +384,9 @@ define([
 
         //archived
         const archivedCorporationsControl = `archivedCorporationsStock$${player_id}`;
-        this[archivedCorporationsControl] = new AllVisibleDeck(
+        this[archivedCorporationsControl] = new LineStock(
           this.corporationManager,
-          $(`prs_archivedCorporation$${player_id}`),
+          $(`prs_archivedCorporations$${player_id}`),
           {
             direction: "horizontal",
             horizontalShift: "32px",
@@ -417,9 +417,9 @@ define([
         }
 
         const archivedKeyControl = `archivedKeysStock$${player_id}`;
-        this[archivedKeyControl] = new AllVisibleDeck(
+        this[archivedKeyControl] = new LineStock(
           this.keyManager,
-          $(`prs_archivedKey$${player_id}`),
+          $(`prs_archivedKeys$${player_id}`),
           {
             direction: "horizontal",
             horizontalShift: "32px",
@@ -436,7 +436,7 @@ define([
         }
 
         const archivedInfoControl = `archivedInfoStock$${player_id}`;
-        this[archivedInfoControl] = new AllVisibleDeck(
+        this[archivedInfoControl] = new LineStock(
           this.informationManager,
           $(`prs_archivedInfo$${player_id}`),
           {

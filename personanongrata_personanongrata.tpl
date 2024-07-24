@@ -26,8 +26,8 @@
         <div id="prs_actionDiscard${PLAYER_ID}" class="prs_actionDiscard"></div>
         <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
         <div id="prs_archivedInfo${PLAYER_ID}"></div>
-        <div id="prs_archivedCorporation${PLAYER_ID}"></div>
-        <div id="prs_archivedKey${PLAYER_ID}"></div>
+        <div id="prs_archivedCorporations${PLAYER_ID}"></div>
+        <div id="prs_archivedKeys${PLAYER_ID}"></div>
       </div>
       <div
         id="prs_played"
@@ -87,8 +87,8 @@
           ></div>
           <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
           <div id="prs_archivedInfo${PLAYER_ID}"></div>
-          <div id="prs_archivedCorporation${PLAYER_ID}"></div>
-          <div id="prs_archivedKey${PLAYER_ID}"></div>
+          <div id="prs_archivedCorporations${PLAYER_ID}"></div>
+          <div id="prs_archivedKeys${PLAYER_ID}"></div>
         </div>
         <div
           id="prs_store${PLAYER_ID}"

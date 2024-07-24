@@ -262,6 +262,10 @@ body > .card {
   position: absolute !important;
 }
 
+.line-stock:not(.prs_hacker) > div.card:not(:first-child) {
+  margin-left: -158px;
+}
+
 .card-stock:empty {
   min-height: unset;
 }
@@ -335,7 +339,7 @@ body > .card {
 
 .prs_playerAreas {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   flex-wrap: wrap;
   column-gap: 16px;
