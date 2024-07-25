@@ -333,11 +333,21 @@ body > .card {
   width: 30px;
 }
 
-.prs_playerAreas {
+/* .prs_playerAreas {
   display: flex;
   align-items: stretch;
   justify-content: center;
   flex-wrap: wrap;
+  column-gap: 16px;
+  row-gap: 8px;
+  width: 100%;
+} */
+
+.prs_playerAreas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(560px, 1fr));
+  align-items: stretch;
+  justify-content: center;
   column-gap: 16px;
   row-gap: 8px;
   width: 100%;
@@ -347,7 +357,7 @@ body > .card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 16px;
   border: 3px solid #000;
   border-radius: 8px;
@@ -388,7 +398,7 @@ body > .card {
 
 .prs_playerZones {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   justify-content: center;
   flex-wrap: wrap;
   gap: 8px;
@@ -405,14 +415,20 @@ body > .card {
   padding: 8px;
   min-height: 330px;
   min-width: 250px;
+
+  flex-grow: 1;
+}
+
+.prs_zone > .card-stock {
+  flex-grow: 1;
 }
 
 .prs_zoneTitle {
-  align-self: flex-end;
-  font-size: 1.5rem;
+  align-self: flex-start;
+  font-size: 1.25rem;
   margin: 0;
   margin-right: auto;
-  opacity: 0.8;
+  opacity: 0.7;
   transform: rotate(180deg);
   writing-mode: vertical-lr;
   -webkit-text-stroke: #000 0.1ch;
