@@ -249,7 +249,7 @@ body > .card {
 
 /* END bga-cards module */
 
-.all-visible-deck:empty {
+.card-stock:empty {
   display: none;
 }
 
@@ -264,10 +264,6 @@ body > .card {
 
 .line-stock:not(.prs_hacker) > div.card:not(:first-child) {
   margin-left: -158px;
-}
-
-.card-stock:empty {
-  min-height: unset;
 }
 
 .hand-stock {
@@ -382,7 +378,7 @@ body > .card {
   background-color: #000;
   border-radius: 8px;
   color: #fff;
-  padding: 4px;
+  padding: 2px 8px;
 }
 
 .prs_publicArea .prs_areaTitle {
@@ -409,6 +405,17 @@ body > .card {
   padding: 8px;
   min-height: 296px;
   min-width: 180px;
+}
+
+.prs_zoneTitle {
+  align-self: flex-end;
+  font-size: 1.5rem;
+  margin: 0;
+  margin-right: auto;
+  opacity: 0.8;
+  transform: rotate(180deg);
+  writing-mode: vertical-lr;
+  -webkit-text-stroke: #000 0.1ch;
 }
 
 .prs_publicCards {

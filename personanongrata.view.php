@@ -28,12 +28,14 @@ class view_personanongrata_personanongrata extends game_view
         // Get players & players number
         global $g_user;
         $players = $this->game->loadPlayersBasicInfos();
-        $players_nbr = count($players);
         $current_player = $g_user->get_id();
         $template = "personanongrata_personanongrata";
 
         $this->tpl["YOU"] = $this->_("You");
-        $this->tpl["CORPORATION_CARDS"] = $this->_("Information, Key and Corporation cards");
+        $this->tpl["COMMON_AREA"] = $this->_("Decks");
+        $this->tpl["ARCHIVED_CARDS"] = $this->_("Archived cards");
+        $this->tpl["PLAY_AREA"] = $this->_("Play area");
+        $this->tpl["PLAYED_TODAY"] = $this->_("Played today");
 
         $this->page->begin_block($template, "playerzone");
         $this->page->begin_block($template, "myzone");

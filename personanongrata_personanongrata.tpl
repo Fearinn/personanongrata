@@ -23,6 +23,9 @@
         id="prs_archive${PLAYER_ID}"
         class="prs_myZone prs_playerZone prs_zone whiteblock"
       >
+        <h4 class="prs_zoneTitle" style="color: #{PLAYER_COLOR}">
+          {ARCHIVED_CARDS}
+        </h4>
         <div id="prs_actionDiscard${PLAYER_ID}" class="prs_actionDiscard"></div>
         <div id="prs_hacker${PLAYER_ID}" class="prs_hacker"></div>
         <div id="prs_archivedInfo${PLAYER_ID}"></div>
@@ -30,18 +33,24 @@
         <div id="prs_archivedKeys${PLAYER_ID}"></div>
       </div>
       <div
-        id="prs_played"
-        class="prs_myZone prs_playerZone prs_zone whiteblock"
-      >
-        <div id="prs_playedAction${PLAYER_ID}" class="prs_playedAction"></div>
-        <div id="prs_playedInfo${PLAYER_ID}" class="prs_playedInfo"></div>
-      </div>
-      <div
         id="prs_store${PLAYER_ID}"
         class="prs_myZone prs_playerZone prs_zone whiteblock"
       >
+        <h4 class="prs_zoneTitle" style="color: #{PLAYER_COLOR}">
+          {PLAY_AREA}
+        </h4>
         <div id="prs_stored${PLAYER_ID}" class="prs_myStored prs_stored"></div>
         <div id="prs_encryptAction${PLAYER_ID}" class="prs_encryptAction"></div>
+      </div>
+      <div
+        id="prs_playedCards"
+        class="prs_myZone prs_playerZone prs_zone whiteblock"
+      >
+        <h4 class="prs_zoneTitle" style="color: #{PLAYER_COLOR}">
+          {PLAYED_TODAY}
+        </h4>
+        <div id="prs_playedAction${PLAYER_ID}" class="prs_playedAction"></div>
+        <div id="prs_playedInfo${PLAYER_ID}" class="prs_playedInfo"></div>
       </div>
       <div
         id="prs_hand${PLAYER_ID} "
@@ -81,6 +90,9 @@
           id="prs_archive${PLAYER_ID}"
           class="prs_playerZone prs_zone whiteblock"
         >
+          <h4 class="prs_zoneTitle" style="color: #{PLAYER_COLOR}">
+            {ARCHIVED_CARDS}
+          </h4>
           <div
             id="prs_actionDiscard${PLAYER_ID}"
             class="prs_actionDiscard"
@@ -91,9 +103,12 @@
           <div id="prs_archivedKeys${PLAYER_ID}"></div>
         </div>
         <div
-          id="prs_store${PLAYER_ID}"
+          id="prs_storedCards${PLAYER_ID}"
           class="prs_playerZone prs_zone whiteblock"
         >
+          <h4 class="prs_zoneTitle" style="color: #{PLAYER_COLOR}">
+            {PLAY_AREA}
+          </h4>
           <div id="prs_stored${PLAYER_ID}" class="prs_stored"></div>
           <div
             id="prs_encryptAction${PLAYER_ID}"
@@ -119,7 +134,7 @@
   </div>
 
   <div id="prs_publicArea" class="prs_publicArea prs_area whiteblock">
-    <h3 class="prs_areaTitle">{CORPORATION_CARDS}</h3>
+    <h3 class="prs_areaTitle">{COMMON_AREA}</h3>
     <div id="prs_publicCards" class="prs_publicCards">
       <div id="prs_infoDeck" class="prs_infoDeck"></div>
       <div id="prs_keys" class="prs_keys"></div>
