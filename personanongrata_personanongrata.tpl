@@ -21,7 +21,7 @@
     <div class="prs_playerZones">
       <div
         id="prs_archive${PLAYER_ID}"
-        class="prs_myZone prs_playerZone prs_zone whiteblock"
+        class="prs_playerZone prs_zone whiteblock"
       >
         <h4 class="prs_zoneTitle" style="color: #{PLAYER_COLOR}">
           {ARCHIVED_CARDS}
@@ -34,7 +34,7 @@
       </div>
       <div
         id="prs_store${PLAYER_ID}"
-        class="prs_myZone prs_playerZone prs_zone whiteblock"
+        class="prs_playerZone prs_zone whiteblock"
       >
         <h4 class="prs_zoneTitle" style="color: #{PLAYER_COLOR}">
           {PLAY_AREA}
@@ -42,24 +42,26 @@
         <div id="prs_stored${PLAYER_ID}" class="prs_myStored prs_stored"></div>
         <div id="prs_encryptAction${PLAYER_ID}" class="prs_encryptAction"></div>
       </div>
-      <div
-        id="prs_playedCards"
-        class="prs_myZone prs_playerZone prs_zone whiteblock"
-      >
+      <div id="prs_playedCards" class="prs_playerZone prs_zone whiteblock">
         <h4 class="prs_zoneTitle" style="color: #{PLAYER_COLOR}">
           {PLAYED_TODAY}
         </h4>
         <div id="prs_playedAction${PLAYER_ID}" class="prs_playedAction"></div>
         <div id="prs_playedInfo${PLAYER_ID}" class="prs_playedInfo"></div>
       </div>
-      <div
-        id="prs_hand${PLAYER_ID} "
-        class="prs_myZone prs_playerZone prs_zone whiteblock"
-      >
+      <div class="prs_playerZone prs_zone whiteblock">
+        <h4 class="prs_zoneTitle" style="color: #{PLAYER_COLOR}">
+          {ACTION_HAND}
+        </h4>
         <div
           id="prs_handOfActions${PLAYER_ID}"
           class="prs_handOfActions prs_hand"
         ></div>
+      </div>
+      <div class="prs_playerZone prs_zone whiteblock">
+        <h4 class="prs_zoneTitle" style="color: #{PLAYER_COLOR}">
+          {INFO_HAND}
+        </h4>
         <div
           id="prs_handOfInfo${PLAYER_ID}"
           class="prs_handOfInfo prs_hand"
@@ -115,14 +117,19 @@
             class="prs_encryptAction"
           ></div>
         </div>
-        <div
-          id="prs_hand${PLAYER_ID} "
-          class="prs_playerZone prs_zone whiteblock"
-        >
+        <div class="prs_playerZone prs_zone whiteblock">
+          <h4 class="prs_zoneTitle" style="color: #{PLAYER_COLOR}">
+            {ACTION_HAND}
+          </h4>
           <div
             id="prs_handOfActions${PLAYER_ID}"
             class="prs_handOfActions prs_hand"
           ></div>
+        </div>
+        <div class="prs_playerZone prs_zone whiteblock">
+          <h4 class="prs_zoneTitle" style="color: #{PLAYER_COLOR}">
+            {INFO_HAND}
+          </h4>
           <div
             id="prs_handOfInfo${PLAYER_ID}"
             class="prs_handOfInfo prs_hand"

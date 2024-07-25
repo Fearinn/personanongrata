@@ -36,6 +36,8 @@ class view_personanongrata_personanongrata extends game_view
         $this->tpl["ARCHIVED_CARDS"] = $this->_("Archived cards");
         $this->tpl["PLAY_AREA"] = $this->_("Play area");
         $this->tpl["PLAYED_TODAY"] = $this->_("Played today");
+        $this->tpl["ACTION_HAND"] = $this->_("Hand (Actions)");
+        $this->tpl["INFO_HAND"] = $this->_("Hand (Information)");
 
         $this->page->begin_block($template, "playerzone");
         $this->page->begin_block($template, "myzone");
