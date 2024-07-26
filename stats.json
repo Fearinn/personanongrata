@@ -54,6 +54,11 @@
       "id": 20,
       "name": "Second-place of a Corporation in a week",
       "type": "int"
+    },
+    "corporationsActivated": {
+      "id": 21,
+      "name": "Corporations activated",
+      "type": "int"
     }
   }
 }

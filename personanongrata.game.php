@@ -91,6 +91,7 @@ class PersonaNonGrata extends Table
         $this->initStat("player", "cardsStolenFrom", 0);
         $this->initStat("player", "corporationFirst", 0);
         $this->initStat("player", "corporationSecond", 0);
+        $this->initStat("player", "corporationsActivated", 0);
 
         if (count($players) == 4) {
             $this->initStat("player", "points6", 0);
@@ -1273,7 +1274,6 @@ class PersonaNonGrata extends Table
         return $points;
     }
 
-
     function computeKeyPoint(int $corporation_id, int $player_id)
     {
         $archived_keys = $this->key_cards->getCardsOfTypeInLocation($corporation_id, null, "archived", $player_id);
@@ -2020,8 +2020,12 @@ class PersonaNonGrata extends Table
                     continue;
                 };
 
+                $this->incStat(1, "corporationsActivated", $player_id);
                 $this->computeArchivedPoints($corporation_id, $player_id);
             }
+
+            $aux_score = 100 * $this->getStat("corporationsActivated", $player_id) + $this->key_cards->countCardsInLocation("archived", $player_id);
+            $this->dbSetAuxScore($player_id, $aux_score);
         }
 
         $this->gamestate->nextState("gameEnd");
