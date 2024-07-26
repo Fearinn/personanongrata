@@ -34,7 +34,7 @@ $machinestates = array(
         "type" => "multipleactiveplayer",
         "action" => "st_day",
         "possibleactions" => array("changeMindPlayed", "changeMindDiscarded"),
-        "transitions" => array("betweenDays" => 3),
+        "transitions" => array("betweenDays" => 3, "infoArchiving" => 4),
         "initialprivate" => 20,
         "updateGameProgression" => true
     ),

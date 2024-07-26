@@ -716,22 +716,22 @@ class PersonaNonGrata extends Table
         return $card["location"] === "hand" && $card["location_arg"] == $player_id;
     }
 
-    function canSteal(int $corporation_id, int $current_player_id): bool
+    function canSteal(int $corporation_id, int $current_player_id): array
     {
-        $canSteal = false;
+        $canSteal = array();
         $players = $this->loadPlayersBasicInfos();
 
         $stole = $this->getPlayerStole($current_player_id);
 
         if ($stole) {
-            return false;
+            return array();
         }
 
         foreach ($players as $player_id => $player) {
             if ($current_player_id != $player_id) {
-                if ($this->getStoredInfoByCorporation($corporation_id, $player_id)) {
-                    $canSteal = true;
-                    break;
+                $stored_info = $this->getStoredInfoByCorporation($corporation_id, $player_id);
+                if ($stored_info) {
+                    $canSteal += $stored_info;
                 }
             }
         }
@@ -1494,9 +1494,11 @@ class PersonaNonGrata extends Table
         $this->gamestate->nextPrivateState($player_id, "changeMindDiscarded");
     }
 
-    function stealInfo($card_id)
+    function stealInfo($card_id, bool $auto = false)
     {
-        $this->checkAction("stealInfo");
+        if (!$auto) {
+            $this->checkAction("stealInfo");
+        }
 
         $player_id = $this->getActivePlayerId();
         $corporation_id = $this->getGameStateValue("currentCorporation");
@@ -1511,9 +1513,12 @@ class PersonaNonGrata extends Table
 
         $this->information_cards->moveCard($card_id, "archived", $player_id);
 
+        $message = $auto ? clienttranslate('${player_name} automatically takes the ${info_label} of ${corporation_label} from ${player_name2} and archives it')
+            : clienttranslate('${player_name} takes the ${info_label} of ${corporation_label} from ${player_name2} and archives it');
+
         $this->notifyAllPlayers(
             "archiveInfo",
-            clienttranslate('${player_name} takes the ${info_label} of ${corporation_label} from ${player_name2} and archives it'),
+            $message,
             array(
                 "preserve" => array("corporationId", "informationId"),
                 "i18n" => array("info_label"),
@@ -1740,7 +1745,8 @@ class PersonaNonGrata extends Table
 
         $hand_actions_count = $this->action_cards->countCardsInLocation("hand");
 
-        if ($hand_actions_count == 0) {
+        //tests
+        if ($hand_actions_count > 0) {
             $this->gamestate->nextState("infoArchiving");
             return;
         }
@@ -1882,16 +1888,32 @@ class PersonaNonGrata extends Table
             $this->incStat(1, "corporationSecond", $second);
         }
 
-        if ($this->canSteal($corporation_id, $first)) {
+        $first_steal = $this->canSteal($corporation_id, $first);
+        $this->dump('firstSteal', $first_steal);
+        if ($first_steal) {
             $this->gamestate->changeActivePlayer($first);
-            $this->gamestate->nextState("stealInfo");
-            return;
+
+            if (count($first_steal) > 1) {
+                $this->gamestate->nextState("stealInfo");
+                return;
+            }
+
+            $stolen_info = array_shift($first_steal);
+
+            $this->dump("stolenInfo", $stolen_info);
         }
 
-        if ($this->canSteal($corporation_id, $second)) {
+        $second_steal = $this->canSteal($corporation_id, $second);
+        if ($second_steal) {
             $this->gamestate->changeActivePlayer($second);
-            $this->gamestate->nextState("stealInfo");
-            return;
+
+            if (count($second_steal) > 1) {
+                $this->gamestate->nextState("stealInfo");
+                return;
+            }
+
+            $stolen_info = array_shift($second_steal);
+            $this->stealInfo($stolen_info["id"], true);
         }
 
         $this->incGameStateValue("currentCorporation", 1);
