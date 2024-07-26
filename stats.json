@@ -1,1 +1,59 @@
-{}
+{
+  "player": {
+    "points1": {
+      "id": 10,
+      "name": "Victory points from Biolife",
+      "type": "int"
+    },
+    "points2": {
+      "id": 11,
+      "name": "Victory points from Cosmoco",
+      "type": "int"
+    },
+    "points3": {
+      "id": 12,
+      "name": "Victory points from Jihui",
+      "type": "int"
+    },
+    "points4": {
+      "id": 13,
+      "name": "Victory points from Delacruz",
+      "type": "int"
+    },
+    "points5": {
+      "id": 14,
+      "name": "Victory points from SJT",
+      "type": "int"
+    },
+    "points6": {
+      "id": 15,
+      "name": "Victory points from Lumni",
+      "type": "int"
+    },
+    "wastedPoints": {
+      "id": 16,
+      "name": "Wasted (not activated) points",
+      "type": "int"
+    },
+    "cardsStolenBy": {
+      "id": 17,
+      "name": "Cards stolen by this player",
+      "type": "int"
+    },
+    "cardsStolenFrom": {
+      "id": 18,
+      "name": "Cards stolen from this player",
+      "type": "int"
+    },
+    "corporationFirst": {
+      "id": 19,
+      "name": "First-place of a Corporation in a week",
+      "type": "int"
+    },
+    "corporationSecond": {
+      "id": 20,
+      "name": "Second-place of a Corporation in a week",
+      "type": "int"
+    }
+  }
+}

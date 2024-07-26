@@ -81,9 +81,19 @@ class PersonaNonGrata extends Table
         $this->setGameStateInitialValue("currentCorporation", 1);
         $this->setGameStateInitialValue("day", 1);
 
-        //corporations
-        if (count($players) < 4) {
-            unset($this->corporations[6]);
+        $this->initStat("player", "points1", 0);
+        $this->initStat("player", "points2", 0);
+        $this->initStat("player", "points3", 0);
+        $this->initStat("player", "points4", 0);
+        $this->initStat("player", "points5", 0);
+        $this->initStat("player", "wastedPoints", 0);
+        $this->initStat("player", "cardsStolenBy", 0);
+        $this->initStat("player", "cardsStolenFrom", 0);
+        $this->initStat("player", "corporationFirst", 0);
+        $this->initStat("player", "corporationSecond", 0);
+
+        if (count($players) == 4) {
+            $this->initStat("player", "points6", 0);
         }
 
         $corporation_cards = array();
@@ -1213,10 +1223,13 @@ class PersonaNonGrata extends Table
             return true;
         }
 
+        $wasted_points = $this->computeArchivedPoints($corporation_id, $player_id, false);
+        $this->setStat($wasted_points, "wastedPoints", $player_id);
+
         return false;
     }
 
-    function computeArchivedPoints(int $corporation_id, int $player_id): int
+    function computeArchivedPoints(int $corporation_id, int $player_id, $updateDb = true): int
     {
         $points = 0;
 
@@ -1230,6 +1243,10 @@ class PersonaNonGrata extends Table
 
         foreach ($archived_info as $card) {
             $points += $card["type_arg"];
+        }
+
+        if (!$updateDb) {
+            return $points;
         }
 
         $total_points = $this->dbIncScore($player_id, $points);
@@ -1250,6 +1267,8 @@ class PersonaNonGrata extends Table
                 "totalPoints" => $total_points
             )
         );
+
+        $this->incStat($points, "points" . $corporation_id, $player_id);
 
         return $points;
     }
@@ -1276,6 +1295,8 @@ class PersonaNonGrata extends Table
                     "totalPoints" => $total_points
                 )
             );
+
+            $this->incStat(1, "points" . $corporation_id, $player_id);
         }
     }
 
@@ -1512,6 +1533,9 @@ class PersonaNonGrata extends Table
 
         $this->setPlayerStole($player_id);
 
+        $this->incStat(1, "cardsStolenBy", $player_id);
+        $this->incStat(1, "cardsStolenFrom", $opponent_id);
+
         $this->gamestate->nextState("infoArchiving");
     }
 
@@ -1584,7 +1608,10 @@ class PersonaNonGrata extends Table
         }
 
         $this->setGameStateValue("corporationFirst", $tie_winner);
+        $this->incStat(1, "corporationFirst", $tie_winner);
+
         $this->setGameStateValue("corporationSecond", $tie_runner);
+        $this->incStat(1, "corporationSecond", $tie_runner);
 
         $this->gamestate->nextState("infoArchiving");
     }
@@ -1638,6 +1665,7 @@ class PersonaNonGrata extends Table
         }
 
         $this->setGameStateValue("corporationSecond", $tie_runner);
+        $this->incStat(1, "corporationSecond", $tie_runner);
 
         $this->gamestate->nextState("infoArchiving");
     }
@@ -1815,6 +1843,7 @@ class PersonaNonGrata extends Table
             $this->obtainCorporation($corporation_id, $first);
 
             $this->setGameStateValue("corporationFirst", $first);
+            $this->incStat(1, "corporationFirst", $first);
         }
 
         if (!$second) {
@@ -1848,7 +1877,9 @@ class PersonaNonGrata extends Table
             }
 
             $this->obtainKey($corporation_id, $second);
+
             $this->setGameStateValue("corporationSecond", $second);
+            $this->incStat(1, "corporationSecond", $second);
         }
 
         if ($this->canSteal($corporation_id, $first)) {
