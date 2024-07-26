@@ -309,7 +309,7 @@ class PersonaNonGrata extends Table
         return $this->corporations;
     }
 
-    private function getRandomKey(array $array): int | string
+    private function getRandomKey(array $array)
     {
         $size = count($array);
         $rand = random_int(0, $size - 1);
@@ -348,7 +348,7 @@ class PersonaNonGrata extends Table
         return $this->isClockwise() ? $this->getPlayerAfterNoZombie($player_id) : $this->getPlayerBeforeNoZombie($player_id);
     }
 
-    function hideCard(array $card, bool $hideType = false, string | int $fake_id = null, string $fake_location = null): array
+    function hideCard(array $card, bool $hideType = false, $fake_id = null, string $fake_location = null): array
     {
         $hidden_card = array(
             "id" => $card["id"],
