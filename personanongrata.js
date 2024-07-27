@@ -345,39 +345,48 @@ define([
         );
 
         this[hackerControl].onSelectionChange = (selection, lastChange) => {
-          if (
-            this.getStateName() === "breakFirstTie" &&
-            this.isCurrentPlayerActive()
-          ) {
-            this.handleSelectedTie(selection, lastChange, this[hackerControl]);
-
-            this.handleConfirmationButton(
-              this.format_string_recursive(
-                _(
-                  "Corporation card to ${selectedTieWinner} | Key to ${selectedTieRunner}"
-                ),
-                {
-                  selectedTieWinner:
-                    this.players[this.selectedTieWinner]?.name || "",
-                  selectedTieRunner:
-                    this.players[this.selectedTieRunner]?.name || "",
-                }
-              )
-            );
+          if (!this.isCurrentPlayerActive()) {
             return;
           }
 
-          if (
-            this.getStateName() === "breakSecondTie" &&
-            this.isCurrentPlayerActive()
-          ) {
-            if (selection.length === 0) {
-              this.selectedTieWinner = null;
+          console.log(lastChange, this.getStateName());
+
+          const selected_player_id = lastChange.location_arg;
+
+          if (this.getStateName() === "breakFirstTie") {
+            if (selection.length > 0) {
+              this.unselectHackers(selected_player_id);
+              this.selectedTieWinner = selected_player_id;
             } else {
-              this.selectedTieWinner = lastChange.location_arg;
+              this.selectedTieWinner = null;
             }
 
             this.handleConfirmationButton();
+            return;
+          }
+
+          if (this.getStateName() === "client_pickTieRunner") {
+            console.log("pick runner");
+            if (selection.length > 0) {
+              this.unselectHackers(selected_player_id);
+              this.selectedTieRunner = selected_player_id;
+            } else {
+              this.selectedTieRunner = null;
+            }
+
+            this.handleConfirmationButton();
+            return;
+          }
+
+          if (this.getStateName() === "breakSecondTie") {
+            if (selection.length === 0) {
+              this.selectedTieWinner = null;
+            } else {
+              this.selectedTieWinner = selected_player_id;
+            }
+
+            this.handleConfirmationButton();
+            return;
           }
         };
 
@@ -825,6 +834,7 @@ define([
           const storedControl = `storedStock$${player_id}`;
           this[storedControl].setSelectionMode("none");
         }
+        return;
       }
 
       if (stateName === "breakFirstTie") {
@@ -832,6 +842,15 @@ define([
           const hackerControl = `hackerStock$${player_id}`;
           this[hackerControl].setSelectionMode("none");
         }
+        return;
+      }
+
+      if (stateName === "client_pickTieRunner") {
+        for (const player_id in this.players) {
+          const hackerControl = `hackerStock$${player_id}`;
+          this[hackerControl].setSelectionMode("none");
+        }
+        return;
       }
 
       if (stateName === "breakSecondTie") {
@@ -840,6 +859,7 @@ define([
           this[hackerControl].setSelectionMode("none");
         }
       }
+      return;
     },
 
     onUpdateActionButtons: function (stateName, args) {
@@ -939,6 +959,38 @@ define([
           }
         }
         return;
+      }
+
+      if (stateName === "client_pickTieRunner") {
+        if (this.isCurrentPlayerActive()) {
+          this.addActionButton(
+            "prs_changeMind_btn",
+            _("Change Mind"),
+            () => {
+              this.selectedTieWinner = null;
+              this.unselectHackers();
+
+              this.restoreServerGameState();
+            },
+            null,
+            null,
+            "gray"
+          );
+
+          const tiedPlayers = args.tiedPlayers;
+
+          for (const player_id in this.players) {
+            const hackerControl = `hackerStock$${player_id}`;
+            this[hackerControl].setSelectionMode("single");
+
+            if (
+              !tiedPlayers[player_id] ||
+              player_id == this.selectedTieWinner
+            ) {
+              this[hackerControl].setSelectableCards([]);
+            }
+          }
+        }
       }
 
       if (stateName === "breakSecondTie") {
@@ -1044,14 +1096,25 @@ define([
             this.onStealInfo();
           });
         }
+        return;
       }
 
       if (this.getStateName() === "breakFirstTie") {
-        if (this.selectedTieWinner && this.selectedTieRunner) {
+        if (this.selectedTieWinner) {
+          this.addActionButton("prs_confirmationBtn", content, () => {
+            this.onPickTieWinner();
+          });
+        }
+        return;
+      }
+
+      if (this.getStateName() === "client_pickTieRunner") {
+        if (this.selectedTieRunner) {
           this.addActionButton("prs_confirmationBtn", content, () => {
             this.onBreakFirstTie();
           });
         }
+        return;
       }
 
       if (this.getStateName() === "breakSecondTie") {
@@ -1060,53 +1123,18 @@ define([
             this.onBreakSecondTie();
           });
         }
+        return;
       }
     },
 
-    unselectAllHackers: function () {
+    unselectHackers: function (preserved = null) {
       for (const player_id in this.players) {
+        if (player_id == preserved) {
+          continue;
+        }
+
         const hackerControl = `hackerStock$${player_id}`;
         this[hackerControl].unselectAll(true);
-      }
-    },
-
-    handleSelectedTie: function (selection, lastChange, stock) {
-      if (this.selectedTieWinner) {
-        if (selection.length == 0) {
-          if (lastChange.location_arg == this.selectedTieWinner) {
-            this.selectedTieWinner = null;
-            this.selectedTieRunner = null;
-            this.unselectAllHackers();
-          } else {
-            this.selectedTieRunner = null;
-          }
-        }
-
-        if (selection.length > 0) {
-          this.selectedTieRunner = lastChange.location_arg;
-          stock.getCardElement(lastChange).style.borderColor = "orange";
-        }
-        return;
-      }
-
-      if (this.selectedTieRunner) {
-        if (selection.length == 0) {
-          this.selectedTieWinner = null;
-        }
-
-        if (selection.length > 0) {
-          this.selectedTieRunner = lastChange.location_arg;
-          stock.getCardElement(lastChange).style.borderColor = "orange";
-        }
-        return;
-      }
-
-      if (selection.length == 0) {
-        this.selectedTieWinner = null;
-      }
-
-      if (selection.length > 0) {
-        this.selectedTieWinner = lastChange.location_arg;
       }
     },
 
@@ -1153,6 +1181,14 @@ define([
     onStealInfo: function () {
       this.performAction("stealInfo", {
         card_id: this.selectedInfo.id,
+      });
+    },
+
+    onPickTieWinner: function () {
+      this.setClientState("client_pickTieRunner", {
+        descriptionmyturn: _(
+          "${you} must pick who obtains the Key of ${corporation_label} this week"
+        ),
       });
     },
 

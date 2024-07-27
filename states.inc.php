@@ -106,8 +106,8 @@ $machinestates = array(
 
     42 => array(
         "name" => "breakFirstTie",
-        "description" => clienttranslate('${actplayer} must pick who obtains the Corporation card and the Key of ${corporation_label} this week'),
-        "descriptionmyturn" => clienttranslate('${you} must pick who obtains the Corporation card and the Key of ${corporation_label} this week'),
+        "description" => clienttranslate('${actplayer} must pick who obtains the Corporation card of ${corporation_label} this week'),
+        "descriptionmyturn" => clienttranslate('${you} must pick who obtains the Corporation card of ${corporation_label} this week'),
         "type" => "activeplayer",
         "possibleactions" => array("breakFirstTie"),
         "args" => "arg_breakFirstTie",
