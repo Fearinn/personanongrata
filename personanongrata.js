@@ -298,6 +298,12 @@ define([
         if (!this.clockwise) {
           this.toggleDirection("counterclockwise");
         }
+      } else {
+        document
+          .querySelectorAll(".prs_directionTagContainer")
+          .forEach((element) => {
+            element.style.display = "none";
+          });
       }
 
       for (const player_id in this.players) {
