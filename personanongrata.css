@@ -271,7 +271,7 @@ body > .card {
 }
 
 .slot > div.card:not(:first-child) {
-  margin-top: -230px;
+  margin-top: -210px;
 }
 
 .slot:empty {
@@ -454,8 +454,7 @@ body > .card {
 }
 
 .prs_stored:not(.prs_myStored) [data-slot-id="-1"] div.card:not(:first-child) {
-  margin-top: 0;
-  top: 8px;
+  margin-top: -272px;
 }
 
 .prs_handContainer {
