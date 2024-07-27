@@ -232,8 +232,7 @@ define([
 
       this.players = gamedatas.players;
       this.clockwise = gamedatas.clockwise;
-      this.playerLeft = gamedatas.playerLeft;
-      this.playerRight = gamedatas.playerRight;
+      this.sidePlayers = gamedatas.sidePlayers;
 
       this.actions = gamedatas.actions;
       this.corporations = gamedatas.corporations;
@@ -260,17 +259,45 @@ define([
       this.selectedInfo = gamedatas.cardsPlayedByMe["info"];
 
       if (Object.keys(this.players).length > 2) {
+        const currentSidePlayers = this.sidePlayers[this.player_id];
+        const currentPlayerLeft = currentSidePlayers["left"];
+        const currentPlayerRight = currentSidePlayers["right"];
+
         $(`prs_playerArea$${this.player_id}`).style.order = 0;
+        $(`prs_playerArea$${currentPlayerLeft}`).style.order = -1;
+        $(`prs_playerArea$${currentPlayerRight}`).style.order = 1;
 
-        $(`prs_playerArea$${this.playerLeft}`).style.order = -1;
-        $(`prs_directionTag$${this.playerLeft}`).textContent = _(
-          "Your left (next counterclockwise)"
-        );
+        for (const player_id in this.players) {
+          const sidePlayers = this.sidePlayers[player_id];
 
-        $(`prs_playerArea$${this.playerRight}`).style.order = 1;
-        $(`prs_directionTag$${this.playerRight}`).textContent = _(
-          "Your right (next clockwise)"
-        );
+          const playerLeft = this.players[sidePlayers["left"]];
+          const playerRight = this.players[sidePlayers["right"]];
+
+          const leftTag = $(`prs_leftTag$${player_id}`);
+          const rightTag = $(`prs_rightTag$${player_id}`);
+
+          leftTag.textContent = playerLeft.name;
+          leftTag.style.color = `#${playerLeft.color}`;
+
+          rightTag.textContent = playerRight.name;
+          rightTag.style.color = `#${playerRight.color}`;
+
+          this.addTooltip(
+            leftTag.parentNode.id,
+            _("The direction in which the Information cards are passed"),
+            ""
+          );
+
+          this.addTooltip(
+            rightTag.parentNode.id,
+            _("The direction in which the Information cards are passed"),
+            ""
+          );
+        }
+
+        if (!this.clockwise) {
+          this.toggleDirection("counterclockwise");
+        }
       }
 
       for (const player_id in this.players) {
@@ -280,8 +307,7 @@ define([
 
         $(
           `player_board_${player_id}`
-        ).innerHTML += `<div id="prs_corporationCounters$${player_id}" class="prs_corporationCounters">
-        </div>`;
+        ).innerHTML += `<div id="prs_corporationCounters$${player_id}" class="prs_corporationCounters"></div>`;
 
         if (!player["zombie"]) {
           for (const corporation_id in this.corporations) {
@@ -955,6 +981,12 @@ define([
       return `-${xAxis}% 0`;
     },
 
+    toggleDirection: function (direction) {
+      document.querySelectorAll("[data-direction]").forEach((element) => {
+        element.dataset.direction = direction;
+      });
+    },
+
     getEncrypted: function (player_id) {
       const encryptedInfo = this[`storedStock$${player_id}`]
         .getCards()
@@ -1397,6 +1429,9 @@ define([
     notif_tie: function (notif) {},
 
     notif_flipHackers: function (notif) {
+      const direction = notif.args.direction;
+      this.toggleDirection(direction);
+
       for (const player_id in this.players) {
         const hackerControl = `hackerStock$${player_id}`;
 

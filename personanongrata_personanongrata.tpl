@@ -17,7 +17,9 @@
     class="prs_myArea prs_area"
     style="border-color: #{PLAYER_COLOR}"
   >
-    <h3 class="prs_areaTitle" style="color: #{PLAYER_COLOR}">{YOU}</h3>
+    <div class="prs_areaHeader">
+      <h3 class="prs_areaTitle" style="color: #{PLAYER_COLOR}">{YOU}</h3>
+    </div>
     <div class="prs_playerZones">
       <div
         id="prs_archive${PLAYER_ID}"
@@ -62,10 +64,30 @@
         <h4 class="prs_zoneTitle" style="color: #{PLAYER_COLOR}">
           {INFO_HAND}
         </h4>
-        <div
-          id="prs_handOfInfo${PLAYER_ID}"
-          class="prs_handOfInfo prs_hand"
-        ></div>
+        <div class="prs_handContainer">
+          <div
+            id="prs_leftTagContainer${PLAYER_ID}"
+            class="prs_directionTagContainer"
+          >
+            <div class="prs_directionIcon" data-direction="clockwise"></div>
+            <span id="prs_leftTag${PLAYER_ID}" class="prs_areaTitle"
+              >clockwise</span
+            >
+          </div>
+          <div
+            id="prs_handOfInfo${PLAYER_ID}"
+            class="prs_handOfInfo prs_hand"
+          ></div>
+          <div
+            id="prs_rightTagContainer${PLAYER_ID}"
+            class="prs_directionTagContainer"
+          >
+            <div class="prs_directionIcon" data-direction="clockwise"></div>
+            <span id="prs_rightTag${PLAYER_ID}" class="prs_areaTitle"
+              >clockwise</span
+            >
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -81,11 +103,6 @@
         <h3 class="prs_areaTitle" style="color: #{PLAYER_COLOR}">
           {PLAYER_NAME}
         </h3>
-        <span
-          id="prs_directionTag${PLAYER_ID}"
-          class="prs_directionTag prs_areaTitle"
-          style="color: #{PLAYER_COLOR}"
-        ></span>
       </div>
       <div class="prs_playerZones">
         <div
@@ -130,10 +147,30 @@
           <h4 class="prs_zoneTitle" style="color: #{PLAYER_COLOR}">
             {INFO_HAND}
           </h4>
-          <div
-            id="prs_handOfInfo${PLAYER_ID}"
-            class="prs_handOfInfo prs_hand"
-          ></div>
+          <div class="prs_handContainer">
+            <div
+              id="prs_leftTagContainer${PLAYER_ID}"
+              class="prs_directionTagContainer"
+            >
+              <div class="prs_directionIcon" data-direction="clockwise"></div>
+              <span id="prs_leftTag${PLAYER_ID}" class="prs_areaTitle"
+                >clockwise</span
+              >
+            </div>
+            <div
+              id="prs_handOfInfo${PLAYER_ID}"
+              class="prs_handOfInfo prs_hand"
+            ></div>
+            <div
+              id="prs_rightTagContainer${PLAYER_ID}"
+              class="prs_directionTagContainer"
+            >
+              <div class="prs_directionIcon" data-direction="clockwise"></div>
+              <span id="prs_rightTag${PLAYER_ID}" class="prs_areaTitle"
+                >clockwise</span
+              >
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -141,7 +178,9 @@
   </div>
 
   <div id="prs_publicArea" class="prs_publicArea prs_area whiteblock">
-    <h3 class="prs_areaTitle">{COMMON_AREA}</h3>
+    <div class="prs_areaHeader">
+      <h3 class="prs_areaTitle">{COMMON_AREA}</h3>
+    </div>
     <div id="prs_publicCards" class="prs_publicCards">
       <div id="prs_infoDeck" class="prs_infoDeck"></div>
       <div id="prs_keys" class="prs_keys"></div>

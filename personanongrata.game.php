@@ -194,8 +194,7 @@ class PersonaNonGrata extends Table
 
         $result["players"] = $this->getCollectionFromDb("SELECT player_id id, player_score score, player_zombie zombie FROM player ");
         $result["clockwise"] = $this->isClockwise();
-        $result["playerLeft"] = $this->getPlayerBeforeNoZombie($current_player_id);
-        $result["playerRight"] = $this->getPlayerAfterNoZombie($current_player_id);
+        $result["sidePlayers"] = $this->getSidePlayers();
         $result["actions"] = $this->actions;
         $result["corporations"] = $this->corporations();
         $result["informations"] = $this->informations;
@@ -423,6 +422,20 @@ class PersonaNonGrata extends Table
     }
 
     //gamedatas getters
+
+    function getSidePlayers(): array
+    {
+        $players = $this->loadPlayersNoZombies();
+
+        $side_players = array();
+
+        foreach ($players as $player_id => $player) {
+            $side_players[$player_id]["left"] = $this->getPlayerBeforeNoZombie($player_id);
+            $side_players[$player_id]["right"] = $this->getPlayerAfterNoZombie($player_id);
+        }
+
+        return $side_players;
+    }
 
     function getHackers(): array
     {
@@ -1745,8 +1758,7 @@ class PersonaNonGrata extends Table
 
         $hand_actions_count = $this->action_cards->countCardsInLocation("hand");
 
-        //tests
-        if ($hand_actions_count > 0) {
+        if ($hand_actions_count == 0) {
             $this->gamestate->nextState("infoArchiving");
             return;
         }
