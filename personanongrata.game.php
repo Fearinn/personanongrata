@@ -1901,7 +1901,6 @@ class PersonaNonGrata extends Table
         }
 
         $first_steal = $this->canSteal($corporation_id, $first);
-        $this->dump('firstSteal', $first_steal);
         if ($first_steal) {
             $this->gamestate->changeActivePlayer($first);
 
@@ -1911,8 +1910,7 @@ class PersonaNonGrata extends Table
             }
 
             $stolen_info = array_shift($first_steal);
-
-            $this->dump("stolenInfo", $stolen_info);
+            $this->stealInfo($stolen_info["id"], true);
         }
 
         $second_steal = $this->canSteal($corporation_id, $second);
