@@ -408,7 +408,6 @@ body > .card {
 }
 
 .prs_zone {
-  position: relative;
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -422,7 +421,13 @@ body > .card {
   flex-grow: 1;
 }
 
-.prs_zone > .card-stock {
+.prs_stocksContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+
   flex-grow: 1;
 }
 
