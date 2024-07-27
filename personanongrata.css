@@ -274,6 +274,10 @@ body > .card {
   margin-top: -210px;
 }
 
+.slot .prs_informationCard {
+  z-index: 0 !important;
+}
+
 .slot:empty {
   display: none;
 }
