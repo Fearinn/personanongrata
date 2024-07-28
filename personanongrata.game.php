@@ -430,8 +430,8 @@ class PersonaNonGrata extends Table
         $side_players = array();
 
         foreach ($players as $player_id => $player) {
-            $side_players[$player_id]["left"] = $this->getPlayerBeforeNoZombie($player_id);
-            $side_players[$player_id]["right"] = $this->getPlayerAfterNoZombie($player_id);
+            $side_players[$player_id]["left"] = $this->getPlayerAfterNoZombie($player_id);
+            $side_players[$player_id]["right"] = $this->getPlayerBeforeNoZombie($player_id);
         }
 
         return $side_players;
@@ -834,7 +834,7 @@ class PersonaNonGrata extends Table
     }
     function sendToRight(array $info_card, array $action_card, int $player_id): void
     {
-        $recipient_id = $this->getPlayerAfterNoZombie($player_id);
+        $recipient_id = $this->getPlayerBeforeNoZombie($player_id);
 
         $this->information_cards->moveCard($info_card["id"], "stored", $recipient_id);
 
@@ -868,7 +868,7 @@ class PersonaNonGrata extends Table
 
     function sendToLeft(array $info_card, array $action_card, int $player_id): void
     {
-        $recipient_id = $this->getPlayerBeforeNoZombie($player_id);
+        $recipient_id = $this->getPlayerAfterNoZombie($player_id);
 
         $this->information_cards->moveCard($info_card["id"], "stored", $recipient_id);
 

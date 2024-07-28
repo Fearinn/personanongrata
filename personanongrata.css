@@ -504,6 +504,6 @@ body > .card {
   width: 60px;
 }
 
-.prs_directionIcon[data-direction="counterclockwise"] {
+.prs_directionIcon[data-direction="clockwise"] {
   background-position: 100% 0;
 }

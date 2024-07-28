@@ -828,6 +828,7 @@ define([
           );
 
           this[`actionsInHandStock$${this.player_id}`].setSelectionMode("none");
+          this[`infoInHandStock$${this.player_id}`].setSelectionMode("none");
 
           this.selectedAction = null;
           this.selectedInfo = null;
@@ -892,6 +893,7 @@ define([
           );
 
           this[`actionsInHandStock$${this.player_id}`].setSelectionMode("none");
+          this[`infoInHandStock$${this.player_id}`].setSelectionMode("none");
 
           this.selectedAction = null;
           this.selectedInfo = null;
