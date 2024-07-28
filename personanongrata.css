@@ -249,6 +249,18 @@ body > .card {
 
 /* END bga-cards module */
 
+@font-face {
+  font-family: "Neuropol";
+  font-weight: normal;
+  src: url("neuropol/neuropol.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Neuropol";
+  font-weight: bold;
+  src: url("neuropol/neuropol.otf") format("opentype");
+}
+
 .card-stock:empty {
   display: none;
 }
@@ -392,6 +404,8 @@ body > .card {
   border-radius: 8px;
   color: #fff;
   padding: 2px 8px;
+
+  font-family: "Neuropol", sans-serif;
 }
 
 .prs_publicArea .prs_areaTitle {
@@ -436,10 +450,11 @@ body > .card {
   font-size: 1.25rem;
   margin: 0;
   margin-right: auto;
-  opacity: 0.7;
   transform: rotate(180deg);
   writing-mode: vertical-lr;
   -webkit-text-stroke: #000 0.1ch;
+
+  font-family: "Neuropol", sans-serif;
 }
 
 .prs_publicCards {
