@@ -1195,7 +1195,7 @@ define([
     onPickTieWinner: function () {
       this.setClientState("client_pickTieRunner", {
         descriptionmyturn: _(
-          "${you} must pick who obtains the Key of ${corporation_label} this week"
+          "${you} must pick who obtains the Key of ${corporation_label} this week (click their Character card)"
         ),
       });
     },
