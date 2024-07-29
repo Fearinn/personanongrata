@@ -1501,15 +1501,12 @@ define([
     },
 
     notif_discardLastInfo: function (notif) {
-      const player_id = notif.args.player_id;
-      const infoCard = notif.args.infoCard;
+      for (const player_id in this.players) {
+        const infoInHandControl = `infoInHandStock$${player_id}`;
 
-      const infoInHandControl = `infoInHandStock$${player_id}`;
-
-      this[infoInHandControl].removeAll();
-      this[infoInHandControl].addCard(infoCard);
-      this[infoInHandControl].removeCard(infoCard);
-      this.updateHandWidth(this[infoInHandControl]);
+        this[infoInHandControl].removeAll();
+        this.updateHandWidth(this[infoInHandControl]);
+      }
     },
 
     notif_drawNewInfo: function (notif) {

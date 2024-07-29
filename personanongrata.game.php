@@ -1950,26 +1950,11 @@ class PersonaNonGrata extends Table
 
         $players = $this->loadPlayersNoZombies();
 
-        foreach ($players as $player_id => $player) {
-            $info_card = $this->getSingleCardInLocation($this->information_cards, "hand", $player_id);
-
-            $corporation_id = $info_card["type"];
-            $info_id = $info_card["type_arg"];
-
-            $this->notifyAllPlayers(
-                "discardLastInfo",
-                clienttranslate('${player_name} discards the ${info_label} of ${corporation_label}'),
-                array(
-                    "i18n" => array("info_label"),
-                    "player_id" => $player_id,
-                    "player_name" => $this->getPlayerNameById($player_id),
-                    "info_label" => $this->informations[$info_id]["name"],
-                    "corporation_label" => $this->corporations[$corporation_id],
-                    "corporationId" => $corporation_id,
-                    "infoCard" => $info_card
-                )
-            );
-        }
+        $this->notifyAllPlayers(
+            "discardLastInfo",
+            clienttranslate('All players discard the last Information card in their hands'),
+            array()
+        );
 
         $this->notifyAllPlayers(
             "resetActions",
