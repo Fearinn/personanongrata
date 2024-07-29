@@ -47,12 +47,12 @@
     },
     "corporationFirst": {
       "id": 19,
-      "name": "First-place of a Corporation in a week",
+      "name": "First-place of a Corporation",
       "type": "int"
     },
     "corporationSecond": {
       "id": 20,
-      "name": "Second-place of a Corporation in a week",
+      "name": "Second-place of a Corporation",
       "type": "int"
     },
     "corporationsActivated": {
