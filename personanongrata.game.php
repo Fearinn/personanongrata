@@ -1911,6 +1911,7 @@ class PersonaNonGrata extends Table
 
             $stolen_info = array_shift($first_steal);
             $this->stealInfo($stolen_info["id"], true);
+            return;
         }
 
         $second_steal = $this->canSteal($corporation_id, $second);
@@ -1924,6 +1925,7 @@ class PersonaNonGrata extends Table
 
             $stolen_info = array_shift($second_steal);
             $this->stealInfo($stolen_info["id"], true);
+            return;
         }
 
         $this->incGameStateValue("currentCorporation", 1);
