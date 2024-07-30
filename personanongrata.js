@@ -1044,6 +1044,10 @@ define([
     },
 
     performAction: function (action, args = {}, checkAction = true) {
+      if (this.isSpectator) {
+        checkAction = true;
+      }
+
       args.gameVersion = this.gameVersion;
 
       this.bgaPerformAction(action, args, { checkAction });
