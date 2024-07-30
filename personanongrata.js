@@ -259,13 +259,15 @@ define([
       this.selectedInfo = gamedatas.cardsPlayedByMe["info"];
 
       if (Object.keys(this.players).length > 2) {
-        const currentSidePlayers = this.sidePlayers[this.player_id];
-        const currentPlayerLeft = currentSidePlayers["left"];
-        const currentPlayerRight = currentSidePlayers["right"];
+        if (!this.isSpectator) {
+          const currentSidePlayers = this.sidePlayers[this.player_id];
+          const currentPlayerLeft = currentSidePlayers["left"];
+          const currentPlayerRight = currentSidePlayers["right"];
 
-        $(`prs_playerArea$${this.player_id}`).style.order = 0;
-        $(`prs_playerArea$${currentPlayerLeft}`).style.order = -1;
-        $(`prs_playerArea$${currentPlayerRight}`).style.order = 1;
+          $(`prs_playerArea$${this.player_id}`).style.order = 0;
+          $(`prs_playerArea$${currentPlayerLeft}`).style.order = -1;
+          $(`prs_playerArea$${currentPlayerRight}`).style.order = 1;
+        }
 
         for (const player_id in this.players) {
           const sidePlayers = this.sidePlayers[player_id];
@@ -609,194 +611,197 @@ define([
         //end of players loop
       }
 
-      //played
-      const playedActionControl = `playedActionStock$${this.player_id}`;
-      this[playedActionControl] = new LineStock(
-        this.actionManager,
-        $(`prs_playedAction$${this.player_id}`),
-        {}
-      );
-      if (this.selectedAction) {
-        this[playedActionControl].addCard(this.selectedAction);
-      }
+      if (!this.isSpectator) {
+        //played
+        const playedActionControl = `playedActionStock$${this.player_id}`;
+        this[playedActionControl] = new LineStock(
+          this.actionManager,
+          $(`prs_playedAction$${this.player_id}`),
+          {}
+        );
+        if (this.selectedAction) {
+          this[playedActionControl].addCard(this.selectedAction);
+        }
 
-      const playedInfoControl = `playedInfoStock$${this.player_id}`;
-      this[playedInfoControl] = new LineStock(
-        this.informationManager,
-        $(`prs_playedInfo$${this.player_id}`),
-        {}
-      );
+        const playedInfoControl = `playedInfoStock$${this.player_id}`;
+        this[playedInfoControl] = new LineStock(
+          this.informationManager,
+          $(`prs_playedInfo$${this.player_id}`),
+          {}
+        );
 
-      if (this.selectedInfo) {
-        this[playedInfoControl].addCard(this.selectedInfo);
-      }
+        if (this.selectedInfo) {
+          this[playedInfoControl].addCard(this.selectedInfo);
+        }
 
-      //stored
-      const storedControl = `storedStock$${this.player_id}`;
-      this[storedControl] = new SlotStock(
-        this.informationManager,
-        $(`prs_stored$${this.player_id}`),
-        {
-          slotsIds: [-1].concat(Object.keys(this.corporations)),
-          mapCardToSlot: (card) => {
-            if (card.location === "encrypted" || !card.type) {
-              return -1;
+        //stored
+        const storedControl = `storedStock$${this.player_id}`;
+        this[storedControl] = new SlotStock(
+          this.informationManager,
+          $(`prs_stored$${this.player_id}`),
+          {
+            slotsIds: [-1].concat(Object.keys(this.corporations)),
+            mapCardToSlot: (card) => {
+              if (card.location === "encrypted" || !card.type) {
+                return -1;
+              }
+
+              return card.type;
+            },
+          }
+        );
+
+        for (const card_id in this.infoStoredByMe) {
+          const card = this.infoStoredByMe[card_id];
+
+          this[storedControl].addCard(card);
+        }
+
+        const encryptActionControl = `encryptActionStock$${this.player_id}`;
+        this[encryptActionControl] = new LineStock(
+          this.actionManager,
+          $(`prs_encryptAction$${this.player_id}`),
+          {}
+        );
+
+        const encryptActionUsed = this.encryptActionUsed[this.player_id];
+        const encryptedInfo = this.getEncrypted(this.player_id);
+
+        if (encryptActionUsed) {
+          this[encryptActionControl].addCard(
+            encryptActionUsed,
+            {},
+            {
+              forceToElement: $(`information-${encryptedInfo.id}`)
+                .parentElement,
             }
+          );
+        }
 
+        //keys
+        const keysControl = `keysStock`;
+        this[keysControl] = new SlotStock(this.keyManager, $(`prs_keys`), {
+          slotsIds: Object.keys(this.corporations),
+          slotClasses: ["prs_keySlot"],
+          mapCardToSlot: (card) => {
             return card.type;
           },
-        }
-      );
-
-      for (const card_id in this.infoStoredByMe) {
-        const card = this.infoStoredByMe[card_id];
-
-        this[storedControl].addCard(card);
-      }
-
-      const encryptActionControl = `encryptActionStock$${this.player_id}`;
-      this[encryptActionControl] = new LineStock(
-        this.actionManager,
-        $(`prs_encryptAction$${this.player_id}`),
-        {}
-      );
-
-      const encryptActionUsed = this.encryptActionUsed[this.player_id];
-      const encryptedInfo = this.getEncrypted(this.player_id);
-
-      if (encryptActionUsed) {
-        this[encryptActionControl].addCard(
-          encryptActionUsed,
-          {},
-          {
-            forceToElement: $(`information-${encryptedInfo.id}`).parentElement,
-          }
-        );
-      }
-
-      //keys
-      const keysControl = `keysStock`;
-      this[keysControl] = new SlotStock(this.keyManager, $(`prs_keys`), {
-        slotsIds: Object.keys(this.corporations),
-        slotClasses: ["prs_keySlot"],
-        mapCardToSlot: (card) => {
-          return card.type;
-        },
-      });
-
-      for (const key_id in this.keysOnTable) {
-        const keyCard = this.keysOnTable[key_id];
-
-        this[keysControl].addCard(keyCard);
-      }
-
-      //corporations
-      for (const corporation_id in this.corporations) {
-        const corporationDeck = this.corporationDecks[corporation_id];
-        const cards = [];
-
-        for (const card_id in corporationDeck) {
-          const card = corporationDeck[card_id];
-          cards.push(card);
-        }
-
-        const corporationDeckControl = `corporationDeck:${corporation_id}`;
-        this[corporationDeckControl] = new AllVisibleDeck(
-          this.corporationManager,
-          $(`prs_corporationDeck:${corporation_id}`),
-          { direction: "horizontal", horizontalShift: "0px" }
-        );
-
-        cards.sort((a, b) => {
-          return a.location_arg - b.location_arg;
         });
 
-        cards.forEach((card) => {
-          this[corporationDeckControl].addCard(card);
-        });
-      }
+        for (const key_id in this.keysOnTable) {
+          const keyCard = this.keysOnTable[key_id];
 
-      //actions
-      const actionsInHandControl = `actionsInHandStock$${this.player_id}`;
-      this[actionsInHandControl] = new HandStock(
-        this.actionManager,
-        $(`prs_handOfActions$${this.player_id}`),
-        { cardOverlap: "120px", sort: sortFunction("type_arg") }
-      );
-
-      this[actionsInHandControl].onSelectionChange = (
-        selection,
-        lastChange
-      ) => {
-        if (this.isCurrentPlayerActive()) {
-          if (this.getStateName() === "playCards") {
-            if (selection.length === 0) {
-              this.selectedAction = null;
-            } else {
-              this.selectedAction = lastChange;
-            }
-
-            this.handleConfirmationButton();
-          }
+          this[keysControl].addCard(keyCard);
         }
-      };
 
-      for (const card_id in this.actionsInMyHand) {
-        const card = this.actionsInMyHand[card_id];
-        this[actionsInHandControl].addCard(card);
-        this.updateHandWidth(this[actionsInHandControl]);
-      }
+        //corporations
+        for (const corporation_id in this.corporations) {
+          const corporationDeck = this.corporationDecks[corporation_id];
+          const cards = [];
 
-      //informations
-      const deckOfInformationsControl = "deckOfInformationsStock";
-      this[deckOfInformationsControl] = new Deck(
-        this.informationManager,
-        $(`prs_infoDeck`),
-        {}
-      );
-
-      for (const card_id in this.deckOfInformations) {
-        const card = this.deckOfInformations[card_id];
-
-        this[deckOfInformationsControl].addCard(card);
-        this[deckOfInformationsControl].setCardVisible(card, false);
-      }
-
-      const infoInHandControl = `infoInHandStock$${this.player_id}`;
-      this[infoInHandControl] = new HandStock(
-        this.informationManager,
-        $(`prs_handOfInfo$${this.player_id}`),
-        { cardOverlap: "120px", sort: this.infoSortFunction }
-      );
-
-      this[infoInHandControl].onSelectionChange = (selection, lastChange) => {
-        if (this.isCurrentPlayerActive()) {
-          if (this.getStateName() === "playCards") {
-            if (selection.length === 0) {
-              this.selectedInfo = null;
-            } else {
-              this.selectedInfo = lastChange;
-            }
-
-            this.handleConfirmationButton();
+          for (const card_id in corporationDeck) {
+            const card = corporationDeck[card_id];
+            cards.push(card);
           }
 
-          if (this.getStateName() === "discardInfo") {
-            if (selection.length === 0) {
-              this.selectedInfo = null;
-            } else {
-              this.selectedInfo = lastChange;
-            }
+          const corporationDeckControl = `corporationDeck:${corporation_id}`;
+          this[corporationDeckControl] = new AllVisibleDeck(
+            this.corporationManager,
+            $(`prs_corporationDeck:${corporation_id}`),
+            { direction: "horizontal", horizontalShift: "0px" }
+          );
 
-            this.handleConfirmationButton();
-          }
+          cards.sort((a, b) => {
+            return a.location_arg - b.location_arg;
+          });
+
+          cards.forEach((card) => {
+            this[corporationDeckControl].addCard(card);
+          });
         }
-      };
 
-      for (const card_id in this.infoInMyHand) {
-        const card = this.infoInMyHand[card_id];
-        this[infoInHandControl].addCard(card);
-        this.updateHandWidth(this[infoInHandControl]);
+        //actions
+        const actionsInHandControl = `actionsInHandStock$${this.player_id}`;
+        this[actionsInHandControl] = new HandStock(
+          this.actionManager,
+          $(`prs_handOfActions$${this.player_id}`),
+          { cardOverlap: "120px", sort: sortFunction("type_arg") }
+        );
+
+        this[actionsInHandControl].onSelectionChange = (
+          selection,
+          lastChange
+        ) => {
+          if (this.isCurrentPlayerActive()) {
+            if (this.getStateName() === "playCards") {
+              if (selection.length === 0) {
+                this.selectedAction = null;
+              } else {
+                this.selectedAction = lastChange;
+              }
+
+              this.handleConfirmationButton();
+            }
+          }
+        };
+
+        for (const card_id in this.actionsInMyHand) {
+          const card = this.actionsInMyHand[card_id];
+          this[actionsInHandControl].addCard(card);
+          this.updateHandWidth(this[actionsInHandControl]);
+        }
+
+        //informations
+        const deckOfInformationsControl = "deckOfInformationsStock";
+        this[deckOfInformationsControl] = new Deck(
+          this.informationManager,
+          $(`prs_infoDeck`),
+          {}
+        );
+
+        for (const card_id in this.deckOfInformations) {
+          const card = this.deckOfInformations[card_id];
+
+          this[deckOfInformationsControl].addCard(card);
+          this[deckOfInformationsControl].setCardVisible(card, false);
+        }
+
+        const infoInHandControl = `infoInHandStock$${this.player_id}`;
+        this[infoInHandControl] = new HandStock(
+          this.informationManager,
+          $(`prs_handOfInfo$${this.player_id}`),
+          { cardOverlap: "120px", sort: this.infoSortFunction }
+        );
+
+        this[infoInHandControl].onSelectionChange = (selection, lastChange) => {
+          if (this.isCurrentPlayerActive()) {
+            if (this.getStateName() === "playCards") {
+              if (selection.length === 0) {
+                this.selectedInfo = null;
+              } else {
+                this.selectedInfo = lastChange;
+              }
+
+              this.handleConfirmationButton();
+            }
+
+            if (this.getStateName() === "discardInfo") {
+              if (selection.length === 0) {
+                this.selectedInfo = null;
+              } else {
+                this.selectedInfo = lastChange;
+              }
+
+              this.handleConfirmationButton();
+            }
+          }
+        };
+
+        for (const card_id in this.infoInMyHand) {
+          const card = this.infoInMyHand[card_id];
+          this[infoInHandControl].addCard(card);
+          this.updateHandWidth(this[infoInHandControl]);
+        }
       }
 
       this.setupNotifications();
@@ -827,8 +832,12 @@ define([
             "gray"
           );
 
-          this[`actionsInHandStock$${this.player_id}`].setSelectionMode("none");
-          this[`infoInHandStock$${this.player_id}`].setSelectionMode("none");
+          if (!this.isSpectator) {
+            this[`actionsInHandStock$${this.player_id}`].setSelectionMode(
+              "none"
+            );
+            this[`infoInHandStock$${this.player_id}`].setSelectionMode("none");
+          }
 
           this.selectedAction = null;
           this.selectedInfo = null;
@@ -892,8 +901,12 @@ define([
             "gray"
           );
 
-          this[`actionsInHandStock$${this.player_id}`].setSelectionMode("none");
-          this[`infoInHandStock$${this.player_id}`].setSelectionMode("none");
+          if (!this.isSpectator) {
+            this[`actionsInHandStock$${this.player_id}`].setSelectionMode(
+              "none"
+            );
+            this[`infoInHandStock$${this.player_id}`].setSelectionMode("none");
+          }
 
           this.selectedAction = null;
           this.selectedInfo = null;
