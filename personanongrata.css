@@ -316,12 +316,6 @@ body > .card {
   margin: 0;
 }
 
-.prs_selected {
-  border: 3px solid red;
-  transform: none !important;
-  z-index: 9 !important;
-}
-
 .prs_card,
 .prs_cardFace {
   border-radius: 12px;
@@ -506,4 +500,11 @@ body > .card {
 
 .prs_directionIcon[data-direction="clockwise"] {
   background-position: 100% 0;
+}
+
+.prs_selected,
+.slot .prs_selected {
+  border: 3px solid red;
+  transform: none !important;
+  z-index: 9 !important;
 }
