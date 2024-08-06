@@ -251,14 +251,16 @@ body > .card {
 
 @font-face {
   font-family: "Neuropol";
+  font-style: normal;
   font-weight: normal;
-  src: url("neuropol/neuropol.otf") format("opentype");
+  src: url("img/neuropol/Neuropol.otf") format("opentype");
 }
 
 @font-face {
   font-family: "Neuropol";
+  font-style: normal;
   font-weight: bold;
-  src: url("neuropol/neuropol.otf") format("opentype");
+  src: url("img/neuropol/Neuropol.otf") format("opentype");
 }
 
 .card-stock:empty {
@@ -446,7 +448,7 @@ body > .card {
   margin-right: auto;
   transform: rotate(180deg);
   writing-mode: vertical-lr;
-  -webkit-text-stroke: #000 0.1ch;
+  -webkit-text-stroke: #000000 0.05ch;
 
   font-family: "Neuropol", sans-serif;
 }
