@@ -18,5 +18,13 @@
       }
     },
     "needReload": true
+  },
+  "102": {
+    "name": "Thematic font",
+    "values": {
+      "0": { "name": "Disabled" },
+      "1": { "name": "Enabled", "cssPref": "prs_thematicFont", "default": true }
+    },
+    "needReload": true
   }
 }

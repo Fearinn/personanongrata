@@ -301,6 +301,10 @@ body > .card {
   background-position: top center;
 }
 
+.prs_thematicFont .prs_title {
+  font-family: "Neuropol", sans-serif;
+}
+
 .prs_gameArea {
   display: flex;
   align-items: stretch;
@@ -400,8 +404,6 @@ body > .card {
   border-radius: 8px;
   color: #fff;
   padding: 2px 8px;
-
-  font-family: "Neuropol", sans-serif;
 }
 
 .prs_publicArea .prs_areaTitle {
@@ -449,8 +451,6 @@ body > .card {
   transform: rotate(180deg);
   writing-mode: vertical-lr;
   -webkit-text-stroke: #000000 0.05ch;
-
-  font-family: "Neuropol", sans-serif;
 }
 
 .prs_publicCards {
