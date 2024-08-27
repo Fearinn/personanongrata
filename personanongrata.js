@@ -1476,7 +1476,7 @@ define([
       const corporationCard = notif.args.corporationCard;
       const isCurrentPlayer = player_id == this.player_id;
 
-      const hackerElement = isCurrentPlayer
+      const hackerElement = isCurrentPlayer && !this.areArchivedCollapsed
         ? undefined
         : $(`prs_hacker$${player_id}`);
 
@@ -1514,9 +1514,10 @@ define([
         isStolen ? player_id2 : player_id
       );
 
-      const hackerElement = isCurrentPlayer
-        ? undefined
-        : $(`prs_hacker$${player_id}`);
+      const hackerElement =
+        isCurrentPlayer && !this.areArchivedCollapsed
+          ? undefined
+          : $(`prs_hacker$${player_id}`);
 
       const archivedInfoControl = `archivedInfoStock$${player_id}`;
 
