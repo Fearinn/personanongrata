@@ -1758,7 +1758,8 @@ class PersonaNonGrata extends Table
 
         $hand_actions_count = $this->action_cards->countCardsInLocation("hand");
 
-        if ($hand_actions_count == 0) {
+        //tests
+        if ($hand_actions_count >= 0) {
             $this->gamestate->nextState("infoArchiving");
             return;
         }

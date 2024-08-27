@@ -36,6 +36,12 @@
           <div id="prs_archivedInfo${PLAYER_ID}"></div>
           <div id="prs_archivedCorporations${PLAYER_ID}"></div>
           <div id="prs_archivedKeys${PLAYER_ID}"></div>
+          <button
+            id="prs_collapseArchived_btn"
+            class="prs_collapseArchived_btn bgabutton"
+            aria-label="Collapse or expand archived cards (for you only)"
+            title="Collapse or expand archived cards (for you only)"
+          ></button>
         </div>
       </div>
       <div

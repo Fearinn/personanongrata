@@ -258,6 +258,8 @@ define([
       this.selectedAction = gamedatas.cardsPlayedByMe["action"];
       this.selectedInfo = gamedatas.cardsPlayedByMe["info"];
 
+      this.areArchivedCollapsed = false;
+
       if (Object.keys(this.players).length > 2) {
         if (!this.isSpectator) {
           const currentSidePlayers = this.sidePlayers[this.player_id];
@@ -504,6 +506,48 @@ define([
             { forceToElement: hackerElement }
           );
           this[archivedInfoControl].setCardVisible(card, isCurrentPlayer);
+        }
+
+        const collapseArchivedBtn = $("prs_collapseArchived_btn");
+
+        if (this.player_id == player_id) {
+          dojo.connect(collapseArchivedBtn, "onclick", () => {
+            const archivedCorporations =
+              this[archivedCorporationsControl].getCards();
+            const archivedInfo = this[archivedInfoControl].getCards();
+
+            this[archivedCorporationsControl].removeAll();
+            this[archivedInfoControl].removeAll();
+
+            const hackerElement = $(`prs_hacker$${this.player_id}`);
+
+            archivedCorporations.forEach((card) => {
+              this[archivedCorporationsControl].addCard(
+                card,
+                {},
+                {
+                  forceToElement: this.areArchivedCollapsed
+                    ? undefined
+                    : hackerElement,
+                }
+              );
+            });
+
+            archivedInfo.forEach((card) => {
+              this[archivedInfoControl].addCard(
+                card,
+                {},
+                {
+                  forceToElement: this.areArchivedCollapsed
+                    ? undefined
+                    : hackerElement,
+                }
+              );
+            });
+
+            this.areArchivedCollapsed = !this.areArchivedCollapsed;
+            collapseArchivedBtn.classList.toggle("prs_reveal_btn");
+          });
         }
 
         if (this.player_id != player_id) {
@@ -1095,11 +1139,11 @@ define([
     },
 
     handleConfirmationButton: function (content = _("Confirm selection")) {
-      dojo.destroy("prs_confirmationBtn");
+      dojo.destroy("prs_confirmation_btn");
 
       if (this.getStateName() === "playCards") {
         if (this.selectedAction && this.selectedInfo) {
-          this.addActionButton("prs_confirmationBtn", content, () => {
+          this.addActionButton("prs_confirmation_btn", content, () => {
             this.onPlayCards();
           });
         }
@@ -1108,7 +1152,7 @@ define([
 
       if (this.getStateName() === "discardInfo") {
         if (this.selectedInfo) {
-          this.addActionButton("prs_confirmationBtn", content, () => {
+          this.addActionButton("prs_confirmation_btn", content, () => {
             this.onDiscardInfo();
           });
         }
@@ -1117,7 +1161,7 @@ define([
 
       if (this.getStateName() === "stealInfo") {
         if (this.selectedInfo) {
-          this.addActionButton("prs_confirmationBtn", content, () => {
+          this.addActionButton("prs_confirmation_btn", content, () => {
             this.onStealInfo();
           });
         }
@@ -1126,7 +1170,7 @@ define([
 
       if (this.getStateName() === "breakFirstTie") {
         if (this.selectedTieWinner) {
-          this.addActionButton("prs_confirmationBtn", content, () => {
+          this.addActionButton("prs_confirmation_btn", content, () => {
             this.onPickTieWinner();
           });
         }
@@ -1135,7 +1179,7 @@ define([
 
       if (this.getStateName() === "client_pickTieRunner") {
         if (this.selectedTieRunner) {
-          this.addActionButton("prs_confirmationBtn", content, () => {
+          this.addActionButton("prs_confirmation_btn", content, () => {
             this.onBreakFirstTie();
           });
         }
@@ -1144,7 +1188,7 @@ define([
 
       if (this.getStateName() === "breakSecondTie") {
         if (this.selectedTieWinner) {
-          this.addActionButton("prs_confirmationBtn", content, () => {
+          this.addActionButton("prs_confirmation_btn", content, () => {
             this.onBreakSecondTie();
           });
         }
@@ -1673,25 +1717,6 @@ define([
     },
 
     notif_zombieTurn: function (notif) {
-      // const player_id = notif.args.player_id;
-      // const infoCards = notif.args.infoCards;
-
-      // const deckOfInformations = `deckOfInformationsStock`;
-      // this[deckOfInformations].addCards(infoCards, {
-      //   fromElement: $(`prs_handOfInfo$${player_id}`),
-      // });
-      // this[deckOfInformations].shuffle();
-
-      // this[`infoInHandStock$${player_id}`].removeAll();
-
-      // const keyCards = this[`archivedKeysStock$${player_id}`].getCards();
-      // this["keysStock"].addCards(keyCards);
-
-      // const actionsCards = this[`discardedActionsStock$${player_id}`].getCards();
-      // this[`discardedActionsStock$${player_id}`].addCards(actionCards);
-
-      // dojo.destroy(`prs_hand$${player_id}`);
-
       this.showMessage(
         _("A player quits the game. Reload in progress"),
         "info"

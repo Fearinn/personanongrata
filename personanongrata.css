@@ -429,17 +429,16 @@ body > .card {
   padding: 8px;
   min-height: 330px;
   min-width: 250px;
-
   flex-grow: 1;
 }
 
 .prs_stocksContainer {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
   gap: 8px;
-
   flex-grow: 1;
 }
 
@@ -509,4 +508,25 @@ body > .card {
   border: 3px solid red;
   transform: none !important;
   z-index: 9 !important;
+}
+
+.prs_collapseArchived_btn {
+  position: absolute;
+  top: 0;
+  right: 8px;
+  margin: 0;
+  padding: 0;
+
+  background-image: url("img/collapse.svg") !important;
+  background-size: cover;
+  border: 2px solid black;
+  text-align: center;
+  height: 35px;
+  width: 35px;
+  padding: 4px;
+  z-index: 99;
+}
+
+.prs_reveal_btn.prs_collapseArchived_btn {
+  background-image: url("img/reveal.svg") !important;
 }
