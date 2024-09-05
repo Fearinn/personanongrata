@@ -45,9 +45,6 @@ define([
         zoomControls: {
           color: "white",
         },
-        autoZoom: {
-          expectedWidth: 740,
-        },
       });
 
       console.log(this.zoomManager);
