@@ -528,5 +528,5 @@ body > .card {
 }
 
 .prs_reveal_btn.prs_collapseArchived_btn {
-  background-image: url("img/reveal.svg") !important;
+  background-image: url("img/eye_open.svg") !important;
 }
