@@ -21,6 +21,7 @@ define([
   "ebg/core/gamegui",
   "ebg/counter",
   g_gamethemeurl + "modules/bga-cards.js",
+  g_gamethemeurl + "modules/bga-zoom.js",
 ], function (dojo, declare) {
   return declare("bgagame.personanongrata", ebg.core.gamegui, {
     constructor: function () {
@@ -37,6 +38,19 @@ define([
         5: "bc2026",
         6: "936036",
       };
+
+      this.zoomManager = new ZoomManager({
+        element: document.getElementById("prs_gameArea"),
+        localStorageZoomKey: "personanongrata-zoom",
+        zoomControls: {
+          color: "white",
+        },
+        autoZoom: {
+          expectedWidth: 740,
+        },
+      });
+
+      console.log(this.zoomManager);
 
       this.hackerManager = new CardManager(this, {
         cardHeight: 280,
