@@ -66,7 +66,7 @@ $machinestates = array(
 
     3 => array(
         "name" => "betweenDays",
-        "description" => "",
+        "description" => clienttranslate("End of day: activating all Action cards..."),
         "type" => "game",
         "action" => "st_betweenDays",
         "transitions" => array(
@@ -78,7 +78,7 @@ $machinestates = array(
 
     4 => array(
         "name" => "infoArchiving",
-        "description" => "",
+        "description" => clienttranslate("End of week: calculating points for each Corporation..."),
         "type" => "game",
         "action" => "st_infoArchiving",
         "transitions" => array(
@@ -130,7 +130,7 @@ $machinestates = array(
 
     5 => array(
         "name" => "betweenWeeks",
-        "description" => "",
+        "description" => clienttranslate("Setting up the next week..."),
         "type" => "game",
         "action" => "st_betweenWeeks",
         "transitions" => array(
@@ -141,7 +141,7 @@ $machinestates = array(
 
     6 => array(
         "name" => "finalScoring",
-        "description" => "",
+        "description" => clienttranslate("Calculating final scores..."),
         "type" => "game",
         "action" => "st_finalScoring",
         "transitions" => array(
