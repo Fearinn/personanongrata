@@ -669,6 +669,48 @@ define([
         //end of players loop
       }
 
+      //keys
+      const keysControl = `keysStock`;
+      this[keysControl] = new SlotStock(this.keyManager, $(`prs_keys`), {
+        slotsIds: Object.keys(this.corporations),
+        slotClasses: ["prs_keySlot"],
+        mapCardToSlot: (card) => {
+          return card.type;
+        },
+      });
+
+      for (const key_id in this.keysOnTable) {
+        const keyCard = this.keysOnTable[key_id];
+
+        this[keysControl].addCard(keyCard);
+      }
+
+      //corporations
+      for (const corporation_id in this.corporations) {
+        const corporationDeck = this.corporationDecks[corporation_id];
+        const cards = [];
+
+        for (const card_id in corporationDeck) {
+          const card = corporationDeck[card_id];
+          cards.push(card);
+        }
+
+        const corporationDeckControl = `corporationDeck:${corporation_id}`;
+        this[corporationDeckControl] = new AllVisibleDeck(
+          this.corporationManager,
+          $(`prs_corporationDeck:${corporation_id}`),
+          { direction: "horizontal", horizontalShift: "0px" }
+        );
+
+        cards.sort((a, b) => {
+          return a.location_arg - b.location_arg;
+        });
+
+        cards.forEach((card) => {
+          this[corporationDeckControl].addCard(card);
+        });
+      }
+
       if (!this.isSpectator) {
         //played
         const playedActionControl = `playedActionStock$${this.player_id}`;
@@ -734,48 +776,6 @@ define([
                 .parentElement,
             }
           );
-        }
-
-        //keys
-        const keysControl = `keysStock`;
-        this[keysControl] = new SlotStock(this.keyManager, $(`prs_keys`), {
-          slotsIds: Object.keys(this.corporations),
-          slotClasses: ["prs_keySlot"],
-          mapCardToSlot: (card) => {
-            return card.type;
-          },
-        });
-
-        for (const key_id in this.keysOnTable) {
-          const keyCard = this.keysOnTable[key_id];
-
-          this[keysControl].addCard(keyCard);
-        }
-
-        //corporations
-        for (const corporation_id in this.corporations) {
-          const corporationDeck = this.corporationDecks[corporation_id];
-          const cards = [];
-
-          for (const card_id in corporationDeck) {
-            const card = corporationDeck[card_id];
-            cards.push(card);
-          }
-
-          const corporationDeckControl = `corporationDeck:${corporation_id}`;
-          this[corporationDeckControl] = new AllVisibleDeck(
-            this.corporationManager,
-            $(`prs_corporationDeck:${corporation_id}`),
-            { direction: "horizontal", horizontalShift: "0px" }
-          );
-
-          cards.sort((a, b) => {
-            return a.location_arg - b.location_arg;
-          });
-
-          cards.forEach((card) => {
-            this[corporationDeckControl].addCard(card);
-          });
         }
 
         //actions
@@ -1490,9 +1490,10 @@ define([
       const corporationCard = notif.args.corporationCard;
       const isCurrentPlayer = player_id == this.player_id;
 
-      const hackerElement = isCurrentPlayer && !this.areArchivedCollapsed
-        ? undefined
-        : $(`prs_hacker$${player_id}`);
+      const hackerElement =
+        isCurrentPlayer && !this.areArchivedCollapsed
+          ? undefined
+          : $(`prs_hacker$${player_id}`);
 
       const archivedCorporationsControl = `archivedCorporationsStock$${player_id}`;
 
