@@ -1751,9 +1751,9 @@ class PersonaNonGrata extends Table
         $this->information_cards->moveAllCardsInLocation("pre_discard", "discard");
 
         foreach ($players as $player_id => $player) {
-            // $this->revealPlayed($player_id);
-
             $this->activateActionCard($player_id);
+
+            $this->giveExtraTime($player_id);
         }
 
         $hand_actions_count = $this->action_cards->countCardsInLocation("hand");
@@ -1983,6 +1983,8 @@ class PersonaNonGrata extends Table
                     "infoCards" => $info_cards,
                 )
             );
+
+            $this->giveExtraTime($player_id);
         }
 
         $this->notifyAllPlayers(
