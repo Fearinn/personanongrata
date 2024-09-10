@@ -47,8 +47,6 @@ define([
         },
       });
 
-      console.log(this.zoomManager);
-
       this.hackerManager = new CardManager(this, {
         cardHeight: 280,
         cardWidth: 180,
@@ -271,6 +269,12 @@ define([
 
       this.areArchivedCollapsed = false;
 
+      this.addTooltip(
+        "prs_collapseArchived_btn",
+        "",
+        _("Collapse or expand archived cards (for you only)")
+      );
+
       if (Object.keys(this.players).length > 2) {
         if (!this.isSpectator) {
           const currentSidePlayers = this.sidePlayers[this.player_id];
@@ -370,8 +374,6 @@ define([
             return;
           }
 
-          console.log(lastChange, this.getStateName());
-
           const selected_player_id = lastChange.location_arg;
 
           if (this.getStateName() === "breakFirstTie") {
@@ -387,7 +389,6 @@ define([
           }
 
           if (this.getStateName() === "client_pickTieRunner") {
-            console.log("pick runner");
             if (selection.length > 0) {
               this.unselectHackers(selected_player_id);
               this.selectedTieRunner = selected_player_id;

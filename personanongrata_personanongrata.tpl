@@ -39,8 +39,6 @@
           <button
             id="prs_collapseArchived_btn"
             class="prs_collapseArchived_btn bgabutton"
-            aria-label="Collapse or expand archived cards (for you only)"
-            title="Collapse or expand archived cards (for you only)"
           ></button>
         </div>
       </div>
