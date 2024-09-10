@@ -31,13 +31,13 @@ class view_personanongrata_personanongrata extends game_view
         $current_player = $g_user->get_id();
         $template = "personanongrata_personanongrata";
 
-        $this->tpl["YOU"] = $this->_("You");
-        $this->tpl["COMMON_AREA"] = $this->_("Decks");
-        $this->tpl["ARCHIVED_CARDS"] = $this->_("Archived cards");
-        $this->tpl["PLAY_AREA"] = $this->_("Play area");
-        $this->tpl["PLAYED_TODAY"] = $this->_("Played today");
-        $this->tpl["ACTION_HAND"] = $this->_("Hand (Actions)");
-        $this->tpl["INFO_HAND"] = $this->_("Hand (Information)");
+        $this->tpl["YOU"] = self::_("You");
+        $this->tpl["COMMON_AREA"] = self::_("Decks");
+        $this->tpl["ARCHIVED_CARDS"] = self::_("Archived cards");
+        $this->tpl["PLAY_AREA"] = self::_("Play area");
+        $this->tpl["PLAYED_TODAY"] = self::_("Played today");
+        $this->tpl["ACTION_HAND"] = self::_("Hand (Actions)");
+        $this->tpl["INFO_HAND"] = self::_("Hand (Information)");
 
         $this->page->begin_block($template, "playerzone");
         $this->page->begin_block($template, "myzone");
