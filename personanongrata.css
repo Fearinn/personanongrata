@@ -452,7 +452,7 @@ body > .card {
 
 .prs_areaTitle {
   font-weight: bold;
-  
+
   display: inline-block;
   background-color: #000;
   border-radius: 8px;
@@ -505,7 +505,6 @@ body > .card {
   margin-right: auto;
   transform: rotate(180deg);
   writing-mode: vertical-lr;
-  -webkit-text-stroke: #000000 0.05ch;
 
   background-color: black;
   padding: 8px 2px;

@@ -709,6 +709,22 @@ define([
         });
       }
 
+      // informations
+
+      const deckOfInformationsControl = "deckOfInformationsStock";
+      this[deckOfInformationsControl] = new Deck(
+        this.informationManager,
+        $(`prs_infoDeck`),
+        {}
+      );
+
+      for (const card_id in this.deckOfInformations) {
+        const card = this.deckOfInformations[card_id];
+
+        this[deckOfInformationsControl].addCard(card);
+        this[deckOfInformationsControl].setCardVisible(card, false);
+      }
+
       if (!this.isSpectator) {
         //played
         const playedActionControl = `playedActionStock$${this.player_id}`;
@@ -808,19 +824,6 @@ define([
         }
 
         //informations
-        const deckOfInformationsControl = "deckOfInformationsStock";
-        this[deckOfInformationsControl] = new Deck(
-          this.informationManager,
-          $(`prs_infoDeck`),
-          {}
-        );
-
-        for (const card_id in this.deckOfInformations) {
-          const card = this.deckOfInformations[card_id];
-
-          this[deckOfInformationsControl].addCard(card);
-          this[deckOfInformationsControl].setCardVisible(card, false);
-        }
 
         const infoInHandControl = `infoInHandStock$${this.player_id}`;
         this[infoInHandControl] = new HandStock(
@@ -877,18 +880,18 @@ define([
 
       if (stateName === "playCards") {
         if (!this.isCurrentPlayerActive()) {
-          this.addActionButton(
-            "prs_changeMind_btn",
-            _("Change mind"),
-            () => {
-              this.onChangeMindPlayed();
-            },
-            null,
-            null,
-            "gray"
-          );
-
           if (!this.isSpectator) {
+            this.addActionButton(
+              "prs_changeMind_btn",
+              _("Change mind"),
+              () => {
+                this.onChangeMindPlayed();
+              },
+              null,
+              null,
+              "gray"
+            );
+
             this[`actionsInHandStock$${this.player_id}`].setSelectionMode(
               "none"
             );
@@ -941,23 +944,23 @@ define([
 
       if (stateName === "day") {
         if (!this.isCurrentPlayerActive()) {
-          this.addActionButton(
-            "prs_changeMind_btn",
-            _("Change mind"),
-            () => {
-              if (Object.keys(this.players).length == 2) {
-                this.onChangeMindDiscarded();
-                return;
-              }
-
-              this.onChangeMindPlayed();
-            },
-            null,
-            null,
-            "gray"
-          );
-
           if (!this.isSpectator) {
+            this.addActionButton(
+              "prs_changeMind_btn",
+              _("Change mind"),
+              () => {
+                if (Object.keys(this.players).length == 2) {
+                  this.onChangeMindDiscarded();
+                  return;
+                }
+
+                this.onChangeMindPlayed();
+              },
+              null,
+              null,
+              "gray"
+            );
+
             this[`actionsInHandStock$${this.player_id}`].setSelectionMode(
               "none"
             );
@@ -982,19 +985,25 @@ define([
 
       if (stateName === "discardInfo") {
         if (this.isCurrentPlayerActive()) {
-          this.addActionButton(
-            "prs_changeMind_btn",
-            _("Change mind"),
-            () => {
-              this.onChangeMindPlayed();
-            },
-            null,
-            null,
-            "gray"
-          );
+          if (!this.isSpectator) {
+            this.addActionButton(
+              "prs_changeMind_btn",
+              _("Change mind"),
+              () => {
+                this.onChangeMindPlayed();
+              },
+              null,
+              null,
+              "gray"
+            );
 
-          this[`actionsInHandStock$${this.player_id}`].setSelectionMode("none");
-          this[`infoInHandStock$${this.player_id}`].setSelectionMode("single");
+            this[`actionsInHandStock$${this.player_id}`].setSelectionMode(
+              "none"
+            );
+            this[`infoInHandStock$${this.player_id}`].setSelectionMode(
+              "single"
+            );
+          }
         }
         return;
       }
@@ -1040,19 +1049,21 @@ define([
 
       if (stateName === "client_pickTieRunner") {
         if (this.isCurrentPlayerActive()) {
-          this.addActionButton(
-            "prs_changeMind_btn",
-            _("Change Mind"),
-            () => {
-              this.selectedTieWinner = null;
-              this.unselectHackers();
+          if (!this.isSpectator) {
+            this.addActionButton(
+              "prs_changeMind_btn",
+              _("Change Mind"),
+              () => {
+                this.selectedTieWinner = null;
+                this.unselectHackers();
 
-              this.restoreServerGameState();
-            },
-            null,
-            null,
-            "gray"
-          );
+                this.restoreServerGameState();
+              },
+              null,
+              null,
+              "gray"
+            );
+          }
 
           const tiedPlayers = args.tiedPlayers;
 
