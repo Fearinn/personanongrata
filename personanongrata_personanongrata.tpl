@@ -11,6 +11,7 @@
 -->
 
 <div id="prs_gameArea" class="prs_gameArea">
+  <div id="prs_infoVoid" class="prs_infoVoid"></div>
   <!-- BEGIN myzone -->
   <div
     id="prs_playerArea${PLAYER_ID}"

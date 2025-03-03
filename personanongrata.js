@@ -725,6 +725,12 @@ define([
         this[deckOfInformationsControl].setCardVisible(card, false);
       }
 
+      this["infoVoidStock"] = new VoidStock(
+        this.informationManager,
+        $("prs_infoVoid"),
+        {}
+      );
+
       if (!this.isSpectator) {
         //played
         const playedActionControl = `playedActionStock$${this.player_id}`;
@@ -1331,6 +1337,7 @@ define([
       dojo.subscribe("zombieTurn", this, "notif_zombieTurn");
 
       this.notifqueue.setSynchronous("discardInfo", 1000);
+      this.notifqueue.setSynchronous("discardInfoPrivate", 1000);
       this.notifqueue.setSynchronous("storeInfo", 1000);
       this.notifqueue.setSynchronous("storeInfoPrivate", 1000);
       this.notifqueue.setSynchronous("activateActionCard", 1000);
@@ -1345,10 +1352,6 @@ define([
       this.notifqueue.setSynchronous("computeArchivedPoints", 1000);
       this.notifqueue.setSynchronous("computeKeyPoint", 1000);
       this.notifqueue.setSynchronous("zombieTurn", 1000);
-
-      this.notifqueue.setIgnoreNotificationCheck("discardInfo", (notif) => {
-        return notif.args.player_id == this.player_id;
-      });
     },
 
     notif_playCards: function (notif) {
@@ -1372,13 +1375,17 @@ define([
     notif_discardInfo: function (notif) {
       const player_id = notif.args.player_id;
 
+      if (player_id == this.player_id) {
+        return;
+      }
+
       const infoInHandControl = `infoInHandStock$${player_id}`;
+      const hand = this[infoInHandControl].getCards();
 
-      const hand = this[infoInHandControl];
-
-      this[infoInHandControl].removeCard({
-        id: `-${hand.length}:${player_id}`,
+      this["infoVoidStock"].addCard({
+        id: hand[0].id,
       });
+
       this.updateHandWidth(this[infoInHandControl]);
     },
 
@@ -1388,7 +1395,7 @@ define([
 
       const infoInHandControl = `infoInHandStock$${player_id}`;
 
-      this[infoInHandControl].removeCard(infoCard);
+      this["infoVoidStock"].addCard(infoCard);
       this.updateHandWidth(this[infoInHandControl]);
     },
 
@@ -1437,7 +1444,7 @@ define([
         const infoInHandControl = `infoInHandStock$${player_id}`;
         const hand = this[infoInHandControl].getCards();
         this[infoInHandControl].removeCard({
-          id: `-${hand.length}:${player_id}`,
+          id: hand[0].id,
         });
       }
 
@@ -1590,7 +1597,7 @@ define([
       for (const player_id in this.players) {
         const infoInHandControl = `infoInHandStock$${player_id}`;
 
-        this[infoInHandControl].removeAll();
+        this["infoVoidStock"].addCards(this[infoInHandControl].getCards());
         this.updateHandWidth(this[infoInHandControl]);
       }
     },

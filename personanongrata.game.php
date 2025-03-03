@@ -1440,15 +1440,6 @@ class PersonaNonGrata extends Table
             )
         );
 
-        $this->notifyAllPlayers(
-            "discardInfo",
-            "",
-            array(
-                "player_id" => $player_id,
-                "player_name" => $this->getPlayerNameById($player_id)
-            )
-        );
-
         $this->gamestate->setPlayerNonMultiactive($player_id, "betweenDays");
     }
 
@@ -1752,7 +1743,6 @@ class PersonaNonGrata extends Table
 
         foreach ($players as $player_id => $player) {
             $this->activateActionCard($player_id);
-
             $this->giveExtraTime($player_id);
         }
 
@@ -1765,7 +1755,7 @@ class PersonaNonGrata extends Table
 
         $this->passHands();
 
-        if ($this->getPlayersNumber() == 2) {
+        if ($this->getPlayersNumber() === 2) {
             $this->drawSingleNewInfo();
         }
 

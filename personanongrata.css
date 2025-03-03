@@ -358,6 +358,7 @@ body > .card {
 }
 
 .prs_gameArea {
+  position: relative;
   display: flex;
   align-items: stretch;
   justify-content: center;
@@ -588,4 +589,11 @@ body > .card {
 
 .prs_reveal_btn.prs_collapseArchived_btn {
   background-image: url("img/eye_open.svg") !important;
+}
+
+.prs_infoVoid {
+  position: absolute !important;
+  bottom: 0;
+  right: 0;
+  max-height: 300px;
 }
