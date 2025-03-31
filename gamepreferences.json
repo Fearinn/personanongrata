@@ -3,8 +3,9 @@
     "name": "Thematic background",
     "values": {
       "0": { "name": "Disabled" },
-      "1": { "name": "Enabled", "cssPref": "prs_darkTheme", "default": true }
+      "1": { "name": "Enabled", "cssPref": "prs_darkTheme"}
     },
+    "default": 1,
     "needReload": true
   },
   "101": {
@@ -23,8 +24,9 @@
     "name": "Thematic font",
     "values": {
       "0": { "name": "Disabled" },
-      "1": { "name": "Enabled", "cssPref": "prs_thematicFont", "default": true }
+      "1": { "name": "Enabled", "cssPref": "prs_thematicFont"}
     },
+    "default": 1,
     "needReload": true
   }
 }
