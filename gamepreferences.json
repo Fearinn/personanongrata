@@ -3,10 +3,9 @@
     "name": "Thematic background",
     "values": {
       "0": { "name": "Disabled" },
-      "1": { "name": "Enabled", "cssPref": "prs_darkTheme"}
+      "1": { "name": "Enabled", "cssPref": "prs_darkTheme" }
     },
-    "default": 1,
-    "needReload": true
+    "default": 1
   },
   "101": {
     "name": "Sort hand by",
@@ -24,9 +23,8 @@
     "name": "Thematic font",
     "values": {
       "0": { "name": "Disabled" },
-      "1": { "name": "Enabled", "cssPref": "prs_thematicFont"}
+      "1": { "name": "Enabled", "cssPref": "prs_thematicFont" }
     },
-    "default": 1,
-    "needReload": true
+    "default": 1
   }
 }
