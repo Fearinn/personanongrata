@@ -357,7 +357,13 @@ body > .card {
   font-family: "Neuropol", sans-serif;
 }
 
+#bga-zoom-wrapper {
+  direction: ltr;
+}
+
 .prs_gameArea {
+  direction: ltr;
+
   position: relative;
   display: flex;
   align-items: stretch;
