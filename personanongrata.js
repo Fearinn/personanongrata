@@ -275,6 +275,114 @@ define([
         _("Collapse or expand archived cards (for you only)")
       );
 
+      if (!this.isSpectator) {
+        const { id: player_id, color: player_color } =
+          this.players[this.player_id];
+
+        document.getElementById(`prs_infoVoid`).insertAdjacentHTML(
+          "afterend",
+          `<div
+            id="prs_playerArea$${player_id}"
+            class="prs_myArea prs_area"
+            style="border-color: #${player_color}"
+          >
+            <div class="prs_areaHeader">
+              <h3 class="prs_areaTitle prs_title" style="color: #${player_color}">
+                ${_("You")}
+              </h3>
+            </div>
+            <div class="prs_playerZones">
+              <div class="prs_playerZone prs_zone whiteblock">
+                <h4 class="prs_zoneTitle prs_title" style="color: #${player_color}">
+                  ${_("Archived cards")}
+                </h4>
+                <div class="prs_stocksContainer">
+                  <div
+                    id="prs_actionDiscard$${player_id}"
+                    class="prs_actionDiscard"
+                  ></div>
+                  <div id="prs_hacker$${player_id}" class="prs_hacker"></div>
+                  <div id="prs_archivedInfo$${player_id}"></div>
+                  <div id="prs_archivedCorporations$${player_id}"></div>
+                  <div id="prs_archivedKeys$${player_id}"></div>
+                  <button
+                    id="prs_collapseArchived_btn"
+                    class="prs_collapseArchived_btn bgabutton"
+                  ></button>
+                </div>
+              </div>
+              <div
+                id="prs_store$${player_id}"
+                class="prs_playerZone prs_zone whiteblock"
+              >
+                <h4 class="prs_zoneTitle prs_title" style="color: #${player_color}">
+                  ${_("Play area")}
+                </h4>
+                <div class="prs_stocksContainer">
+                  <div
+                    id="prs_stored$${player_id}"
+                    class="prs_myStored prs_stored"
+                  ></div>
+                  <div
+                    id="prs_encryptAction$${player_id}"
+                    class="prs_encryptAction"
+                  ></div>
+                </div>
+              </div>
+              <div id="prs_playedCards" class="prs_playerZone prs_zone whiteblock">
+                <h4 class="prs_zoneTitle prs_title" style="color: #${player_color}">
+                ${_("Played today")}
+                </h4>
+                <div class="prs_stocksContainer">
+                  <div id="prs_playedAction$${player_id}" class="prs_playedAction"></div>
+                  <div id="prs_playedInfo$${player_id}" class="prs_playedInfo"></div>
+                </div>
+              </div>
+              <div class="prs_playerZone prs_zone whiteblock">
+                <h4 class="prs_zoneTitle prs_title" style="color: #${player_color}">
+                 ${_("Hand (Actions)")}
+                </h4>
+                <div class="prs_stocksContainer">
+                  <div
+                    id="prs_handOfActions$${player_id}"
+                    class="prs_handOfActions prs_hand"
+                  ></div>
+                </div>
+              </div>
+              <div class="prs_playerZone prs_zone whiteblock">
+                <h4 class="prs_zoneTitle prs_title" style="color: #${player_color}">
+                  ${_("Hand (Information)")}
+                </h4>
+                <div class="prs_handContainer">
+                  <div
+                    id="prs_leftTagContainer$${player_id}"
+                    class="prs_directionTagContainer"
+                  >
+                    <div class="prs_directionIcon" data-direction="clockwise"></div>
+                    <span id="prs_leftTag$${player_id}" class="prs_areaTitle prs_title"
+                      >clockwise</span
+                    >
+                  </div>
+                  <div
+                    id="prs_handOfInfo$${player_id}"
+                    class="prs_handOfInfo prs_hand"
+                  ></div>
+                  <div
+                    id="prs_rightTagContainer$${player_id}"
+                    class="prs_directionTagContainer"
+                  >
+                    <div class="prs_directionIcon" data-direction="clockwise"></div>
+                    <span id="prs_rightTag$${player_id}" class="prs_areaTitle prs_title"
+                      >clockwise</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>`
+        );
+      }
+
       if (Object.keys(this.players).length > 2) {
         if (!this.isSpectator) {
           const currentSidePlayers = this.sidePlayers[this.player_id];

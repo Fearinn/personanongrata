@@ -40,20 +40,20 @@ class view_personanongrata_personanongrata extends game_view
         $this->tpl["INFO_HAND"] = self::_("Hand (Information)");
 
         $this->page->begin_block($template, "playerzone");
-        $this->page->begin_block($template, "myzone");
+        // $this->page->begin_block($template, "myzone");
 
         foreach ($players as $player_id => $player) {
-            if ($player_id == $current_player) {
-                $this->page->insert_block(
-                    "myzone",
-                    array(
-                        "PLAYER_ID" => $player_id,
-                        "PLAYER_COLOR" => $player["player_color"],
-                        "PLAYER_NAME" => $player["player_name"]
-                    )
-                );
-                continue;
-            }
+            // if ($player_id == $current_player) {
+            //     $this->page->insert_block(
+            //         "myzone",
+            //         array(
+            //             "PLAYER_ID" => $player_id,
+            //             "PLAYER_COLOR" => $player["player_color"],
+            //             "PLAYER_NAME" => $player["player_name"]
+            //         )
+            //     );
+            //     continue;
+            // }
 
             $this->page->insert_block(
                 "playerzone",
