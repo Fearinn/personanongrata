@@ -26,9 +26,7 @@ class view_personanongrata_personanongrata extends game_view
     function build_page($viewArgs)
     {
         // Get players & players number
-        global $g_user;
         $players = $this->game->loadPlayersBasicInfos();
-        $current_player = $g_user->get_id();
         $template = "personanongrata_personanongrata";
 
         $this->tpl["YOU"] = self::_("You");
