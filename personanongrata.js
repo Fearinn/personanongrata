@@ -276,11 +276,16 @@ define([
       );
 
       if (!this.isSpectator) {
-        const { id: player_id, color: player_color } =
-          this.players[this.player_id];
+        const {
+          id: player_id,
+          color: player_color,
+          name: player_name,
+        } = this.players[this.player_id];
 
-        document.getElementById(`prs_infoVoid`).insertAdjacentHTML(
-          "afterend",
+        document.getElementById(`prs_playerArea$${player_id}`)?.remove();
+
+        document.getElementById(`prs_playerAreas`).insertAdjacentHTML(
+          "afterbegin",
           `<div
             id="prs_playerArea$${player_id}"
             class="prs_myArea prs_area"
@@ -288,7 +293,9 @@ define([
           >
             <div class="prs_areaHeader">
               <h3 class="prs_areaTitle prs_title" style="color: #${player_color}">
-                ${_("You")}
+                ${this.format_string_recursive(_("You (${player_name})"), {
+                  player_name,
+                })}
               </h3>
             </div>
             <div class="prs_playerZones">
@@ -411,13 +418,13 @@ define([
 
           this.addTooltip(
             leftTag.parentNode.id,
-            _("The direction in which the Information cards are passed"),
+            _("The direction to which the Information cards are passed"),
             ""
           );
 
           this.addTooltip(
             rightTag.parentNode.id,
-            _("The direction in which the Information cards are passed"),
+            _("The direction to which the Information cards are passed"),
             ""
           );
         }
@@ -435,7 +442,6 @@ define([
 
       for (const player_id in this.players) {
         const player = this.players[player_id];
-
         this.storedCounters[player_id] = {};
 
         $(
@@ -468,6 +474,11 @@ define([
             gamedatas.storedCounters[player_id],
             player_id
           );
+
+          const { color: player_color } = this.players[player_id];
+          document
+            .getElementById(`prs_playerArea$${player_id}`)
+            .style.setProperty("--color", `#${player_color}55`);
         }
 
         const hackerControl = `hackerStock$${player_id}`;
