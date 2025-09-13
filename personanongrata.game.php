@@ -184,7 +184,7 @@ class PersonaNonGrata extends Table
         /************ End of the game initialization *****/
     }
 
-    protected function getAllDatas()
+    protected function getAllDatas(): array
     {
         $result = array();
 
@@ -347,8 +347,12 @@ class PersonaNonGrata extends Table
         return $this->isClockwise() ? $this->getPlayerAfterNoZombie($player_id) : $this->getPlayerBeforeNoZombie($player_id);
     }
 
-    function hideCard(array $card, bool $hideType = false, $fake_id = null, string $fake_location = null): array
-    {
+    function hideCard(
+        array $card,
+        bool $hideType = false,
+        $fake_id = null,
+        ?string $fake_location = null
+    ): array {
         $hidden_card = array(
             "id" => $card["id"],
             "location" => $card["location"],
@@ -370,8 +374,12 @@ class PersonaNonGrata extends Table
         return $hidden_card;
     }
 
-    function hideCards(array $cards, bool $hideType = false, bool $hideId = false, string $fake_location = null): array
-    {
+    function hideCards(
+        array $cards,
+        bool $hideType = false,
+        bool $hideId = false,
+        ?string $fake_location = null
+    ): array {
         $hidden_cards = array();
 
         $fake_ids = range(count($cards) * -1 - 1, -2);
@@ -2042,7 +2050,7 @@ class PersonaNonGrata extends Table
         $this->gamestate->nextState("gameEnd");
     }
 
-    function zombieTurn($state, $active_player)
+    public function zombieTurn($state, $active_player): void
     {
         $statename = $state['name'];
 

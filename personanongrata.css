@@ -417,7 +417,7 @@ body > .card {
 
 .prs_playerAreas {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(560px, 1000px));
+  grid-template-columns: repeat(auto-fit, minmax(560px, 1200px));
   align-items: stretch;
   justify-content: center;
   column-gap: 16px;
